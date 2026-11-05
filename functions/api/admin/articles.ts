@@ -17,7 +17,12 @@ export const onRequest:PagesFunction<Env>=async({request,env})=>{
    const id=crypto.randomUUID();
    await env.DB.prepare("INSERT INTO articles(id,title,slug,category,excerpt,content,status,created_at,updated_at,published_at) VALUES(?,?,?,?,?,?,?,?,?,?)").bind(id,title,slug,category,excerpt,content,status,new Date().toISOString(),new Date().toISOString(),status==="published"?new Date().toISOString():null).run();
    return json({id,slug},201);
-  }catch{return json({error:"No se pudo guardar. Comprueba que el slug no esté repetido."},409)}
+  }catch(error){
+   console.error("NEXORA article insert failed:",error);
+   const detail=error instanceof Error?error.message:String(error);
+   if(/UNIQUE constraint failed:\s*articles\.slug/i.test(detail))return json({error:"Ya existe un artículo con ese título o slug. Cambia el título e inténtalo de nuevo."},409);
+   return json({error:"Error de base de datos al guardar: "+detail},500);
+  }
  }
  return json({error:"Método no permitido"},405);
 };
