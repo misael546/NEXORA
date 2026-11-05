@@ -12,7 +12,7 @@ export const onRequest:PagesFunction<Env>=async({request,env})=>{
  try{
   const body=await env.AI.run("@cf/deepgram/aura-2-es",{text,speaker,encoding:"mp3"});
   if(!body)return Response.json({error:"El servicio no devolvió audio."},{status:502});
-  return new Response(body,{headers:{"Content-Type":"audio/mpeg","Content-Disposition":'attachment; filename="nexora-voz.mp3"',"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
+  return new Response(body,{headers:{"Content-Type":"audio/mpeg","Content-Disposition":'inline; filename="nexora-voz.mp3"',"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
  }catch(error){
   console.error("NEXORA VOICE generation failed:",error);
   return Response.json({error:"No se pudo generar el MP3. Comprueba la cuota de Workers AI e inténtalo más tarde."},{status:502});
