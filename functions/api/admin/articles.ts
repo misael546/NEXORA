@@ -1,7 +1,7 @@
 import {requireAdmin,Env} from "../../_lib/auth";
 import {json,slugify,clean} from "../../_lib/http";
 export const onRequest:PagesFunction<Env>=async({request,env})=>{
- const denied=await requireAdmin(request,env);if(denied)return denied;
+ const denied=await requireAdmin(request,env);if(denied)return denied;\n if(!env.DB)return json({error:"La base de datos D1 todavía no está conectada."},503);
  if(request.method==="GET"){
   const {results}=await env.DB.prepare("SELECT id,title,slug,category,excerpt,status,created_at,updated_at,published_at FROM articles ORDER BY updated_at DESC").all();
   return json({articles:results});
