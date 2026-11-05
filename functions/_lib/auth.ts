@@ -6,7 +6,7 @@ export async function requireAdmin(request:Request,env:Env):Promise<Response|nul
   if(!token||!env.ACCESS_TEAM_DOMAIN||!env.ACCESS_AUD||!env.ADMIN_EMAIL)return new Response("No autorizado",{status:401});
   try{
     const parts=token.split(".");if(parts.length!==3)throw new Error("jwt");
-    const header=JSON.parse(new TextDecoder().decode(b64(parts[0])));
+    const header=JSON.parse(new TextDecoder().decode(b64(parts[0])));\n    if(header.alg!=="RS256")throw new Error("algorithm");
     const claims:Claims=JSON.parse(new TextDecoder().decode(b64(parts[1])));
     const issuer=env.ACCESS_TEAM_DOMAIN.replace(/\/$/,"");
     if(claims.iss!==issuer||!claims.exp||claims.exp*1000<Date.now())throw new Error("claims");
