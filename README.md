@@ -44,3 +44,5 @@ Los espacios publicitarios no deben activarse hasta que exista una cuenta aproba
 3. Añadir una tarjeta enlazada al artículo en `index.html`.
 4. Añadir la URL a `sitemap.xml`.
 5. Revisar los enlaces y publicar el commit en `main`.
+
+Configuración de NEXORA actualizada.
