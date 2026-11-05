@@ -29,7 +29,7 @@ Cada commit en `main` debería iniciar una nueva implementación en Cloudflare P
 
 Abre `index.html` en un navegador o utiliza un servidor estático local. En Cloudflare Pages, configura la rama `main`, deja vacío el comando de compilación y usa `/` como directorio de salida.
 
-## Estado y límites
+## Panel editorial\n\nEl CMS se encuentra en preparación técnica. Sigue los pasos de [ADMIN_SETUP.md](ADMIN_SETUP.md) para crear la base D1, proteger las rutas con Cloudflare Access y configurar las variables de entorno. No habilites el panel antes de completar esa configuración.\n\n## Estado y límites
 
 Esta es una primera versión editorial estática. El buscador filtra los artículos disponibles en el navegador. Las páginas legales describen las funciones que existen actualmente.
 
