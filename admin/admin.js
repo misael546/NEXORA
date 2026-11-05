@@ -10,5 +10,40 @@ $("status").addEventListener("change",()=>{$("statusPill").textContent=$("status
 $("articleForm").addEventListener("submit",async e=>{e.preventDefault();const payload={title:$("title").value,category:$("category").value,status:$("status").value,excerpt:$("excerpt").value,content:$("content").value};$("saveBtn").disabled=true;try{if(current){await api("/api/admin/articles/"+encodeURIComponent(current.slug),{method:"PUT",body:JSON.stringify(payload)});note("Artículo actualizado.","ok")}else{await api("/api/admin/articles",{method:"POST",body:JSON.stringify(payload)});note("Artículo guardado.","ok")}await load();formReset()}catch(err){note(err.message,"error")}finally{$("saveBtn").disabled=false}});
 $("deleteBtn").addEventListener("click",async()=>{if(!current||!confirm("¿Eliminar este artículo permanentemente?"))return;try{await api("/api/admin/articles/"+encodeURIComponent(current.slug),{method:"DELETE"});note("Artículo eliminado.","ok");formReset();await load()}catch(e){note(e.message,"error")}});
 formReset();load();
-/* NEXORA VOICE · Workers AI */
-(()=>{const text=$("voiceText"),generate=$("voiceGenerate"),status=$("voiceStatus");if(!text||!generate)return;let audioUrl=null;const setStatus=(message,error=false)=>{status.textContent=message;status.classList.toggle("error",error)};text.addEventListener("input",()=>{$("voiceCount").textContent=text.value.length+" / 3000"});generate.addEventListener("click",async()=>{const value=text.value.trim();if(!value){setStatus("Escribe un texto antes de generar el MP3.",true);text.focus();return}if(value.length>3000){setStatus("El texto supera el límite de 3,000 caracteres.",true);return}generate.disabled=true;generate.textContent="Generando…";setStatus("Generando el MP3. Puede tardar unos segundos.");try{const response=await fetch("/api/admin/voice",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:value,speaker:$("voiceSpeaker").value})});if(!response.ok){let msg="No se pudo generar el audio.";try{const d=await response.json();msg=d.error||msg}catch{}throw new Error(msg)}const blob=await response.blob();if(!blob.size)throw new Error("El servicio devolvió un audio vacío.");if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=URL.createObjectURL(blob);$("voiceAudio").src=audioUrl;$("voiceDownload").href=audioUrl;$("voiceDownloadArea").hidden=false;setStatus("MP3 listo. Puedes escucharlo o descargarlo.");$("voiceDownload").click()}catch(e){setStatus(e.message,true)}finally{generate.disabled=false;generate.textContent="Generar MP3"}});window.addEventListener("pagehide",()=>{if(audioUrl)URL.revokeObjectURL(audioUrl)})})();
+/* NEXORA VOICE · Workers AI · escucha integrada y descarga opcional */
+(()=>{
+ const text=$("voiceText"),generate=$("voiceGenerate"),status=$("voiceStatus"),area=$("voiceDownloadArea"),audio=$("voiceAudio"),download=$("voiceDownload");
+ if(!text||!generate||!audio||!download)return;
+ let audioUrl=null;
+ const setStatus=(message,error=false)=>{status.textContent=message;status.classList.toggle("error",error)};
+ const clearAudio=()=>{
+  if(audioUrl){URL.revokeObjectURL(audioUrl);audioUrl=null}
+  audio.pause();audio.removeAttribute("src");audio.load();area.hidden=true;
+ };
+ text.addEventListener("input",()=>{
+  $("voiceCount").textContent=text.value.length+" / 3000";
+  if(audioUrl){clearAudio();setStatus("Texto actualizado. Genera un nuevo audio para escucharlo.");}
+ });
+ $("voiceSpeaker").addEventListener("change",()=>{
+  if(audioUrl){clearAudio();setStatus("Voz cambiada. Genera de nuevo para escucharla.");}
+ });
+ generate.addEventListener("click",async()=>{
+  const value=text.value.trim();
+  if(!value){setStatus("Escribe un texto antes de generar el audio.",true);text.focus();return}
+  if(value.length>3000){setStatus("El texto supera el límite de 3,000 caracteres.",true);return}
+  generate.disabled=true;generate.textContent="Generando audio…";setStatus("Generando tu voz. Espera un momento…");
+  try{
+   const response=await fetch("/api/admin/voice",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:value,speaker:$("voiceSpeaker").value})});
+   if(!response.ok){let msg="No se pudo generar el audio.";try{const d=await response.json();msg=d.error||msg}catch{}throw new Error(msg)}
+   const blob=await response.blob();
+   if(!blob.size||(!blob.type.includes("audio")&&blob.type!=="application/octet-stream"))throw new Error("El servicio no devolvió un archivo de audio válido.");
+   if(audioUrl)URL.revokeObjectURL(audioUrl);
+   audioUrl=URL.createObjectURL(blob);
+   audio.src=audioUrl;download.href=audioUrl;area.hidden=false;audio.load();
+   setStatus("¡Audio listo! Pulsa reproducir para escucharlo aquí. Si te gusta, puedes descargarlo; no se descarga automáticamente.");
+   area.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }catch(e){setStatus(e.message,true)}
+  finally{generate.disabled=false;generate.textContent="Generar y escuchar"}
+ });
+ window.addEventListener("pagehide",()=>{if(audioUrl)URL.revokeObjectURL(audioUrl)});
+})();
