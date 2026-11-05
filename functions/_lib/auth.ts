@@ -1,4 +1,4 @@
-export interface Env { DB: D1Database; AI?: { run(model:string,input:Record<string,unknown>,options?:{returnRawResponse?:boolean}):Promise<Response|ReadableStream<Uint8Array>> }; ACCESS_TEAM_DOMAIN: string; ACCESS_AUD: string; ADMIN_EMAIL: string }
+export interface Env { DB: D1Database; AI?: { run(model:string,input:Record<string,unknown>):Promise<ReadableStream<Uint8Array>> }; ACCESS_TEAM_DOMAIN: string; ACCESS_AUD: string; ADMIN_EMAIL: string }
 type Claims={iss?:string;aud?:string|string[];exp?:number;email?:string};
 const b64=(s:string)=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
 export async function requireAdmin(request:Request,env:Env):Promise<Response|null>{
