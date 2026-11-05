@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://nexora-ey8.pages.dev/sitemap.xml
