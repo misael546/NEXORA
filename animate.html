@@ -20,7 +20,7 @@
 <body>
 <header class="top wrap"><a class="brand" href="index.html"><b>N.</b> NEXORA</a><a class="back" href="index.html">← Volver al sitio</a></header>
 <main class="wrap">
-<section class="intro"><div class="eyebrow">NEXORA CREATIVE LAB · VERSIÓN 0.4</div><h1>Da movimiento a tus <span>ideas.</span></h1><p>Sube un dibujo o una imagen, crea acciones en clips separados y reproduce toda la secuencia. Esta primera versión funciona en tu navegador: no sube tu imagen a un servidor ni utiliza una IA de pago.</p></section>
+<section class="intro"><div class="eyebrow">NEXORA CREATIVE LAB · VERSIÓN 0.5</div><h1>Da movimiento a tus <span>ideas.</span></h1><p>Sube un dibujo o una imagen, crea acciones en clips separados y reproduce toda la secuencia. Esta primera versión funciona en tu navegador: no sube tu imagen a un servidor ni utiliza una IA de pago.</p></section>
 <div class="layout">
 <section class="panel">
 <h2>Vista previa</h2>
@@ -33,6 +33,7 @@
  <div class="rig-head"><strong>RIG COMBINADO · DETECCIÓN + AJUSTE</strong><span class="pill" id="rigState">SIN RIG</span></div>
  <p class="hint">Detecta automáticamente rostro y articulaciones. Después podrás corregir los puntos tocándolos sobre la imagen.</p>
  <div class="actions"><button class="btn" id="detectRig" disabled>◎ Detectar personaje</button><button class="btn" id="toggleRig" disabled>✥ Ajustar puntos</button></div>
+ <div class="actions" style="margin-top:8px"><button class="btn" id="saveRig" disabled>↓ Guardar rig</button><button class="btn" id="loadRig" disabled>↑ Cargar rig</button><input id="rigFile" type="file" accept="application/json,.json" hidden></div>
  <div class="field"><label for="addRigPoint">Colocar un punto manualmente</label><select id="addRigPoint"><option value="">Selecciona una parte…</option><option value="boca">Boca</option><option value="hombro_izq">Hombro izquierdo</option><option value="hombro_der">Hombro derecho</option><option value="codo_izq">Codo izquierdo</option><option value="codo_der">Codo derecho</option><option value="mano_izq">Mano izquierda</option><option value="mano_der">Mano derecha</option></select><span class="hint">Elige una parte y toca su ubicación sobre la imagen. También puedes arrastrar puntos ya colocados.</span></div>
  <div class="rig-points" id="rigPoints"><span class="rig-point">Rostro</span><span class="rig-point">Hombros</span><span class="rig-point">Codos</span><span class="rig-point">Manos</span></div>
  <div class="hint" id="rigHelp">Sube una imagen para iniciar la detección. El análisis se realiza en este navegador.</div>
@@ -51,7 +52,7 @@
 <div class="actions" style="margin-top:12px"><button class="btn" id="clear" disabled>Vaciar secuencia</button></div>
 <div class="export"><button class="btn primary" id="export" disabled>Exportar vídeo WebM</button><button class="btn" id="downloadImage" disabled>Guardar imagen</button></div>
 <div class="status" id="exportStatus" role="status"></div>
-<p class="notice"><strong>Sobre esta versión:</strong> puedes animar una boca superpuesta y ver guías articuladas de brazos y manos. Las guías no sustituyen ni deforman los píxeles originales del personaje. El entorno tiene efectos ambientales animados, pero aún no reconstruye escenarios ni genera poses nuevas con IA. La exportación WebM depende de que el navegador admita MediaRecorder.</p>
+<p class="notice"><strong>Sobre esta versión:</strong> puedes guardar y cargar la posición de los puntos del rig en un archivo JSON. La boca se anima como una superposición y los brazos usan guías articuladas; todavía no se separan ni deforman los píxeles originales. El entorno tiene efectos ambientales animados, pero aún no reconstruye escenarios ni genera poses nuevas con IA. La exportación WebM depende de que el navegador admita MediaRecorder.</p>
 </aside>
 </div>
 </main>
@@ -147,7 +148,12 @@ function renderClips(){
 }
 function setStatus(text){$('stageStatus').textContent=text}
 
-function updateRigUI(){const names=Object.keys(rigPoints);$('rigState').textContent=names.length?names.length+' PUNTOS':'SIN RIG';$('toggleRig').disabled=!names.length;$('rigPoints').innerHTML=names.length?names.map(n=>'<span class="rig-point active">'+n+'</span>').join(''):'<span class="rig-point">Rostro</span><span class="rig-point">Hombros</span><span class="rig-point">Codos</span><span class="rig-point">Manos</span>';draw()}
+function updateRigUI(){const names=Object.keys(rigPoints);$('rigState').textContent=names.length?names.length+' PUNTOS':'SIN RIG';$('toggleRig').disabled=!names.length;$('rigPoints').innerHTML=names.length?names.map(n=>'<span class="rig-point active">'+n+'</span>').join(''):'<span class="rig-point">Rostro</span><span class="rig-point">Hombros</span><span class="rig-point">Codos</span><span class="rig-point">Manos</span>';updateRigFileButtons();draw()}
+function updateRigFileButtons(){$('saveRig').disabled=!image||!Object.keys(rigPoints).length;$('loadRig').disabled=!image}
+$('saveRig').addEventListener('click',()=>{if(!image||!Object.keys(rigPoints).length)return;const data={format:'NEXORA-RIG',version:1,imageWidth:image.width,imageHeight:image.height,points:rigPoints};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='nexora-rig.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('rigHelp').textContent='Rig guardado. Conserva este archivo para reutilizar los puntos con la misma imagen.'});
+$('loadRig').addEventListener('click',()=>{if(image)$('rigFile').click()});
+$('rigFile').addEventListener('change',async e=>{const file=e.target.files&&e.target.files[0];e.target.value='';if(!file||!image)return;try{const data=JSON.parse(await file.text());if(data.format!=='NEXORA-RIG'||!data.points||typeof data.points!=='object')throw new Error('El archivo no es un rig de NEXORA.');if(data.imageWidth!==image.width||data.imageHeight!==image.height)throw new Error('Este rig fue creado para una imagen con dimensiones diferentes. Usa la imagen original.');const allowed=['boca','ojo_izq','hombro_izq','hombro_der','codo_izq','codo_der','mano_izq','mano_der'],next={};for(const name of allowed){const p=data.points[name];if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1)next[name]={x:p.x,y:p.y}}if(!Object.keys(next).length)throw new Error('El archivo no contiene puntos válidos.');rigPoints=next;rigEnabled=true;canvas.parentElement.classList.add('rigging');$('toggleRig').textContent='✓ Puntos visibles';updateRigUI();$('rigHelp').textContent='Rig cargado. Comprueba la ubicación de los puntos antes de animar.';setStatus('Rig cargado correctamente.')}catch(err){$('rigHelp').textContent=err.message||'No se pudo leer el archivo de rig.';setStatus('No se pudo cargar el rig.')}});
+
 async function detectRig(){
  if(!image)return;
  $('detectRig').disabled=true;$('rigHelp').textContent='Cargando detector de rostro y postura… La primera vez necesita conexión a internet.';
@@ -176,7 +182,7 @@ $('imageFile').addEventListener('change',e=>{
  const file=e.target.files&&e.target.files[0];if(!file)return;
  if(!file.type.startsWith('image/')){setStatus('Selecciona un archivo de imagen válido.');return}
  if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=URL.createObjectURL(file);const img=new Image();
- img.onload=()=>{image=img;$('empty').classList.add('hidden');$('imageState').textContent='IMAGEN CARGADA';$('addClip').disabled=false;$('downloadImage').disabled=false;$('detectRig').disabled=false;rigPoints={};rigEnabled=false;updateRigUI();clips=[];renderClips();draw();setStatus('Imagen lista. Escribe una acción y añade tu primer clip.')};
+ img.onload=()=>{image=img;$('empty').classList.add('hidden');$('imageState').textContent='IMAGEN CARGADA';$('addClip').disabled=false;$('downloadImage').disabled=false;$('detectRig').disabled=false;rigPoints={};rigEnabled=false;updateRigUI();updateRigFileButtons();clips=[];renderClips();draw();setStatus('Imagen lista. Escribe una acción y añade tu primer clip.')};
  img.onerror=()=>setStatus('No se pudo abrir esta imagen. Prueba con PNG o JPG.');img.src=imageUrl;
 });
 $('visualMode').addEventListener('change',()=>{const game=$('visualMode').value==='game';$('modeHint').textContent=game?'Modo captura: la imagen llena el escenario y los movimientos actúan como movimientos de cámara.':'Modo personaje: anima la imagen completa como un personaje.';if(game){$('instruction').placeholder='Ejemplo: La cámara se acerca a la batalla y tiembla con la explosión';$('movement').value='camera-drift'}else{$('instruction').placeholder='Ejemplo: Haz que el personaje brinque y gire en el aire';$('movement').value='jump'}draw();setStatus(game?'Modo captura de juego activado. Elige un movimiento de cámara.':'Modo personaje activado.')});
