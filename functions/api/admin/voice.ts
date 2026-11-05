@@ -10,8 +10,7 @@ export const onRequest:PagesFunction<Env>=async({request,env})=>{
  if(!text)return Response.json({error:"Escribe un texto para generar el audio."},{status:400});
  if(text.length>3000)return Response.json({error:"El límite es de 3,000 caracteres por MP3 para cuidar la cuota gratuita."},{status:413});
  try{
-  const result=await env.AI.run("@cf/deepgram/aura-2-es",{text,speaker,encoding:"mp3"},{returnRawResponse:true});
-  const body=result instanceof Response?result.body:result;
+  const body=await env.AI.run("@cf/deepgram/aura-2-es",{text,speaker,encoding:"mp3"});
   if(!body)return Response.json({error:"El servicio no devolvió audio."},{status:502});
   return new Response(body,{headers:{"Content-Type":"audio/mpeg","Content-Disposition":'attachment; filename="nexora-voz.mp3"',"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
  }catch(error){
