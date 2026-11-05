@@ -20,7 +20,7 @@
 <body>
 <header class="top wrap"><a class="brand" href="index.html"><b>N.</b> NEXORA</a><a class="back" href="index.html">← Volver al sitio</a></header>
 <main class="wrap">
-<section class="intro"><div class="eyebrow">NEXORA CREATIVE LAB · VERSIÓN 0.2</div><h1>Da movimiento a tus <span>ideas.</span></h1><p>Sube un dibujo o una imagen, crea acciones en clips separados y reproduce toda la secuencia. Esta primera versión funciona en tu navegador: no sube tu imagen a un servidor ni utiliza una IA de pago.</p></section>
+<section class="intro"><div class="eyebrow">NEXORA CREATIVE LAB · VERSIÓN 0.3</div><h1>Da movimiento a tus <span>ideas.</span></h1><p>Sube un dibujo o una imagen, crea acciones en clips separados y reproduce toda la secuencia. Esta primera versión funciona en tu navegador: no sube tu imagen a un servidor ni utiliza una IA de pago.</p></section>
 <div class="layout">
 <section class="panel">
 <h2>Vista previa</h2>
@@ -38,7 +38,7 @@
 </div>
 <div class="field"><label for="instruction">¿Qué quieres que haga?</label><textarea id="instruction" maxlength="180" placeholder="Ejemplo: Haz que el personaje brinque y gire en el aire"></textarea></div>
 <div class="field"><label for="scenePreset">Instrucción rápida de escena</label><select id="scenePreset"><option value="">Elige una escena preparada…</option><option value="forest">Salto aventurero en el bosque</option><option value="storm">Caída bajo una tormenta</option><option value="magic">Levitación mágica</option><option value="fire">Aterrizaje entre brasas</option><option value="snow">Caminata en una nevada</option><option value="wind">Entrada heroica con viento</option><option value="dream">Flotar en un mundo de ensueño</option><option value="impact">Golpe con impacto cinematográfico</option></select><span class="hint">Configura automáticamente movimiento y ambiente. Puedes personalizarlo después.</span></div>
-<div class="field"><label for="movement">Movimiento del personaje</label><select id="movement"><option value="jump">Brincar / saltar</option><option value="fall">Caer al suelo</option><option value="spin">Girar</option><option value="walk">Caminar en el sitio</option><option value="zoom">Acercamiento cinematográfico</option><option value="float">Flotar</option><option value="fade">Aparecer / desaparecer</option><option value="shake">Temblar</option><option value="bounce">Rebotar</option><option value="dash">Impulso rápido</option><option value="sway">Balancearse</option><option value="crouch">Agacharse</option><option value="pulse">Respirar / pulsar</option><option value="recoil">Retroceder por impacto</option><option value="camera-left">Cámara hacia la izquierda</option><option value="camera-right">Cámara hacia la derecha</option><option value="camera-zoom">Zoom de cámara</option><option value="camera-shake">Sacudida de cámara</option><option value="camera-drift">Cámara flotante</option><option value="camera-pulse">Zoom respirado</option></select></div>
+<div class="field"><label for="movement">Movimiento del personaje</label><select id="movement"><option value="jump">Brincar / saltar</option><option value="fall">Caer al suelo</option><option value="spin">Girar</option><option value="walk">Caminar en el sitio</option><option value="zoom">Acercamiento cinematográfico</option><option value="float">Flotar</option><option value="fade">Aparecer / desaparecer</option><option value="shake">Temblar</option><option value="bounce">Rebotar</option><option value="dash">Impulso rápido</option><option value="sway">Balancearse</option><option value="crouch">Agacharse</option><option value="pulse">Respirar / pulsar</option><option value="recoil">Retroceder por impacto</option><option value="talk">Hablar / mover la boca</option><option value="wave">Saludar con la mano</option><option value="point">Señalar con la mano</option><option value="raise-arms">Levantar ambos brazos</option><option value="camera-left">Cámara hacia la izquierda</option><option value="camera-right">Cámara hacia la derecha</option><option value="camera-zoom">Zoom de cámara</option><option value="camera-shake">Sacudida de cámara</option><option value="camera-drift">Cámara flotante</option><option value="camera-pulse">Zoom respirado</option></select></div>
 <div class="field"><label for="environment">Animación del entorno</label><select id="environment"><option value="none">Sin efecto ambiental</option><option value="wind">Viento y hojas</option><option value="rain">Lluvia</option><option value="snow">Nieve</option><option value="embers">Chispas y brasas</option><option value="magic">Partículas mágicas</option><option value="fog">Niebla en movimiento</option><option value="petals">Pétalos flotando</option><option value="dust">Polvo ambiental</option><option value="bubbles">Burbujas</option></select><span class="hint">Este efecto se anima detrás del personaje durante cada clip.</span></div>
 <div class="field"><label for="duration">Duración del clip: <span id="durationLabel">2.5 s</span></label><input id="duration" type="range" min="1" max="6" step=".5" value="2.5"></div>
 <div class="actions"><button class="btn primary" id="addClip" disabled>＋ Añadir clip</button><button class="btn" id="preview" disabled>▶ Reproducir secuencia</button></div>
@@ -50,7 +50,7 @@
 <div class="actions" style="margin-top:12px"><button class="btn" id="clear" disabled>Vaciar secuencia</button></div>
 <div class="export"><button class="btn primary" id="export" disabled>Exportar vídeo WebM</button><button class="btn" id="downloadImage" disabled>Guardar imagen</button></div>
 <div class="status" id="exportStatus" role="status"></div>
-<p class="notice"><strong>Sobre esta versión:</strong> el rig combinado detecta puntos de rostro y postura y permite corregirlos manualmente; todavía no deforma automáticamente los píxeles de brazos o boca. El entorno tiene efectos ambientales animados, pero aún no reconstruye escenarios ni genera poses nuevas con IA. La exportación WebM depende de que el navegador admita MediaRecorder.</p>
+<p class="notice"><strong>Sobre esta versión:</strong> puedes animar una boca superpuesta y ver guías articuladas de brazos y manos. Las guías no sustituyen ni deforman los píxeles originales del personaje. El entorno tiene efectos ambientales animados, pero aún no reconstruye escenarios ni genera poses nuevas con IA. La exportación WebM depende de que el navegador admita MediaRecorder.</p>
 </aside>
 </div>
 </main>
@@ -100,7 +100,7 @@ function draw(time=0,clip=null,progress=0){
  case'dash':x=W/2+(p<.35?ease(p/.35)*W*.22:(1-ease((p-.35)/.65))*W*.22);rot=(p<.35?-.08:.08)*(1-p);break;
  case'sway':rot=Math.sin(p*Math.PI*2)*.18;break;
  case'crouch':sy=1-Math.sin(e*Math.PI)*.28;sx=1+Math.sin(e*Math.PI)*.12;y=H/2+Math.sin(e*Math.PI)*H*.08;break;
- case'pulse':s*=1+Math.sin(p*Math.PI*4)*.045;break;
+ case'pulse':s*=1+Math.sin(p*Math.PI*4)*.045;break;\n case'talk':case'wave':case'point':case'raise-arms':break;
  case'recoil':x=W/2+(p<.25?-ease(p/.25)*W*.12:(1-ease((p-.25)/.75))*W*.12);rot=-Math.sin(p*Math.PI)*.12;break;
  case'camera-left':x=W/2-e*W*.11;break;
  case'camera-right':x=W/2+e*W*.11;break;
@@ -111,8 +111,32 @@ function draw(time=0,clip=null,progress=0){
  }
  if(clip&&clip.type==='fall'){ctx.save();ctx.globalAlpha=.22*(.4+e*.6);ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(W/2,H*.85,Math.max(35,image.width*scale*.34)*(1+e*.25),10,0,0,Math.PI*2);ctx.fill();ctx.restore()}ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);ctx.rotate(rot);ctx.scale(s*sx,s*sy);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(image,-image.width/2,-image.height/2);ctx.restore();
  if(rigEnabled&&Object.keys(rigPoints).length){ctx.save();for(const [name,pt] of Object.entries(rigPoints)){const px=x+(pt.x-.5)*image.width*s,py=y+(pt.y-.5)*image.height*s;ctx.beginPath();ctx.arc(px,py,name==='mouth'?9:6,0,Math.PI*2);ctx.fillStyle=name==='mouth'?'#ff7b9c':'#72e5e8';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#07111d';ctx.stroke();ctx.font='12px DM Sans';ctx.fillStyle='#fff';ctx.fillText(name,px+9,py-8)}ctx.restore()}
+ if(clip&&rigPoints.boca&&(clip.type==='talk'||clip.type==='wave'||clip.type==='point'||clip.type==='raise-arms')){
+  const m=rigPoints.boca,mx=x+(m.x-.5)*image.width*s,my=y+(m.y-.5)*image.height*s;
+  const mouthOpen=clip.type==='talk'?(0.5+0.5*Math.sin(p*Math.PI*14)):0.12;
+  const mw=Math.max(5,image.width*s*.018),mh=Math.max(2,image.height*s*.012+mouthOpen*image.height*s*.035);
+  ctx.save();ctx.translate(mx,my);ctx.fillStyle='#32131b';ctx.beginPath();ctx.ellipse(0,0,mw,mh,0,0,Math.PI*2);ctx.fill();if(mouthOpen>.48){ctx.fillStyle='#e8899c';ctx.beginPath();ctx.ellipse(0,mh*.45,mw*.55,mh*.22,0,0,Math.PI*2);ctx.fill()}ctx.restore();
+ }
+ if(clip&&['wave','point','raise-arms'].includes(clip.type)){
+  const sides=clip.type==='raise-arms'?['izq','der']:[clip.type==='wave'?'der':'izq'];
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  for(const side of sides){
+   const sh=rigPoints['hombro_'+side],el=rigPoints['codo_'+side],ha=rigPoints['mano_'+side];if(!sh||!el||!ha)continue;
+   const sx0=x+(sh.x-.5)*image.width*s,sy0=y+(sh.y-.5)*image.height*s;
+   const ex0=x+(el.x-.5)*image.width*s,ey0=y+(el.y-.5)*image.height*s;
+   const hx0=x+(ha.x-.5)*image.width*s,hy0=y+(ha.y-.5)*image.height*s;
+   const phase=p*Math.PI*2,raise=clip.type==='raise-arms'?Math.sin(p*Math.PI)*image.height*s*.19:0;
+   const wave=clip.type==='wave'?Math.sin(phase*3)*image.height*s*.07:0;
+   let ex=ex0,ey=ey0-raise*.55,hx=hx0,hy=hy0-raise-wave;
+   if(clip.type==='point'){ex=ex0+(hx0-ex0)*.35;ey=ey0+(hy0-ey0)*.35;hx=hx0+(hx0-ex0)*.55;hy=hy0+(hy0-ey0)*.55}
+   ctx.strokeStyle='rgba(114,229,232,.92)';ctx.lineWidth=Math.max(4,image.width*s*.012);ctx.shadowColor='#72e5e8';ctx.shadowBlur=12;
+   ctx.beginPath();ctx.moveTo(sx0,sy0);ctx.lineTo(ex,ey);ctx.lineTo(hx,hy);ctx.stroke();ctx.shadowBlur=0;
+   for(const [jx,jy] of [[sx0,sy0],[ex,ey],[hx,hy]]){ctx.beginPath();ctx.arc(jx,jy,Math.max(4,image.width*s*.012),0,Math.PI*2);ctx.fillStyle='#d7ffff';ctx.fill()}
+  }
+  ctx.restore();
+ }
 }
-function label(type){return({bounce:'Rebotar',dash:'Impulso rápido',sway:'Balancearse',crouch:'Agacharse',pulse:'Respirar / pulsar',recoil:'Retroceder por impacto','camera-left':'Cámara a la izquierda','camera-right':'Cámara a la derecha','camera-zoom':'Zoom de cámara','camera-shake':'Sacudida de cámara','camera-drift':'Cámara flotante','camera-pulse':'Zoom respirado',jump:'Brincar / saltar',fall:'Caer al suelo',spin:'Girar',walk:'Caminar en el sitio',zoom:'Acercamiento',float:'Flotar',fade:'Aparecer / desaparecer',shake:'Temblar'})[type]||type}
+function label(type){return({bounce:'Rebotar',dash:'Impulso rápido',sway:'Balancearse',crouch:'Agacharse',pulse:'Respirar / pulsar',recoil:'Retroceder por impacto','camera-left':'Cámara a la izquierda','camera-right':'Cámara a la derecha','camera-zoom':'Zoom de cámara','camera-shake':'Sacudida de cámara','camera-drift':'Cámara flotante','camera-pulse':'Zoom respirado',talk:'Hablar / mover la boca',wave:'Saludar con la mano',point:'Señalar con la mano','raise-arms':'Levantar ambos brazos',jump:'Brincar / saltar',fall:'Caer al suelo',spin:'Girar',walk:'Caminar en el sitio',zoom:'Acercamiento',float:'Flotar',fade:'Aparecer / desaparecer',shake:'Temblar'})[type]||type}
 function renderClips(){
  $('clipCount').textContent=clips.length+' CLIP'+(clips.length===1?'':'S');
  const list=$('clips');list.innerHTML='';
