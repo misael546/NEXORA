@@ -26,8 +26,9 @@
 <div class="upload"><label class="file-label" for="imageFile">＋ Subir imagen</label><input id="imageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><span class="pill" id="imageState">SIN IMAGEN</span></div>
 <p class="hint">Consejo: un PNG con fondo transparente y el personaje completo suele dar mejores resultados. La imagen permanece en este dispositivo.</p>
 <div class="field"><label for="instruction">¿Qué quieres que haga?</label><textarea id="instruction" maxlength="180" placeholder="Ejemplo: Haz que el personaje brinque y gire en el aire"></textarea></div>
-<div class="field"><label for="movement">Movimiento</label><select id="movement"><option value="jump">Brincar / saltar</option><option value="fall">Caer al suelo</option><option value="spin">Girar</option><option value="walk">Caminar en el sitio</option><option value="zoom">Acercamiento cinematográfico</option><option value="float">Flotar</option><option value="fade">Aparecer / desaparecer</option><option value="shake">Temblar</option></select></div>
-<div class="field"><label for="environment">Animación del entorno</label><select id="environment"><option value="none">Sin efecto ambiental</option><option value="wind">Viento y hojas</option><option value="rain">Lluvia</option><option value="snow">Nieve</option><option value="embers">Chispas y brasas</option><option value="magic">Partículas mágicas</option></select><span class="hint">Este efecto se anima detrás del personaje durante cada clip.</span></div>
+<div class="field"><label for="scenePreset">Instrucción rápida de escena</label><select id="scenePreset"><option value="">Elige una escena preparada…</option><option value="forest">Salto aventurero en el bosque</option><option value="storm">Caída bajo una tormenta</option><option value="magic">Levitación mágica</option><option value="fire">Aterrizaje entre brasas</option><option value="snow">Caminata en una nevada</option><option value="wind">Entrada heroica con viento</option><option value="dream">Flotar en un mundo de ensueño</option><option value="impact">Golpe con impacto cinematográfico</option></select><span class="hint">Configura automáticamente movimiento y ambiente. Puedes personalizarlo después.</span></div>
+<div class="field"><label for="movement">Movimiento del personaje</label><select id="movement"><option value="jump">Brincar / saltar</option><option value="fall">Caer al suelo</option><option value="spin">Girar</option><option value="walk">Caminar en el sitio</option><option value="zoom">Acercamiento cinematográfico</option><option value="float">Flotar</option><option value="fade">Aparecer / desaparecer</option><option value="shake">Temblar</option><option value="bounce">Rebotar</option><option value="dash">Impulso rápido</option><option value="sway">Balancearse</option><option value="crouch">Agacharse</option><option value="pulse">Respirar / pulsar</option><option value="recoil">Retroceder por impacto</option></select></div>
+<div class="field"><label for="environment">Animación del entorno</label><select id="environment"><option value="none">Sin efecto ambiental</option><option value="wind">Viento y hojas</option><option value="rain">Lluvia</option><option value="snow">Nieve</option><option value="embers">Chispas y brasas</option><option value="magic">Partículas mágicas</option><option value="fog">Niebla en movimiento</option><option value="petals">Pétalos flotando</option><option value="dust">Polvo ambiental</option><option value="bubbles">Burbujas</option></select><span class="hint">Este efecto se anima detrás del personaje durante cada clip.</span></div>
 <div class="field"><label for="duration">Duración del clip: <span id="durationLabel">2.5 s</span></label><input id="duration" type="range" min="1" max="6" step=".5" value="2.5"></div>
 <div class="actions"><button class="btn primary" id="addClip" disabled>＋ Añadir clip</button><button class="btn" id="preview" disabled>▶ Reproducir secuencia</button></div>
 <div class="status" id="stageStatus" role="status">Sube una imagen para habilitar el estudio.</div>
@@ -54,7 +55,7 @@ function draw(time=0,clip=null,progress=0){
  for(let x=0;x<W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
  for(let y=0;y<H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
  const env=clip&&clip.environment?clip.environment:'none';
- const count=env==='rain'?95:env==='snow'?48:env==='wind'?32:env==='embers'?38:env==='magic'?42:0;
+ const count=env==='rain'?95:env==='snow'?48:env==='wind'?32:env==='embers'?38:env==='magic'?42:env==='fog'?14:env==='petals'?32:env==='dust'?55:env==='bubbles'?28:0;
  for(let i=0;i<count;i++){
   const seed=i*97.31+13.7,baseX=(Math.sin(seed*12.9898)*.5+.5)*W,baseY=(Math.sin(seed*78.233)*.5+.5)*H;
   let px=baseX,py=baseY,size=2;ctx.beginPath();
@@ -63,6 +64,10 @@ function draw(time=0,clip=null,progress=0){
   if(env==='wind'){px=(baseX+time*(65+i%5*15))%(W+30)-15;py=baseY+Math.sin(time*2+i)*13;ctx.strokeStyle='rgba(135,225,177,.52)';ctx.lineWidth=1.5;ctx.ellipse(px,py,7,2,Math.sin(time+i),0,Math.PI*2);ctx.stroke();continue}
   if(env==='embers'){px=(baseX+Math.sin(time+i)*12+W)%W;py=(baseY-time*(24+i%4*12)+H)%H;size=1+i%3;ctx.fillStyle='rgba(255,155,82,'+(.35+Math.sin(time*3+i)*.2)+')'}
   if(env==='magic'){px=(baseX+Math.sin(time*.7+i)*20+W)%W;py=(baseY+Math.cos(time*.9+i)*18+H)%H;size=1+i%3;ctx.fillStyle='rgba(167,139,250,'+(.28+Math.abs(Math.sin(time*2+i))*.5)+')'}
+  if(env==='fog'){px=(baseX+time*(8+i%3*5))%(W+100)-50;py=baseY;size=18+i%5*9;ctx.fillStyle='rgba(170,190,210,.035)';ctx.ellipse(px,py,size*1.8,size*.55,0,0,Math.PI*2);ctx.fill();continue}
+  if(env==='petals'){px=(baseX+Math.sin(time+i)*25+W)%W;py=(baseY+time*(12+i%4*7))%H;size=2+i%3;ctx.fillStyle='rgba(255,160,190,.68)';ctx.ellipse(px,py,size*1.5,size,Math.sin(time+i),0,Math.PI*2);ctx.fill();continue}
+  if(env==='dust'){px=(baseX+Math.sin(time*.5+i)*12+W)%W;py=(baseY-time*(5+i%5*3)+H)%H;size=1+i%2;ctx.fillStyle='rgba(210,190,150,.34)'}
+  if(env==='bubbles'){px=(baseX+Math.sin(time+i)*10+W)%W;py=(baseY-time*(14+i%4*6)+H)%H;size=2+i%5;ctx.strokeStyle='rgba(130,220,245,.5)';ctx.lineWidth=1;ctx.arc(px,py,size,0,Math.PI*2);ctx.stroke();continue}
   ctx.arc(px,py,size,0,Math.PI*2);ctx.fill();
  }
  if(!image)return;
@@ -79,10 +84,16 @@ function draw(time=0,clip=null,progress=0){
  case'float':y=H/2-Math.sin(p*Math.PI*2)*H*.09;rot=Math.sin(p*Math.PI*2)*.035;break;
  case'fade':alpha=p<.5?p*2:(1-p)*2;break;
  case'shake':x=W/2+Math.sin(p*Math.PI*22)*(1-p)*W*.035;rot=Math.sin(p*Math.PI*22)*(1-p)*.035;break;
+ case'bounce':y=H/2-Math.abs(Math.sin(p*Math.PI*3))*H*.16;break;
+ case'dash':x=W/2+(p<.35?ease(p/.35)*W*.22:(1-ease((p-.35)/.65))*W*.22);rot=(p<.35?-.08:.08)*(1-p);break;
+ case'sway':rot=Math.sin(p*Math.PI*2)*.18;break;
+ case'crouch':sy=1-Math.sin(e*Math.PI)*.28;sx=1+Math.sin(e*Math.PI)*.12;y=H/2+Math.sin(e*Math.PI)*H*.08;break;
+ case'pulse':s*=1+Math.sin(p*Math.PI*4)*.045;break;
+ case'recoil':x=W/2+(p<.25?-ease(p/.25)*W*.12:(1-ease((p-.25)/.75))*W*.12);rot=-Math.sin(p*Math.PI)*.12;break;
  }
  if(clip&&clip.type==='fall'){ctx.save();ctx.globalAlpha=.22*(.4+e*.6);ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(W/2,H*.85,Math.max(35,image.width*scale*.34)*(1+e*.25),10,0,0,Math.PI*2);ctx.fill();ctx.restore()}ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);ctx.rotate(rot);ctx.scale(s*sx,s*sy);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(image,-image.width/2,-image.height/2);ctx.restore();
 }
-function label(type){return({jump:'Brincar / saltar',fall:'Caer al suelo',spin:'Girar',walk:'Caminar en el sitio',zoom:'Acercamiento',float:'Flotar',fade:'Aparecer / desaparecer',shake:'Temblar'})[type]||type}
+function label(type){return({bounce:'Rebotar',dash:'Impulso rápido',sway:'Balancearse',crouch:'Agacharse',pulse:'Respirar / pulsar',recoil:'Retroceder por impacto',jump:'Brincar / saltar',fall:'Caer al suelo',spin:'Girar',walk:'Caminar en el sitio',zoom:'Acercamiento',float:'Flotar',fade:'Aparecer / desaparecer',shake:'Temblar'})[type]||type}
 function renderClips(){
  $('clipCount').textContent=clips.length+' CLIP'+(clips.length===1?'':'S');
  const list=$('clips');list.innerHTML='';
@@ -99,6 +110,7 @@ $('imageFile').addEventListener('change',e=>{
  img.onload=()=>{image=img;$('empty').classList.add('hidden');$('imageState').textContent='IMAGEN CARGADA';$('addClip').disabled=false;$('downloadImage').disabled=false;clips=[];renderClips();draw();setStatus('Imagen lista. Escribe una acción y añade tu primer clip.')};
  img.onerror=()=>setStatus('No se pudo abrir esta imagen. Prueba con PNG o JPG.');img.src=imageUrl;
 });
+$('scenePreset').addEventListener('change',()=>{const presets={forest:{move:'jump',env:'petals',text:'Salta con energía mientras el viento mueve los pétalos del bosque'},storm:{move:'fall',env:'rain',text:'Cae al suelo bajo una lluvia intensa y dramática'},magic:{move:'float',env:'magic',text:'Flota lentamente rodeado de partículas mágicas'},fire:{move:'recoil',env:'embers',text:'Aterriza con fuerza mientras las brasas vuelan'},snow:{move:'walk',env:'snow',text:'Camina lentamente mientras cae la nieve'},wind:{move:'dash',env:'wind',text:'Entra con impulso mientras el viento agita el entorno'},dream:{move:'float',env:'fog',text:'Flota suavemente dentro de una niebla de ensueño'},impact:{move:'recoil',env:'dust',text:'Retrocede por un impacto y levanta polvo del suelo'}};const p=presets[$('scenePreset').value];if(!p)return;$('movement').value=p.move;$('environment').value=p.env;$('instruction').value=p.text;setStatus('Escena preparada. Puedes personalizarla antes de añadir el clip.')});
 $('addClip').addEventListener('click',()=>{
  if(!image)return;const text=$('instruction').value.trim();clips.push({type:$('movement').value,environment:$('environment').value,duration:Number($('duration').value),text:text||label($('movement').value)});renderClips();draw();setStatus('Clip añadido. Puedes agregar otra acción para continuar la secuencia.');
 });
