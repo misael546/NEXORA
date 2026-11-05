@@ -22,7 +22,7 @@ Cada commit en `main` debería iniciar una nueva implementación en Cloudflare P
 - `articulo-pc.html`: mantenimiento básico de Windows.
 - `acerca.html`, `contacto.html`: información del proyecto.
 - `privacidad.html`, `cookies.html`: políticas informativas.
-- `robots.txt`, `sitemap.xml`: rastreo e indexación.
+- `robots.txt`, `sitemap.xml`: rastreo e indexación.\n- `feed.xml`: novedades mediante RSS.\n- `404.html`: página de error personalizada.
 - `favicon.svg`: icono del sitio.
 
 ## Desarrollo y publicación
