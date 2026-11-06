@@ -7,7 +7,7 @@ function affine(ctx,s0,s1,s2,d0,d1,d2){const den=s0.x*(s1.y-s2.y)+s1.x*(s2.y-s0.
 class MeshDeformer{
  constructor(options={}){this.columns=Math.max(2,Math.min(32,options.columns||8));this.rows=Math.max(2,Math.min(32,options.rows||10));this.strength=clamp(options.strength??1,0,1);this.controls=[];this.source=null}
  setControls(controls){this.controls=(controls||[]).filter(c=>c.source&&c.target).map(c=>({source:{x:clamp(c.source.x),y:clamp(c.source.y)},target:{x:clamp(c.target.x),y:clamp(c.target.y)}}));return this.controls.length}
- capture(points){this.controls=Object.values(points||{}).map(p=>({source:{x:clamp(p.x),y:clamp(p.y)},target:{x:clamp(p.x),y:clamp(p.y)}}));return this.controls.length}
+ capture(points){this.controls=Object.entries(points||{}).map(([name,p])=>({name,source:{x:clamp(p.x),y:clamp(p.y)},target:{x:clamp(p.x),y:clamp(p.y)}}));return this.controls.length}
  updateTargets(points){for(const control of this.controls){const p=points[control.name];if(p)control.target={x:clamp(p.x),y:clamp(p.y)}}}
  grid(){const out=[];for(let y=0;y<=this.rows;y++)for(let x=0;x<=this.columns;x++)out.push({x:x/this.columns,y:y/this.rows});return out}
  deformPoint(point){if(!this.controls.length)return{...point};let dx=0,dy=0,total=0;for(const c of this.controls){const d=dist2(point,c.source),w=1/Math.max(0.0004,d*d);dx+=(c.target.x-c.source.x)*w;dy+=(c.target.y-c.source.y)*w;total+=w}if(!total)return{...point};return{x:clamp(point.x+dx/total*this.strength,-.5,1.5),y:clamp(point.y+dy/total*this.strength,-.5,1.5)}}
