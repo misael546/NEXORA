@@ -125,3 +125,19 @@ test("mesh deformer preserves original shape and follows rig landmarks", () => {
   assert.equal(restored.controls.length, 3);
   assert.equal(restored.columns, 4);
 });
+
+
+test("weighted bone skinning moves its limb region and round-trips configuration", () => {
+  const { api } = loadEngine();
+  const mesh = new api.NexoraMeshDeformer.MeshDeformer({ strength: 1, influenceRadius: 0.25 });
+  const points = { shoulder: {x:0.3,y:0.4}, elbow:{x:0.5,y:0.5}, hand:{x:0.7,y:0.6} };
+  mesh.captureBones(points, [{name:"arm",from:"shoulder",to:"elbow",radius:0.3}]);
+  const before = mesh.deformPoint({x:0.4,y:0.45});
+  mesh.updateBoneTargets({shoulder:{x:0.3,y:0.4},elbow:{x:0.6,y:0.55}},[{name:"arm",from:"shoulder",to:"elbow"}]);
+  const after = mesh.deformPoint({x:0.4,y:0.45});
+  assert.ok(after.x > before.x);
+  assert.ok(after.y > before.y);
+  const restored = new api.NexoraMeshDeformer.MeshDeformer().importJSON(mesh.exportJSON());
+  assert.equal(restored.bones.length,1);
+  assert.equal(restored.bones[0].name,"arm");
+});
