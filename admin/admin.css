@@ -5,3 +5,5 @@
 .voice-options{grid-template-columns:repeat(2,minmax(0,1fr))}.voice-download{display:grid;gap:12px;margin-top:16px;padding:14px;border:1px solid #32645f;border-radius:9px;background:#0b1722}.voice-download audio{width:100%;max-width:100%}.voice-download-link{display:inline-block;text-align:center;text-decoration:none;padding:11px 15px;border-radius:8px;color:var(--text)}@media(max-width:760px){.voice-options{grid-template-columns:1fr}}
 
 .voice-ready{font-size:10px;letter-spacing:1.3px;color:var(--cyan);font-weight:800}.voice-download audio{display:block;min-height:42px}.voice-download-link{width:fit-content;max-width:100%}
+
+.animate-admin-panel{margin-top:20px;padding:22px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,#111d2d,#101827)}.animate-admin-panel .voice-head{margin-bottom:14px}.animate-admin-panel .animate-open{display:inline-flex;text-decoration:none;align-items:center;justify-content:center;min-height:42px}.animate-admin-panel .hint{margin-bottom:0}@media(max-width:760px){.animate-admin-panel{padding:16px}.animate-admin-panel .animate-open{width:100%}}
