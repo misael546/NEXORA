@@ -28,6 +28,8 @@ const panel=document.createElement("section");panel.className="panel";panel.styl
 <div class="field"><label for="nvParticles">Ambiente</label><select id="nvParticles"><option value="none">Sin partículas</option><option value="dust">Polvo</option><option value="snow">Nieve</option><option value="embers">Brasas</option><option value="magic">Partículas mágicas</option></select></div>
 <div class="field"><label for="nvZoom">Zoom de cámara</label><input id="nvZoom" type="range" min="0.6" max="1.8" step="0.05" value="1"></div>
 <div class="actions"><button class="btn" id="nvRender">Renderizar fotograma</button><button class="btn" id="nvAnimate">Vista animada</button></div>
+<div class="field"><label for="nvPoint">Punto del esqueleto</label><select id="nvPoint"><option value="head">Cabeza</option><option value="neck">Cuello</option><option value="shoulderL">Hombro izquierdo</option><option value="elbowL">Codo izquierdo</option><option value="handL">Mano izquierda</option><option value="shoulderR">Hombro derecho</option><option value="elbowR">Codo derecho</option><option value="handR">Mano derecha</option><option value="hip">Cadera</option><option value="kneeL">Rodilla izquierda</option><option value="footL">Pie izquierdo</option><option value="kneeR">Rodilla derecha</option><option value="footR">Pie derecho</option></select></div>
+<div class="actions"><button class="btn" id="nvRigToggle">Editar esqueleto</button><button class="btn" id="nvRigSave">Guardar rig</button><button class="btn" id="nvRigLoad">Cargar rig</button><input id="nvRigFile" type="file" accept="application/json,.json" hidden></div>
 <div class="hint" id="nvHelp">Sube una imagen en el panel principal para añadirla a esta vista por capas.</div>
 `;
 const notice=aside.querySelector(".notice");aside.insertBefore(panel,notice||null);
@@ -49,13 +51,19 @@ $("ncFile").addEventListener("change",async e=>{const file=e.target.files?.[0];i
 refresh();
 const engine=new window.NexoraVisualEngine.VisualEngine($("nvCanvas"));
 const compositor=new window.NexoraCompositor.SceneCompositor(engine);
-let engineImage=null,raf=0;
+let engineImage=null,raf=0,rigEditing=false,draggingRigPoint=null;const rig=new window.NexoraAnimationTools.CharacterRig();
 const mainImage=$("imageFile");
 mainImage?.addEventListener("change",()=>{const file=mainImage.files?.[0];if(!file)return;const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{if(engineImage)engine.removeLayer(engineImage);engineImage=engine.addLayer({name:"Personaje / imagen",type:"image",asset:img,width:Math.min(560,img.width),height:Math.min(310,img.height),z:10});engine.draw(0);$("nvStatus").textContent="IMAGEN CARGADA";$("nvHelp").textContent="La imagen está en una capa independiente. Puedes añadir partículas y mover cámara.";URL.revokeObjectURL(url)};img.onerror=()=>{$("nvStatus").textContent="ERROR DE IMAGEN";URL.revokeObjectURL(url)};img.src=url});
-function render(t=0){engine.setCamera({zoom:Number($("nvZoom").value)});engine.draw(t)}
+function render(t=0){engine.setCamera({zoom:Number($("nvZoom").value)});engine.draw(t);rig.draw(engine.ctx,engine.width,engine.height)}
 $("nvRender").addEventListener("click",()=>{render(0);$("nvStatus").textContent="FOTOGRAMA RENDERIZADO"});
 $("nvParticles").addEventListener("change",e=>{const kind=e.target.value;engine.setParticles(kind==="none"?{count:0}:{kind,count:kind==="snow"?60:42,seed:412});render(0)});
 $("nvZoom").addEventListener("input",()=>render(0));
+$("nvRigToggle").addEventListener("click",()=>{rigEditing=!rigEditing;$("nvRigToggle").textContent=rigEditing?"Terminar edición":"Editar esqueleto";$("nvCanvas").style.cursor=rigEditing?"crosshair":"default";render(0)});
+$("nvCanvas").addEventListener("pointerdown",e=>{if(!rigEditing)return;const r=e.currentTarget.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;const nearest=Object.entries(rig.points).map(([name,p])=>({name,d:Math.hypot((p.x-x)*r.width,(p.y-y)*r.height)})).sort((a,b)=>a.d-b.d)[0];if(nearest&&nearest.d<22){draggingRigPoint=nearest.name}else{rig.setPoint($("nvPoint").value,x,y);draggingRigPoint=$("nvPoint").value}e.currentTarget.setPointerCapture(e.pointerId);render(0)});
+$("nvCanvas").addEventListener("pointermove",e=>{if(!rigEditing||!draggingRigPoint)return;const r=e.currentTarget.getBoundingClientRect();rig.setPoint(draggingRigPoint,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);render(0)});
+$("nvCanvas").addEventListener("pointerup",()=>{draggingRigPoint=null});$("nvCanvas").addEventListener("pointercancel",()=>{draggingRigPoint=null});
+$("nvRigSave").addEventListener("click",()=>{const blob=new Blob([JSON.stringify(rig.save(),null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nexora-character-rig.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)});
+$("nvRigLoad").addEventListener("click",()=>$("nvRigFile").click());$("nvRigFile").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{rig.load(JSON.parse(await file.text()));render(0);$("nvStatus").textContent="RIG CARGADO"}catch(err){$("nvStatus").textContent="RIG INVÁLIDO: "+err.message}e.target.value=""});
 $("nvAnimate").addEventListener("click",()=>{if(raf){cancelAnimationFrame(raf);raf=0;$("nvAnimate").textContent="Vista animada";return}$("nvAnimate").textContent="Detener vista";const start=performance.now();const tick=now=>{render((now-start)/1000);raf=requestAnimationFrame(tick)};raf=requestAnimationFrame(tick)});
 window.NEXORA_ANIMATE_ENGINE={visual:engine,continuity,compositor,animation:window.NexoraAnimationTools,version:"1.0.0"};
 window.addEventListener("beforeunload",()=>{if(raf)cancelAnimationFrame(raf)});
