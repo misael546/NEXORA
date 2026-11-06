@@ -1,0 +1,19 @@
+/* NEXORA ANIMATE — scene project, shot timeline and continuity contracts. */
+(()=>{"use strict";
+const KEY="nexora.animate.scene.v1";
+const uid=()=> "shot_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7);
+const clone=x=>JSON.parse(JSON.stringify(x));
+class SceneProject{
+ constructor(storage=localStorage){this.storage=storage;this.data=this.load()}
+ load(){try{const d=JSON.parse(this.storage.getItem(KEY)||"null");if(d?.format==="nexora-scene"&&Array.isArray(d.shots))return d}catch{}return{format:"nexora-scene",version:1,title:"Mi primera escena",fps:24,shots:[],updatedAt:new Date().toISOString()}}
+ save(){this.data.updatedAt=new Date().toISOString();this.storage.setItem(KEY,JSON.stringify(this.data));return this.snapshot()}
+ snapshot(){return clone(this.data)}
+ setTitle(title){this.data.title=String(title||"Escena sin título").trim().slice(0,100);this.save()}
+ addShot(input){const duration=Math.max(.5,Math.min(120,Number(input.duration)||3));const shot={id:uid(),name:String(input.name||"Plano "+(this.data.shots.length+1)).trim(),characterId:String(input.characterId||""),action:String(input.action||"").trim(),location:String(input.location||"").trim(),camera:String(input.camera||"medium"),dialogue:String(input.dialogue||"").trim(),voiceId:String(input.voiceId||""),start:this.data.shots.reduce((m,x)=>Math.max(m,x.start+x.duration),0),duration,continuityLocks:{face:true,eyes:true,hair:true,body:true,palette:true,outfit:true,accessories:true,voice:true}};this.data.shots.push(shot);this.save();return clone(shot)}
+ removeShot(id){this.data.shots=this.data.shots.filter(x=>x.id!==id);let t=0;this.data.shots.forEach(s=>{s.start=t;t+=s.duration});this.save()}
+ validate(continuity){const issues=[];for(const [index,shot]of this.data.shots.entries()){if(!shot.characterId){issues.push({shot:shot.name,index,field:"character",message:"El plano no tiene personaje asignado"});continue}const character=continuity.get(shot.characterId);if(!character){issues.push({shot:shot.name,index,field:"character",message:"El personaje ya no existe en la biblia"})}else{if(!character.face||!character.eyes||!character.hair||!character.body||!character.palette||!character.outfit)issues.push({shot:shot.name,index,field:"identity",message:"La ficha de "+character.name+" tiene rasgos visuales incompletos"});if(shot.voiceId&&character.voiceId&&shot.voiceId!==character.voiceId)issues.push({shot:shot.name,index,field:"voice",message:"La voz del plano contradice la voz maestra de "+character.name})}if(index>0){const prev=this.data.shots[index-1];if(shot.start<prev.start+prev.duration)issues.push({shot:shot.name,index,field:"overlap",message:"El plano se superpone al anterior"})}}return{valid:issues.length===0,issues,shotCount:this.data.shots.length,duration:this.data.shots.reduce((m,s)=>Math.max(m,s.start+s.duration),0)}}
+ exportJSON(){return JSON.stringify(this.snapshot(),null,2)}
+ importJSON(raw){const d=typeof raw==="string"?JSON.parse(raw):raw;if(d.format!=="nexora-scene"||d.version!==1||!Array.isArray(d.shots))throw new Error("Proyecto de escena no válido");this.data=clone(d);let t=0;this.data.shots.forEach(s=>{s.duration=Math.max(.5,Number(s.duration)||3);s.start=t;t+=s.duration});this.save();return this.snapshot()}
+}
+window.NexoraSceneProject={SceneProject,storageKey:KEY};
+})();
