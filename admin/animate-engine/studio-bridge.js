@@ -37,7 +37,7 @@ let editingId=null;
 function status(message){$("ncStatus").textContent=message}
 function refresh(){const select=$("ncSelect"),current=select.value;select.innerHTML='<option value="">Selecciona un personaje…</option>';continuity.list().forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name;select.append(o)});if(current&&continuity.get(current))select.value=current}
 function formData(){const p={};for(const [k,id]of Object.entries(fields))p[k]=$(id).value;p.voiceId=$("voiceSpeaker")?.value||"";return p}
-function fill(p){for(const[k,id]of Object.entries(fields))$(id).value=p[k]||"";editingId=p.id;$("ncSave").textContent="Actualizar personaje"}
+function fill(p){for(const[k,id]of Object.entries(fields))$(id).value=p[k]||"";if(p.voiceId&&$("voiceSpeaker"))$("voiceSpeaker").value=p.voiceId;editingId=p.id;$("ncSave").textContent="Actualizar personaje"}
 function clear(){Object.values(fields).forEach(id=>$(id).value="");editingId=null;$("ncSave").textContent="Guardar personaje"}
 $("ncSave").addEventListener("click",()=>{try{const data=formData();if(!data.name.trim())throw new Error("Escribe el nombre del personaje");if(editingId)continuity.update(editingId,data);else continuity.create(data);refresh();status("Ficha maestra guardada en este navegador.");}catch(e){status(e.message)}});
 $("ncReset").addEventListener("click",clear);
