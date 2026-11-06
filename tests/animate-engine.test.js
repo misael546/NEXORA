@@ -32,7 +32,8 @@ function loadEngine() {
     "continuity.js",
     "animation-tools.js",
     "motion-system.js",
-    "scene-project.js"
+    "scene-project.js",
+    "mesh-deformer.js"
   ]) {
     const source = fs.readFileSync(path.join(__dirname, "../admin/animate-engine", file), "utf8");
     vm.runInContext(source, context, { filename: file });
@@ -101,4 +102,26 @@ test("2D rig inverse kinematics and phoneme-to-viseme mapping return usable resu
   ], 1);
   assert.equal(api.NexoraAnimationTools.visemeAt(track, 0.05), "closed");
   assert.equal(api.NexoraAnimationTools.visemeAt(track, 0.15), "open");
+});
+
+
+test("mesh deformer preserves original shape and follows rig landmarks", () => {
+  const { api } = loadEngine();
+  const mesh = new api.NexoraMeshDeformer.MeshDeformer({ columns: 4, rows: 4 });
+  mesh.capture({
+    head: { x: 0.5, y: 0.2 },
+    hip: { x: 0.5, y: 0.8 },
+    hand: { x: 0.2, y: 0.5 }
+  });
+  assert.equal(mesh.controls.length, 3);
+  const original = mesh.deformPoint({ x: 0.5, y: 0.2 });
+  assert.ok(Math.abs(original.x - 0.5) < 0.001);
+  assert.ok(Math.abs(original.y - 0.2) < 0.001);
+  mesh.updateTargets({ head: { x: 0.6, y: 0.25 } });
+  const moved = mesh.deformPoint({ x: 0.5, y: 0.2 });
+  assert.ok(moved.x > original.x);
+  assert.ok(moved.y > original.y);
+  const restored = new api.NexoraMeshDeformer.MeshDeformer().importJSON(mesh.exportJSON());
+  assert.equal(restored.controls.length, 3);
+  assert.equal(restored.columns, 4);
 });
