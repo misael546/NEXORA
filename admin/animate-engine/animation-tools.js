@@ -5,7 +5,7 @@ const lerp=(a,b,t)=>a+(b-a)*t;
 function interpolatePose(a,b,t){const out={};for(const k of new Set([...Object.keys(a||{}),...Object.keys(b||{})])){const av=a?.[k]??b?.[k]??0,bv=b?.[k]??av;out[k]=typeof av==="number"&&typeof bv==="number"?lerp(av,bv,clamp(t)):t<.5?av:bv}return out}
 function solveTwoBoneIK(root,target,len1,len2,pole=1){const dx=target.x-root.x,dy=target.y-root.y,d=Math.max(.001,Math.hypot(dx,dy)),dist=Math.min(len1+len2-.001,Math.max(Math.abs(len1-len2)+.001,d)),a=Math.acos(clamp((len1*len1+dist*dist-len2*len2)/(2*len1*dist),-1,1)),base=Math.atan2(dy,dx)+pole*a;return{x:root.x+Math.cos(base)*len1,y:root.y+Math.sin(base)*len1}}
 class CharacterRig{
- constructor(points={}){this.points={...points};this.bones=[];this.poses={};this.selected=null}
+ constructor(points={}){this.points={...points};this.bones=[{name:"neck",from:"head",to:"neck"},{name:"spine",from:"neck",to:"hip"},{name:"armL1",from:"shoulderL",to:"elbowL"},{name:"armL2",from:"elbowL",to:"handL"},{name:"armR1",from:"shoulderR",to:"elbowR"},{name:"armR2",from:"elbowR",to:"handR"},{name:"legL1",from:"hip",to:"kneeL"},{name:"legL2",from:"kneeL",to:"footL"},{name:"legR1",from:"hip",to:"kneeR"},{name:"legR2",from:"kneeR",to:"footR"}];this.poses={};this.selected=null}
  setPoint(name,x,y){this.points[name]={x:clamp(x),y:clamp(y)}}
  removePoint(name){delete this.points[name]}
  addBone(name,from,to,length=null){if(!this.points[from]||!this.points[to])throw new Error("Faltan puntos para crear el hueso");this.bones.push({name,from,to,length});return this.bones.at(-1)}
