@@ -50,3 +50,16 @@ Los movimientos del rig animan la estructura de puntos y huesos como guía visua
 3. Comparación visual de referencias por personaje para detectar cambios de rostro, vestuario y proporciones.
 4. Alineación fonética con marcas de tiempo para generar visemas y sincronización de boca.
 5. Render por lotes de planos y composición multicapa con transiciones, profundidad y audio por pista.
+
+
+## Evolución 1.2 — biblioteca de referencias y capas
+
+- `animate-engine/asset-store.js`: biblioteca binaria local basada en IndexedDB para conservar imágenes de referencia sin convertirlas en archivos estáticos del sitio.
+- Las fichas de personajes permiten adjuntar varias imágenes de referencia. La exportación de la biblia incluye las imágenes en un paquete JSON y la importación las restaura en la biblioteca local.
+- El motor visual permite ajustar posición X/Y, escala, rotación y opacidad de la capa del personaje desde el estudio.
+- Se incorporó una suite automatizada con Node.js para validar la biblia de personajes, la continuidad de escenas, las poses clave, la cinemática inversa y la conversión de fonemas a visemas.
+- GitHub Actions ejecuta estas pruebas en cambios relevantes. La ejecución inicial terminó con 4 pruebas aprobadas y 0 fallidas.
+
+## Persistencia y límites
+
+Los recursos se guardan en IndexedDB del navegador/dispositivo; no se sincronizan automáticamente entre teléfonos o navegadores. Para transferirlos se debe exportar e importar el paquete de biblia. La biblioteca local no es un servicio de almacenamiento en la nube ni un sistema de respaldo remoto.
