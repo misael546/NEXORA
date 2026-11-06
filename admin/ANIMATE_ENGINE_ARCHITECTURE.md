@@ -90,3 +90,10 @@ El deformador de malla admite ahora *bone skinning* 2D: cada hueso toma los punt
 Flujo: cargar una ilustración → colocar los puntos del rig sobre sus articulaciones → activar la deformación. El estudio captura los huesos disponibles del rig y actualiza sus extremos cuando se mueven los puntos. Las configuraciones nuevas se exportan como versión 2; el importador conserva compatibilidad con mallas versión 1.
 
 Limitaciones: es deformación geométrica de píxeles existentes. No separa automáticamente partes del cuerpo, no crea píxeles ocultos y no sustituye un sistema de segmentación, máscaras por capa o reconstrucción generativa. Los resultados dependen de la colocación manual del rig y del radio elegido.
+
+
+## v1.5 — Máscaras poligonales por región
+
+El deformador acepta regiones poligonales con el método setRegions([{ name, boneNames, points, feather }]). Cada región limita los huesos enumerados en boneNames a una zona de la imagen; feather suaviza la transición en el borde. Las regiones se serializan en el formato de malla versión 3 y el importador mantiene compatibilidad con las versiones 1 y 2.
+
+Las coordenadas de los polígonos usan el espacio normalizado de la imagen (0–1). Esta API permite construir máscaras independientes para brazos, piernas, torso u otras piezas, pero todavía requiere que los polígonos sean definidos manualmente. No segmenta automáticamente una ilustración ni crea píxeles ocultos. El editor aún no incluye un trazador visual de polígonos; las máscaras pueden crearse mediante la API o un archivo de malla JSON.
