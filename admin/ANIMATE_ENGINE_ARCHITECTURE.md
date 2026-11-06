@@ -63,3 +63,21 @@ Los movimientos del rig animan la estructura de puntos y huesos como guía visua
 ## Persistencia y límites
 
 Los recursos se guardan en IndexedDB del navegador/dispositivo; no se sincronizan automáticamente entre teléfonos o navegadores. Para transferirlos se debe exportar e importar el paquete de biblia. La biblioteca local no es un servicio de almacenamiento en la nube ni un sistema de respaldo remoto.
+
+
+## Evolución 1.3 — deformación de ilustración 2D
+
+- `animate-engine/mesh-deformer.js`: deformador por malla triangular que divide una imagen en celdas y vuelve a dibujar cada triángulo con una transformación afín.
+- Los puntos del rig funcionan como anclas: se captura la posición original y los cambios de posición generan desplazamientos suaves sobre la malla.
+- El estudio incorpora resolución horizontal/vertical, intensidad, activar/desactivar, restablecer, importar y exportar la configuración de malla.
+- La malla se integra como una capa personalizada del motor visual y se actualiza durante la previsualización de poses.
+
+## Uso recomendado y limitaciones de la malla
+
+1. Carga una ilustración de cuerpo completo.
+2. Activa la edición del esqueleto y coloca puntos sobre cabeza, hombros, codos, manos, cadera, rodillas y pies.
+3. Activa la deformación de malla.
+4. Mueve los puntos con desplazamientos pequeños para comprobar el resultado.
+5. Ajusta resolución e intensidad antes de exportar.
+
+La deformación actual es un prototipo geométrico 2D basado en anclas y no separa automáticamente brazos, piernas, pelo o ropa. Puede estirar o distorsionar zonas que se solapan y no reconstruye píxeles ocultos. Para animación de calidad de producción se necesitarán segmentación por partes, pesos de influencia por hueso, mallas adaptativas, corrección de pliegues y reconstrucción/inpainting de zonas ocultas.
