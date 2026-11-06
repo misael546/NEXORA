@@ -141,3 +141,22 @@ test("weighted bone skinning moves its limb region and round-trips configuration
   assert.equal(restored.bones.length,1);
   assert.equal(restored.bones[0].name,"arm");
 });
+
+
+test("polygon masks constrain bone deformation to a softly feathered body region", () => {
+  const { api } = loadEngine();
+  const mesh = new api.NexoraMeshDeformer.MeshDeformer({ strength: 1, influenceRadius: 0.5 });
+  const points = { shoulder: {x:0.25,y:0.4}, elbow:{x:0.45,y:0.4} };
+  mesh.captureBones(points, [{name:"armL1",from:"shoulder",to:"elbow",radius:0.5}]);
+  mesh.setRegions([{name:"left-arm",boneNames:["armL1"],points:[
+    {x:0.15,y:0.25},{x:0.6,y:0.25},{x:0.6,y:0.58},{x:0.15,y:0.58}
+  ],feather:0.03}]);
+  mesh.updateBoneTargets({shoulder:{x:0.25,y:0.5},elbow:{x:0.45,y:0.5}},[{name:"armL1",from:"shoulder",to:"elbow"}]);
+  const inside=mesh.deformPoint({x:0.35,y:0.4});
+  const outside=mesh.deformPoint({x:0.8,y:0.4});
+  assert.ok(inside.y>0.4);
+  assert.ok(Math.abs(outside.y-0.4)<1e-6);
+  const restored=new api.NexoraMeshDeformer.MeshDeformer().importJSON(mesh.exportJSON());
+  assert.equal(restored.regions.length,1);
+  assert.deepEqual(Array.from(restored.regions[0].boneNames),["armL1"]);
+});
