@@ -15,7 +15,7 @@ class ContinuityManager{
  remove(id){this.characters=this.characters.filter(x=>x.id!==id);this.persist()}
  exportJSON(){return JSON.stringify({format:"nexora-character-bible",version:1,characters:this.characters},null,2)}
  importJSON(raw){const data=typeof raw==="string"?JSON.parse(raw):raw;if(data.format!=="nexora-character-bible"||!Array.isArray(data.characters))throw new Error("Archivo de continuidad no válido");for(const item of data.characters){const p=normalize(item);const i=this.characters.findIndex(x=>x.id===p.id);if(i>=0)this.characters[i]=p;else this.characters.push(p)}this.persist();return this.list()}
- validate(id,shot={}){const base=this.get(id);if(!base)throw new Error("Personaje no encontrado");const checks=[];for(const field of fields){if(shot[field]!==undefined&&clean(shot[field])!==clean(base[field]))checks.push({field,expected:base[field],actual:shot[field],severity:["name","face","eyes","hair","body","palette","outfit"].includes(field)?"high":"medium"})}return{characterId:id,consistent:checks.length===0,issues:checks,score:Math.round(100-checks.reduce((n,x)=>n+(x.severity==="high"?15:5),0))}}
+ validate(id,shot={}){const base=this.get(id);if(!base)throw new Error("Personaje no encontrado");const checks=[];for(const field of fields){if(shot[field]!==undefined&&clean(shot[field])!==""&&clean(shot[field])!==clean(base[field]))checks.push({field,expected:base[field],actual:shot[field],severity:["name","face","eyes","hair","body","palette","outfit"].includes(field)?"high":"medium"})}return{characterId:id,consistent:checks.length===0,issues:checks,score:Math.round(100-checks.reduce((n,x)=>n+(x.severity==="high"?15:5),0))}}
 }
 window.NexoraContinuity={ContinuityManager,fields,storageKey:KEY};
 })();
