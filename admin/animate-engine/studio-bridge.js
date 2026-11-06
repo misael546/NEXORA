@@ -76,7 +76,7 @@ function refresh(){const select=$("ncSelect"),current=select.value;select.innerH
 function formData(){const p={};for(const [k,id]of Object.entries(fields))p[k]=$(id).value;p.voiceId=$("voiceSpeaker")?.value||"";return p}
 function fill(p){for(const[k,id]of Object.entries(fields))$(id).value=p[k]||"";if(p.voiceId&&$("voiceSpeaker"))$("voiceSpeaker").value=p.voiceId;editingId=p.id;renderCharacterReferences(p);$("ncSave").textContent="Actualizar personaje"}
 function clear(){Object.values(fields).forEach(id=>$(id).value="");editingId=null;renderCharacterReferences(null);$("ncSave").textContent="Guardar personaje"}
-$("ncSave").addEventListener("click",()=>{try{const data=formData();if(!data.name.trim())throw new Error("Escribe el nombre del personaje");if(editingId)continuity.update(editingId,data);else continuity.create(data);refresh();status("Ficha maestra guardada en este navegador.");}catch(e){status(e.message)}});
+$("ncSave").addEventListener("click",()=>{try{const data=formData();if(!data.name.trim())throw new Error("Escribe el nombre del personaje");const saved=editingId?continuity.update(editingId,data):continuity.create(data);refresh();$("ncSelect").value=saved.id;fill(saved);status("Ficha maestra guardada en este navegador.");}catch(e){status(e.message)}});
 $("ncReset").addEventListener("click",clear);
 $("ncReferenceFiles").addEventListener("change",async e=>{try{await uploadCharacterReferences([...e.target.files||[]])}catch(err){status(err.message)}e.target.value=""});
 $("ncLoad").addEventListener("click",()=>{const p=continuity.get($("ncSelect").value);if(!p){status("Selecciona un personaje.");return}fill(p);status("Ficha cargada. Puedes editarla y actualizarla.")});
