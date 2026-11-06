@@ -26,6 +26,7 @@
 <h2>Vista previa</h2>
 <div class="stage"><canvas id="stage" width="960" height="540"></canvas><div class="empty" id="empty"><div style="font-size:34px">✧</div><strong>Tu escenario está esperando</strong><span>Sube una imagen para comenzar</span></div></div>
 <div class="upload"><label class="file-label" for="imageFile">＋ Subir imagen</label><input id="imageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><span class="pill" id="imageState">SIN IMAGEN</span></div>
+<div class="upload"><label class="file-label" for="audioFile">♫ Añadir audio</label><input id="audioFile" type="file" accept="audio/*"><span class="pill" id="audioState">SIN AUDIO</span></div><audio id="audioTrack" controls preload="metadata" class="hidden" style="width:100%;margin:0 0 12px"></audio><p class="hint">El audio se mezcla con el vídeo al exportar. Puedes usar narración, música o efectos de sonido que tengas permiso para utilizar.</p>
 <p class="hint">Consejo: un PNG con fondo transparente y el personaje completo suele dar mejores resultados. La imagen permanece en este dispositivo.</p>
 <div class="field"><label for="visualMode">Tipo de imagen</label><select id="visualMode"><option value="character">Dibujo o personaje</option><option value="game">Captura de pantalla de un juego</option></select><span class="hint" id="modeHint">Modo personaje: anima la imagen completa como un personaje.</span></div>
 
@@ -60,7 +61,7 @@
 <script>
 (()=>{
 const $=id=>document.getElementById(id),canvas=$('stage'),ctx=canvas.getContext('2d');
-let image=null,imageUrl='',clips=[],playing=false,raf=0;
+let image=null,imageUrl='',clips=[],playing=false,raf=0,audioUrl='',audioContext=null,audioSource=null,audioDestination=null;
 const W=canvas.width,H=canvas.height;
 let rigPoints={},rigEnabled=false,dragPoint=null,faceLandmarker=null,poseLandmarker=null;
 function draw(time=0,clip=null,progress=0){
@@ -181,6 +182,7 @@ canvas.addEventListener('pointermove',e=>{if(!dragPoint||!rigEnabled)return;cons
 canvas.addEventListener('pointerup',()=>{dragPoint=null});
 
 $('duration').addEventListener('input',()=>{$('durationLabel').textContent=$('duration').value+' s'});
+$('audioFile').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(!file)return;if(!file.type.startsWith('audio/')){setStatus('Selecciona un archivo de audio válido.');return}if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=URL.createObjectURL(file);const audio=$('audioTrack');audio.src=audioUrl;audio.classList.remove('hidden');audio.load();$('audioState').textContent='AUDIO LISTO';$('exportStatus').textContent='Audio cargado. Se incluirá en la exportación del vídeo.';});
 $('imageFile').addEventListener('change',e=>{
  const file=e.target.files&&e.target.files[0];if(!file)return;
  if(!file.type.startsWith('image/')){setStatus('Selecciona un archivo de imagen válido.');return}
@@ -212,13 +214,13 @@ $('export').addEventListener('click',async()=>{
  const mime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
  if(!mime){$('exportStatus').textContent='No se encontró un codificador WebM compatible en este navegador.';return}
  $('export').disabled=true;$('exportStatus').textContent='Preparando vídeo… No cierres esta página.';
- const stream=canvas.captureStream(30),chunks=[];let recorder;
+ const stream=canvas.captureStream(30),chunks=[];let recorder;let audioStarted=false;try{const audioEl=$('audioTrack');if(audioEl.src){audioContext=audioContext||new AudioContext();if(!audioSource){audioSource=audioContext.createMediaElementSource(audioEl);audioDestination=audioContext.createMediaStreamDestination();audioSource.connect(audioDestination);audioSource.connect(audioContext.destination)}await audioContext.resume();audioEl.pause();audioEl.currentTime=0;audioDestination.stream.getAudioTracks().forEach(track=>stream.addTrack(track));}}catch(audioErr){$('exportStatus').textContent='El vídeo se exportará sin audio: '+audioErr.message;}
  try{
   recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:5000000});
   recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
   recorder.onerror=()=>{$('exportStatus').textContent='El navegador no pudo completar la grabación.';$('export').disabled=false;stream.getTracks().forEach(t=>t.stop())};
-  recorder.onstop=()=>{const blob=new Blob(chunks,{type:mime});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='nexora-animate.webm';a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);stream.getTracks().forEach(t=>t.stop());$('exportStatus').textContent='Vídeo listo. Se guardó como archivo WebM.';$('export').disabled=false;draw()};
-  recorder.start(250);const total=clips.reduce((a,c)=>a+c.duration,0),start=performance.now();
+  recorder.onstop=()=>{const blob=new Blob(chunks,{type:mime});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='nexora-animate.webm';a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);stream.getTracks().forEach(t=>t.stop());if(audioStarted)audioEl.pause();$('exportStatus').textContent='Vídeo listo. Se guardó como archivo WebM'+(audioStarted?' con audio sincronizado.':'.');$('export').disabled=false;draw()};
+  recorder.start(250);const audioEl=$('audioTrack');if(audioEl.src){try{await audioEl.play();audioStarted=true}catch(e){$('exportStatus').textContent='El vídeo se exportará, pero el audio no pudo iniciar: '+e.message}}const total=clips.reduce((a,c)=>a+c.duration,0),start=performance.now();
   await new Promise(resolve=>{const tick=now=>{const t=(now-start)/1000;if(t>=total){draw();resolve();return}renderAt(t);requestAnimationFrame(tick)};requestAnimationFrame(tick)});
   recorder.stop();
  }catch(err){if(recorder&&recorder.state!=='inactive')recorder.stop();stream.getTracks().forEach(t=>t.stop());$('exportStatus').textContent='No se pudo exportar. Intenta con clips más cortos.';$('export').disabled=false}
