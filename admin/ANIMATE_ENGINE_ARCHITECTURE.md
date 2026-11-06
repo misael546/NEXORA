@@ -81,3 +81,12 @@ Los recursos se guardan en IndexedDB del navegador/dispositivo; no se sincroniza
 5. Ajusta resolución e intensidad antes de exportar.
 
 La deformación actual es un prototipo geométrico 2D basado en anclas y no separa automáticamente brazos, piernas, pelo o ropa. Puede estirar o distorsionar zonas que se solapan y no reconstruye píxeles ocultos. Para animación de calidad de producción se necesitarán segmentación por partes, pesos de influencia por hueso, mallas adaptativas, corrección de pliegues y reconstrucción/inpainting de zonas ocultas.
+
+
+## v1.4 — Deformación ponderada por huesos
+
+El deformador de malla admite ahora *bone skinning* 2D: cada hueso toma los puntos iniciales y finales del rig, calcula una transformación rígida (rotación y escala limitada) y aplica influencia suave según la distancia de cada vértice al segmento. El panel permite ajustar el radio de influencia y la intensidad global.
+
+Flujo: cargar una ilustración → colocar los puntos del rig sobre sus articulaciones → activar la deformación. El estudio captura los huesos disponibles del rig y actualiza sus extremos cuando se mueven los puntos. Las configuraciones nuevas se exportan como versión 2; el importador conserva compatibilidad con mallas versión 1.
+
+Limitaciones: es deformación geométrica de píxeles existentes. No separa automáticamente partes del cuerpo, no crea píxeles ocultos y no sustituye un sistema de segmentación, máscaras por capa o reconstrucción generativa. Los resultados dependen de la colocación manual del rig y del radio elegido.
