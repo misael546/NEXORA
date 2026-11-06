@@ -2,7 +2,7 @@
 (()=>{"use strict";
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const dist2=(a,b)=>(a.x-b.x)**2+(a.y-b.y)**2;
-function barycentric(p,a,b,c){const v0={x:b.x-a.x,y:b.y-a.y},v1={x:c.x-a.x,y:c.y-a.y},v2={x:p.x-a.x,y:p.y-a.y},d=v0.x*v1.y-v1.x*v0.y;if(Math.abs(d)<1e-8)return null;const v=(v2.x*v1.y-v1.y*v2.x)/d,w=(v0.x*v2.y-v2.y*v0.x)/d;return{u:1-v-w,v,w}}
+function barycentric(p,a,b,c){const v0={x:b.x-a.x,y:b.y-a.y},v1={x:c.x-a.x,y:c.y-a.y},v2={x:p.x-a.x,y:p.y-a.y},d=v0.x*v1.y-v1.x*v0.y;if(Math.abs(d)<1e-8)return null;const v=(v2.x*v1.y-v1.x*v2.y)/d,w=(v0.x*v2.y-v2.y*v0.x)/d;return{u:1-v-w,v,w}}
 function affine(ctx,s0,s1,s2,d0,d1,d2){const den=s0.x*(s1.y-s2.y)+s1.x*(s2.y-s0.y)+s2.x*(s0.y-s1.y);if(Math.abs(den)<1e-8)return false;const a=(d0.x*(s1.y-s2.y)+d1.x*(s2.y-s0.y)+d2.x*(s0.y-s1.y))/den,b=(d0.y*(s1.y-s2.y)+d1.y*(s2.y-s0.y)+d2.y*(s0.y-s1.y))/den,c=(d0.x*(s2.x-s1.x)+d1.x*(s0.x-s2.x)+d2.x*(s1.x-s0.x))/den,d=(d0.y*(s2.x-s1.x)+d1.y*(s0.x-s2.x)+d2.y*(s1.x-s0.x))/den,e=(d0.x*(s1.x*s2.y-s2.x*s1.y)+d1.x*(s2.x*s0.y-s0.x*s2.y)+d2.x*(s0.x*s1.y-s1.x*s0.y))/den,f=(d0.y*(s1.x*s2.y-s2.x*s1.y)+d1.y*(s2.x*s0.y-s0.x*s2.y)+d2.y*(s0.x*s1.y-s1.x*s0.y))/den;ctx.transform(a,b,c,d,e,f);return true}
 function closestOnSegment(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy,t=l?clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/l,0,1):0;return{x:a.x+t*dx,y:a.y+t*dy,t}}
 function transformByBone(p,b){const sx=b.sourceB.x-b.sourceA.x,sy=b.sourceB.y-b.sourceA.y,tx=b.targetB.x-b.targetA.x,ty=b.targetB.y-b.targetA.y,sl=Math.max(1e-5,Math.hypot(sx,sy)),tl=Math.hypot(tx,ty),scale=clamp(tl/sl,.35,2.5),angle=Math.atan2(ty,tx)-Math.atan2(sy,sx),c=Math.cos(angle)*scale,s=Math.sin(angle)*scale,rx=p.x-b.sourceA.x,ry=p.y-b.sourceA.y;return{x:b.targetA.x+rx*c-ry*s,y:b.targetA.y+rx*s+ry*c}}
