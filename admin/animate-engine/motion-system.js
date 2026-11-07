@@ -1,9 +1,10 @@
 /* NEXORA ANIMATE — reusable motion presets and keyframe timeline. */
 (()=>{"use strict";
-const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,Number.isFinite(v)?v:a));
 const lerp=(a,b,t)=>a+(b-a)*t;
-const ease=t=>{t=clamp(t);return t*t*(3-2*t)};
-const copyPoints=p=>Object.fromEntries(Object.entries(p||{}).map(([k,v])=>[k,{x:v.x,y:v.y}]));
+const easing=["smooth","linear","ease-in","ease-out","hold"];
+const ease=(t,kind="smooth")=>{t=clamp(t);if(kind==="linear")return t;if(kind==="ease-in")return t*t;if(kind==="ease-out")return 1-(1-t)*(1-t);if(kind==="hold")return 0;return t*t*(3-2*t)};
+const copyPoints=p=>Object.fromEntries(Object.entries(p||{}).map(([k,v])=>{if(!v||!Number.isFinite(v.x)||!Number.isFinite(v.y))throw new Error("Pose inválida en la articulación "+k);return[k,{x:clamp(v.x),y:clamp(v.y)}]}));
 const cycles={
  idle:(p,t)=>{const s=Math.sin(t*Math.PI*2);if(/shoulder/.test(p))return{x:0,y:-.008*s};if(p==="head")return{x:0,y:-.004*s};if(p==="hip")return{x:0,y:.004*s};return{x:0,y:0}},
  walk:(p,t)=>{const s=Math.sin(t*Math.PI*2);if(/arm|elbow|hand/.test(p))return{x:0,y:s*(p.includes("L")?-.045:.045)};if(/knee|foot/.test(p))return{x:s*(p.includes("L")?.035:-.035),y:Math.max(0,Math.cos(t*Math.PI*2))*.025};if(p==="hip")return{x:0,y:Math.abs(s)*-.012};if(p==="head")return{x:0,y:-Math.abs(s)*.006};return{x:0,y:0}},
@@ -14,14 +15,14 @@ const cycles={
 };
 class MotionTimeline{
  constructor(points={}){this.base=copyPoints(points);this.duration=2;this.preset="idle";this.keyframes=[]}
- setBase(points){this.base=copyPoints(points)}
- usePreset(name,duration=this.duration){if(!cycles[name])throw new Error("Movimiento desconocido");this.preset=name;this.duration=Math.max(.1,Number(duration)||2);this.keyframes=[];return this.sample(0)}
- addKeyframe(time,points){const t=clamp(Number(time)||0,0,this.duration);const frame={time:t,points:copyPoints(points)};const i=this.keyframes.findIndex(x=>Math.abs(x.time-t)<.001);if(i>=0)this.keyframes[i]=frame;else this.keyframes.push(frame);this.keyframes.sort((a,b)=>a.time-b.time);return frame}
- sample(time){const t=clamp(time/this.duration,0,1);if(this.keyframes.length){const frames=[{time:0,points:this.base},...this.keyframes,{time:this.duration,points:this.keyframes.at(-1).points}].sort((a,b)=>a.time-b.time);let a=frames[0],b=frames.at(-1);for(let i=0;i<frames.length-1;i++){if(time>=frames[i].time&&time<=frames[i+1].time){a=frames[i];b=frames[i+1];break}}const p=ease((time-a.time)/Math.max(.0001,b.time-a.time)),out={};for(const name of new Set([...Object.keys(a.points),...Object.keys(b.points)])){const x=a.points[name]||b.points[name],y=b.points[name]||x;out[name]={x:lerp(x.x,y.x,p),y:lerp(x.y,y.y,p)}}return out}
- const fn=cycles[this.preset]||cycles.idle;const phase=this.preset==="idle"||this.preset==="walk"||this.preset==="run"||this.preset==="talk"?t*2:t;const out={};for(const [name,p]of Object.entries(this.base)){const d=fn(name,phase);out[name]={x:clamp(p.x+d.x),y:clamp(p.y+d.y)}}return out}
+ setBase(points){this.base=copyPoints(points);return this.base}
+ usePreset(name,duration=this.duration){if(!cycles[name])throw new Error("Movimiento desconocido");const d=Number(duration);if(!Number.isFinite(d)||d<.1||d>3600)throw new Error("Duración de movimiento inválida");this.preset=name;this.duration=d;this.keyframes=[];return this.sample(0)}
+ addKeyframe(time,points,mode="smooth"){const n=Number(time);if(!Number.isFinite(n))throw new Error("Tiempo de pose clave inválido");const t=clamp(n,0,this.duration),easeMode=typeof mode==="string"?mode:mode?.ease||"smooth";if(!easing.includes(easeMode))throw new Error("Interpolación desconocida");const frame={time:t,points:copyPoints(points),ease:easeMode};const i=this.keyframes.findIndex(x=>Math.abs(x.time-t)<.001);if(i>=0)this.keyframes[i]=frame;else this.keyframes.push(frame);this.keyframes.sort((a,b)=>a.time-b.time);return frame}
+ sample(time){const n=Number(time),current=clamp(Number.isFinite(n)?n:0,0,this.duration);if(this.keyframes.length){const byTime=new Map();byTime.set(0,{time:0,points:this.base,ease:"smooth"});for(const frame of this.keyframes)byTime.set(frame.time,{time:frame.time,points:frame.points,ease:frame.ease||"smooth"});const sorted=[...byTime.values()].sort((a,b)=>a.time-b.time);if(!byTime.has(this.duration)){const last=sorted[sorted.length-1];sorted.push({time:this.duration,points:last.points,ease:last.ease})}if(current<=sorted[0].time)return copyPoints(sorted[0].points);for(let i=0;i<sorted.length-1;i++){const a=sorted[i],b=sorted[i+1];if(current<=b.time){const p=ease((current-a.time)/Math.max(.0001,b.time-a.time),b.ease),out={};for(const name of new Set([...Object.keys(a.points),...Object.keys(b.points)])){const x=a.points[name]||b.points[name],y=b.points[name]||x;out[name]={x:clamp(lerp(x.x,y.x,p)),y:clamp(lerp(x.y,y.y,p))}}return out}}return copyPoints(sorted[sorted.length-1].points)}
+ const t=current/this.duration,fn=cycles[this.preset]||cycles.idle,phase=this.preset==="idle"||this.preset==="walk"||this.preset==="run"||this.preset==="talk"?t*2:t,out={};for(const[name,p]of Object.entries(this.base)){const d=fn(name,phase);out[name]={x:clamp(p.x+d.x),y:clamp(p.y+d.y)}}return out}
  apply(rig,time){rig.points=this.sample(time);return rig.points}
  exportJSON(){return JSON.stringify({format:"nexora-motion",version:1,preset:this.preset,duration:this.duration,base:this.base,keyframes:this.keyframes},null,2)}
- importJSON(raw){const d=typeof raw==="string"?JSON.parse(raw):raw;if(d.format!=="nexora-motion"||d.version!==1||!d.base)throw new Error("Archivo de movimiento no válido");this.base=copyPoints(d.base);this.preset=d.preset||"idle";this.duration=Math.max(.1,Number(d.duration)||2);this.keyframes=Array.isArray(d.keyframes)?d.keyframes:[];return this}
+ importJSON(raw){const d=typeof raw==="string"?JSON.parse(raw):raw;if(d?.format!=="nexora-motion"||d.version!==1||!d.base||!Array.isArray(d.keyframes||[]))throw new Error("Archivo de movimiento no válido");const duration=Number(d.duration);if(!Number.isFinite(duration)||duration<.1||duration>3600)throw new Error("Duración de movimiento inválida");if((d.keyframes||[]).length>1000)throw new Error("El movimiento supera 1000 poses clave");const base=copyPoints(d.base),validPreset=cycles[d.preset]?d.preset:"idle",frames=[];for(const f of d.keyframes||[]){if(!Number.isFinite(Number(f.time)))throw new Error("Tiempo de pose clave inválido");const mode=f.ease||"smooth";if(!easing.includes(mode))throw new Error("Interpolación de pose inválida");frames.push({time:clamp(Number(f.time),0,duration),points:copyPoints(f.points),ease:mode})}this.base=base;this.duration=duration;this.preset=validPreset;this.keyframes=[];for(const f of frames)this.addKeyframe(f.time,f.points,f.ease);return this}
 }
-window.NexoraMotionSystem={MotionTimeline,presets:Object.keys(cycles)};
+window.NexoraMotionSystem={MotionTimeline,presets:Object.keys(cycles),easings:easing};
 })();
