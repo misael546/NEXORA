@@ -55,6 +55,7 @@ await new Promise((resolve, reject) => {
 });
 
 let browser;
+let page;
 const pageErrors = [];
 const failedRequests = [];
 const results = [];
