@@ -631,3 +631,14 @@ test("animation studio loads the 3D action library and parses its bridge script"
   assert.ok(bridge.includes('id="n3dBlend"'));
   assert.ok(bridge.includes("updateSkinnedMeshes()"));
 });
+
+test("looping 3D actions complete their blend once without restarting it each cycle", () => {
+  const { api } = loadEngine();
+  const rig = api.NexoraSpatialRig3D.createDinosaur();
+  const player = api.NexoraSpatialActions.createPlayer(rig, "walk", { blendDuration: 0.2 });
+  player.play().advance(0.3);
+  player.advance(0.9);
+  assert.ok(Math.abs(player.time) < 1e-8);
+  assert.ok(player.elapsed >= 1.1);
+  assert.ok(rig.byName.get("pelvis").rotation[2] < -0.005);
+});
