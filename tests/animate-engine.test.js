@@ -330,4 +330,7 @@ test("3D dinosaur dialogue demo contains syntactically valid inline JavaScript",
   assert.doesNotThrow(()=>new vm.Script(scripts[0][1],{filename:"animate-dino-dialogue.html"}));
   assert.match(html,/Exportar vídeo con audio/);
   assert.match(html,/api\/admin\/voice/);
+  assert.match(html,/Quiero ser como tú/);
+  assert.match(html,/no esculpí estos músculos para pelear/);
+  assert.match(html,/NEXORA-Coelo-y-el-musculo\\.webm/);
 });
