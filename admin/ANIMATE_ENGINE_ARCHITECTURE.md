@@ -302,3 +302,5 @@ El arte incluido es una ilustración vectorial procedimental original, no una se
 - El trabajador y el dinosaurio ejecutan parpadeos temporizados en el dibujo vectorial, usando el mismo reloj de reproducción que la actuación corporal.
 - El rugido y la mordida del dinosaurio ya mueven su mandíbula articulada; los clips de cola y locomoción continúan usando el rig segmentado.
 - Las pruebas cubren la nueva articulación mandibular del trabajador, el clip de habla y la conservación de la actuación dinosaurio.
+
+- En el modo de trabajo actual, la interfaz 3D permanece oculta y el renderizador WebGL no se inicializa (`ENABLE_3D_STUDIO=false`). Sus módulos y herramientas siguen conservados en el repositorio para reactivarlos cuando vuelva a ser prioridad.
