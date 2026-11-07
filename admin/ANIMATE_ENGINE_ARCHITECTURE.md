@@ -204,3 +204,10 @@ Esta etapa conserva y prepara los datos del personaje, pero el visor WebGL todav
 ### Límite actual
 
 La reproducción está conectada para mallas skinned que tengan datos GLB válidos y un rig compatible. La importación de materiales y texturas PBR, morph targets, animaciones de pesos, varias primitivas con materiales completos y validación visual con archivos GLB reales siguen pendientes. La prueba automática no sustituye una revisión visual en navegador.
+
+
+### Corrección de compatibilidad GLB — atributos normalizados
+
+- El lector de accessors ahora convierte atributos enteros marcados como `normalized` a sus rangos flotantes definidos por glTF.
+- Esto es esencial para pesos de skinning almacenados como bytes o enteros de 16 bits, en lugar de valores float.
+- Se añadió cobertura con pesos `WEIGHTS_0` normalizados de tipo unsigned byte; se verifica que el peso máximo se convierta a 1.0.
