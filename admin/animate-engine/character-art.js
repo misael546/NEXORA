@@ -39,7 +39,9 @@ function drawWorker(ctx,w,h,rig,options={}){
  const nearHip={x:hip.x-15,y:hip.y+5};
  organicLimb(ctx,nearHip,kl,33,23,pantGrad,"#a7b3c1");
  organicLimb(ctx,kl,fl,23,17,pantGrad,"#9eacbd");
- ellipse(ctx,kl,10,11,"#3b4c63","#1c2838",1.5);
+ // Subtle knee folds, integrated into the trousers instead of a mechanical joint.
+ segment(ctx,{x:kl.x-7,y:kl.y-1},{x:kl.x+7,y:kl.y+2},2.2,"#63758a","#26364a");
+ segment(ctx,{x:kl.x-5,y:kl.y+5},{x:kl.x+5,y:kl.y+7},1.2,"#182536",null);
  polygon(ctx,[{x:fl.x-18,y:fl.y-3},{x:fl.x+9,y:fl.y-4},{x:fl.x+23,y:fl.y+8},{x:fl.x+17,y:fl.y+15},{x:fl.x-20,y:fl.y+14}],gradient(ctx,fl,{x:fl.x,y:fl.y+15},[[0,"#68798c"],[1,"#151e2b"]]));
  // Torso silhouette, collar and high-visibility jacket.
  const top=mix(sl,sr,.5),axis=unit(top,hip),perp={x:-axis.y,y:axis.x};
@@ -67,13 +69,14 @@ function drawWorker(ctx,w,h,rig,options={}){
  // Sleeves overlap the torso at the shoulder; cuffs, reflective bands and gloves complete the silhouette.
  organicLimb(ctx,sl,el,29,23,gradient(ctx,sl,el,[[0,"#f6a14c"],[1,"#c45827"]]),"#ffc16d");
  organicLimb(ctx,el,hl,22,17,gradient(ctx,el,hl,[[0,"#f6ae59"],[1,"#b94f25"]]),"#ffd08b");
- ellipse(ctx,sl,13,13,"#e98536",null,0);
- ellipse(ctx,el,9,9,"#e77e34",null,0);
+ // Shoulder and elbow folds stay inside the sleeve silhouette.
+ segment(ctx,{x:sl.x-7,y:sl.y+8},{x:sl.x+8,y:sl.y+8},2,"#ffd08a","#b85b29");
+ segment(ctx,{x:el.x-6,y:el.y+5},{x:el.x+7,y:el.y+4},1.8,"#f9bc76","#b85b29");
  const cuffL=mix(el,hl,.72);segment(ctx,cuffL,{x:cuffL.x+7,y:cuffL.y-5},4,"#e8eee2","#67786e");
  organicLimb(ctx,sr,er,29,23,gradient(ctx,sr,er,[[0,"#f6a14c"],[1,"#c45827"]]),"#ffc16d");
  organicLimb(ctx,er,hr,22,17,gradient(ctx,er,hr,[[0,"#f6ae59"],[1,"#b94f25"]]),"#ffd08b");
- ellipse(ctx,sr,13,13,"#e98536",null,0);
- ellipse(ctx,er,9,9,"#e77e34",null,0);
+ segment(ctx,{x:sr.x-8,y:sr.y+8},{x:sr.x+7,y:sr.y+8},2,"#ffd08a","#b85b29");
+ segment(ctx,{x:er.x-7,y:er.y+4},{x:er.x+6,y:er.y+5},1.8,"#f9bc76","#b85b29");
  const cuffR=mix(er,hr,.72);segment(ctx,cuffR,{x:cuffR.x-7,y:cuffR.y-5},4,"#e8eee2","#67786e");
  ellipse(ctx,hl,9,8,"#586574","#1c2734",2);ellipse(ctx,hr,9,8,"#586574","#1c2734",2);
  segment(ctx,{x:hl.x-5,y:hl.y+1},{x:hl.x+5,y:hl.y+1},2,"#c5d0ce","#354252");
@@ -99,16 +102,18 @@ function drawWorker(ctx,w,h,rig,options={}){
  }
  // Neck and face.
  segment(ctx,neck,head,18,"#d99b70","#5c3e33","#f6c59d");
- ellipse(ctx,head,25,30,gradient(ctx,{x:head.x-19,y:head.y-22},{x:head.x+20,y:head.y+25},[[0,"#ffe0b5"],[.55,"#e2a77d"],[1,"#ac6956"]]),"#5b3b32",3,faceAngle);
+ ellipse(ctx,head,27.5,32,gradient(ctx,{x:head.x-20,y:head.y-24},{x:head.x+21,y:head.y+27},[[0,"#ffe8c8"],[.48,"#e7ad82"],[1,"#a96354"]]),"#57372f",3,faceAngle);
+ // Soft jaw shadow gives the face volume under the hard hat.
+ ellipse(ctx,{x:head.x+1,y:head.y+16},17,10,"rgba(102,51,43,.12)",null);
  const blinkAt=((Number(options.time)||0)+.2)%3.7,eyeOpen=blinkAt<.13?Math.max(.12,Math.abs(blinkAt-.065)/.065):1;
- ellipse(ctx,{x:head.x-11,y:head.y-1},4.2,5.2*eyeOpen,"#fffdf4","#8a604c",.8);
- ellipse(ctx,{x:head.x+8,y:head.y-1},4.2,5.2*eyeOpen,"#fffdf4","#8a604c",.8);
- ellipse(ctx,{x:head.x-10,y:head.y},2.4,3.2*eyeOpen,"#4d5c73",null);
- ellipse(ctx,{x:head.x+9,y:head.y},2.4,3.2*eyeOpen,"#4d5c73",null);
- ellipse(ctx,{x:head.x-10.5,y:head.y-1.4},1.2,1.5*eyeOpen,"#15243a",null);
- ellipse(ctx,{x:head.x+8.5,y:head.y-1.4},1.2,1.5*eyeOpen,"#15243a",null);
- ellipse(ctx,{x:head.x-11.5,y:head.y-2.8},1.1,1.1*eyeOpen,"#ffffff",null);
- ellipse(ctx,{x:head.x+7.5,y:head.y-2.8},1.1,1.1*eyeOpen,"#ffffff",null);
+ ellipse(ctx,{x:head.x-11.5,y:head.y-1},4.8,5.8*eyeOpen,"#fffdf5","#8a604c",.9);
+ ellipse(ctx,{x:head.x+8.5,y:head.y-1},4.8,5.8*eyeOpen,"#fffdf5","#8a604c",.9);
+ ellipse(ctx,{x:head.x-10.5,y:head.y},2.8,3.8*eyeOpen,"#465c7b",null);
+ ellipse(ctx,{x:head.x+9.5,y:head.y},2.8,3.8*eyeOpen,"#465c7b",null);
+ ellipse(ctx,{x:head.x-10.5,y:head.y-1.2},1.45,1.7*eyeOpen,"#15243a",null);
+ ellipse(ctx,{x:head.x+9.5,y:head.y-1.2},1.45,1.7*eyeOpen,"#15243a",null);
+ ellipse(ctx,{x:head.x-12,y:head.y-3},1.35,1.4*eyeOpen,"#ffffff",null);
+ ellipse(ctx,{x:head.x+8,y:head.y-3},1.35,1.4*eyeOpen,"#ffffff",null);
  segment(ctx,{x:head.x-16,y:head.y-8},{x:head.x-6,y:head.y-11},3.2,"#573a31");
  segment(ctx,{x:head.x+4,y:head.y-11},{x:head.x+15,y:head.y-8},3.2,"#573a31");
  segment(ctx,{x:head.x-1,y:head.y+1},{x:head.x+1,y:head.y+7},1.8,"#a96955","#70473d");
@@ -119,11 +124,15 @@ function drawWorker(ctx,w,h,rig,options={}){
  ellipse(ctx,{x:head.x-24,y:head.y+4},4.3,6.5,"#d18d69","#5b3b32",1.5);
  ellipse(ctx,{x:head.x+22,y:head.y+4},4.3,6.5,"#d18d69","#5b3b32",1.5);
  // Hair, hard hat shell and rim.
- ellipse(ctx,{x:head.x,y:head.y-21},26,11,"#2b2d36","#182231",2);
- ellipse(ctx,{x:head.x,y:head.y-28},25,11,gradient(ctx,{x:head.x-12,y:head.y-41},{x:head.x+14,y:head.y-19},[[0,"#ffe18a"],[.58,"#f39a31"],[1,"#aa4d20"]]),"#6b3b1e",2.5);
- segment(ctx,{x:head.x-29,y:head.y-19},{x:head.x+29,y:head.y-19},6,"#f4a63e","#6b3b1e");
- segment(ctx,{x:head.x-4,y:head.y-37},{x:head.x-4,y:head.y-25},2.5,"#fff0bd");
- ellipse(ctx,{x:head.x+14,y:head.y-27},3.2,3.2,"#fff0b5","#87501f",1.2);
+ // Helmet crown, reinforced brim, side guards and reflected rim light.
+ ellipse(ctx,{x:head.x,y:head.y-22},28,12,"#282d39","#182231",2);
+ ellipse(ctx,{x:head.x,y:head.y-29},27,12,gradient(ctx,{x:head.x-15,y:head.y-44},{x:head.x+16,y:head.y-19},[[0,"#fff0ad"],[.52,"#f6a73d"],[1,"#a94b20"]]),"#6b3b1e",2.7);
+ segment(ctx,{x:head.x-32,y:head.y-19},{x:head.x+32,y:head.y-19},6.5,"#f4a63e","#6b3b1e");
+ segment(ctx,{x:head.x-5,y:head.y-42},{x:head.x-5,y:head.y-25},3,"#fff2c6");
+ segment(ctx,{x:head.x-24,y:head.y-27},{x:head.x-27,y:head.y-19},3,"#ffd875","#91501f");
+ ellipse(ctx,{x:head.x+16,y:head.y-28},3.5,3.5,"#fff0b5","#87501f",1.2);
+ polygon(ctx,[{x:head.x-29,y:head.y-16},{x:head.x-23,y:head.y-14},{x:head.x-24,y:head.y-7},{x:head.x-29,y:head.y-8}],"#d98732","#70401f",1.4);
+ polygon(ctx,[{x:head.x+24,y:head.y-16},{x:head.x+29,y:head.y-14},{x:head.x+29,y:head.y-8},{x:head.x+24,y:head.y-7}],"#d98732","#70401f",1.4);
  segment(ctx,{x:head.x-20,y:head.y+10},{x:head.x-15,y:jaw.y+4},1.7,"#80513d","#e7b68b");
  segment(ctx,{x:head.x+20,y:head.y+10},{x:head.x+15,y:jaw.y+4},1.7,"#80513d","#e7b68b");
  // Small work gloves seams and boot seams.
@@ -152,27 +161,42 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  polygon(ctx,[{x:fl.x-15,y:fl.y-6},{x:fl.x+12,y:fl.y-5},{x:fl.x+27,y:fl.y+5},{x:fl.x+25,y:fl.y+12},{x:fl.x-19,y:fl.y+11}],"#659b5c","#1e4b3b",3);
  for(let i=0;i<3;i++)polygon(ctx,[{x:fl.x+9+i*5,y:fl.y+5},{x:fl.x+17+i*5,y:fl.y+7},{x:fl.x+21+i*5,y:fl.y+12}],"#e4dcad","#5c6848",1);
  // Body mass and belly.
- const center=mix(chest,hip,.5);ellipse(ctx,center,77,51,green,"#173b35",5,-.12);
- ellipse(ctx,mix(chest,hip,.28),39,34,green,"#315d43",2,-.28);
- ellipse(ctx,{x:center.x-7,y:center.y+25},55,22,belly,"#536e4c",2,-.08);
+ const center=mix(chest,hip,.5);
+ // A broad barrel-shaped torso with a deep chest, tapered waist and layered belly.
+ bezierShape(ctx,{x:center.x-69,y:center.y-6},[
+  [center.x-66,center.y-50,center.x-23,center.y-65,center.x+17,center.y-51],
+  [center.x+65,center.y-39,center.x+91,center.y-10,center.x+78,center.y+24],
+  [center.x+68,center.y+58,center.x+6,center.y+66,center.x-38,center.y+43],
+  [center.x-72,center.y+31,center.x-84,center.y+7,center.x-69,center.y-6]
+ ],green,"#173b35",5);
+ ellipse(ctx,mix(chest,hip,.27),45,38,green,"#315d43",2,-.28);
+ ellipse(ctx,{x:center.x-8,y:center.y+24},61,24,belly,"#536e4c",2,-.08);
+ // Shoulder and hip muscle groups blend under the torso contour.
+ ellipse(ctx,{x:center.x-42,y:center.y-7},29,35,green,"#315d43",2,-.32);
+ ellipse(ctx,{x:center.x+48,y:center.y+4},30,34,green,"#315d43",2,.25);
+ segment(ctx,{x:center.x-45,y:center.y+34},{x:center.x-13,y:center.y+45},2.4,"#a6b978","#4a6a48");
+ segment(ctx,{x:center.x+8,y:center.y+45},{x:center.x+43,y:center.y+34},2.4,"#a6b978","#4a6a48");
  // Rib lines and flank markings give the torso a readable organic volume.
  for(let i=0;i<4;i++){const x=center.x-26+i*15;segment(ctx,{x,y:center.y+13+i*.5},{x:x+5,y:center.y+25+i*.5},2.2,"#899b64","#455f46")}
  for(let i=0;i<7;i++){const x=center.x-31+(i%4)*17,y=center.y-14+Math.floor(i/4)*17;ellipse(ctx,{x,y},2.4,3.2,i%2?"#4f8d4f":"#c1dc83",null)}
  // Neck joins head and torso as one readable mass; shoulders and short forearms overlap the chest.
  organicLimb(ctx,chest,neck,42,35,green,"#c4df8a");
  organicLimb(ctx,neck,head,39,34,green,"#c4df8a");
- ellipse(ctx,neck,20,21,green,"#315f43",2);
- organicLimb(ctx,sl,el,19,14,green,"#c4df8a");organicLimb(ctx,el,hl,14,10,green,"#c4df8a");
- organicLimb(ctx,sr,er,19,14,green,"#c4df8a");organicLimb(ctx,er,hr,14,10,green,"#c4df8a");
- ellipse(ctx,sl,9,10,"#79b75d","#315f43",2);ellipse(ctx,sr,9,10,"#79b75d","#315f43",2);
+ // Neck and tiny forelimbs are integrated into the chest; no exposed circular joints.
+ organicLimb(ctx,sl,el,20,15,green,"#c4df8a");
+ organicLimb(ctx,el,hl,15,11,green,"#c4df8a");
+ organicLimb(ctx,sr,er,20,15,green,"#c4df8a");
+ organicLimb(ctx,er,hr,15,11,green,"#c4df8a");
+ segment(ctx,{x:sl.x-6,y:sl.y+5},{x:sl.x+7,y:sl.y+7},2.2,"#c6e58e","#386748");
+ segment(ctx,{x:sr.x-6,y:sr.y+5},{x:sr.x+7,y:sr.y+7},2.2,"#c6e58e","#386748");
  for(const hand of [hl,hr])for(let i=0;i<2;i++)segment(ctx,{x:hand.x+i*3,y:hand.y},{x:hand.x+i*3+2,y:hand.y+8},2,"#e2d79f","#526b4a");
  // Dorsal ridge and small plate-like scales.
  const ridgeStart=mix(neck,chest,.25),ridgeEnd=mix(chest,hip,.48);
- for(let i=0;i<8;i++){const t=i/8,a=mix(ridgeStart,ridgeEnd,t),size=14*(1-t*.43);polygon(ctx,[{x:a.x-size,y:a.y-20},{x:a.x-1,y:a.y-25-size},{x:a.x+size,y:a.y-17}],i%2?"#8fc66b":"#c8e68e","#315f43",2)}
+ for(let i=0;i<10;i++){const t=i/10,a=mix(ridgeStart,ridgeEnd,t),size=9*(1-t*.32);polygon(ctx,[{x:a.x-size,y:a.y-18},{x:a.x-1,y:a.y-19-size},{x:a.x+size,y:a.y-15}],i%2?"#8fc66b":"#c8e68e","#315f43",1.5)}
  // Head and muzzle, slightly three-quarter profile.
  const headAngle=Math.atan2(neck.y-head.y,neck.x-head.x);
  const jawMouth={x:jaw.x,y:Math.min(jaw.y,head.y+h*.115)};
- ellipse(ctx,head,37,30,gradient(ctx,{x:head.x-27,y:head.y-27},{x:head.x+20,y:head.y+26},[[0,"#d1ed96"],[.52,"#80bc61"],[1,"#3f794d"]]),"#173b35",4,-.2);
+ ellipse(ctx,head,41,32,gradient(ctx,{x:head.x-31,y:head.y-29},{x:head.x+24,y:head.y+28},[[0,"#d9f4a0"],[.48,"#83bd62"],[1,"#3a754b"]]),"#173b35",4,-.16);
  // Keep the lower jaw hinged beneath the muzzle. Its opening is clamped so a roar never stretches the mouth into a spike.
  polygon(ctx,[{x:head.x-27,y:head.y+7},{x:head.x-9,y:head.y+12},{x:jawMouth.x+12,y:jawMouth.y+2},{x:jawMouth.x+8,y:jawMouth.y+10},{x:head.x-13,y:jawMouth.y+9},{x:head.x-30,y:head.y+14}],gradient(ctx,{x:head.x-8,y:head.y+12},jawMouth,[[0,"#8fbd65"],[1,"#386c48"]]),"#173b35",3);
  polygon(ctx,[{x:head.x-25,y:head.y+10},{x:head.x-8,y:head.y+14},{x:jawMouth.x+8,y:jawMouth.y+5},{x:jawMouth.x+4,y:jawMouth.y+7}],"#48282d",null);
@@ -181,15 +205,23 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  for(let i=0;i<4;i++){const x=head.x-17+i*8;polygon(ctx,[{x,y:head.y+9+i*.8},{x:x+4,y:head.y+9+i*.8},{x:x+2,y:head.y+16+i}],"#f1edcf","#b1b28e",.8)}
  for(let i=0;i<4;i++){const x=head.x-12+i*8;polygon(ctx,[{x,y:jawMouth.y+8},{x:x+5,y:jawMouth.y+8},{x:x+2.5,y:jawMouth.y+2}],"#f1edcf","#b1b28e",.8)}
  const blinkAt=((Number(options.time)||0)+.35)%3.45,eyeOpen=blinkAt<.14?Math.max(.1,Math.abs(blinkAt-.07)/.07):1;
- ellipse(ctx,{x:head.x-8,y:head.y-9},9,9*eyeOpen,"#f4d36d","#405239",2);
- ellipse(ctx,{x:head.x-10,y:head.y-9},4,5*eyeOpen,"#243128",null);
- ellipse(ctx,{x:head.x-11,y:head.y-11},1.8,1.8*eyeOpen,"#fff9d9",null);
- segment(ctx,{x:head.x-19,y:head.y-19},{x:head.x-3,y:head.y-21},3.2,"#315b3f","#243d31");
+ ellipse(ctx,{x:head.x-8,y:head.y-9},10,10*eyeOpen,"#f4d36d","#405239",2.2);
+ ellipse(ctx,{x:head.x-10,y:head.y-9},4.6,5.4*eyeOpen,"#243128",null);
+ ellipse(ctx,{x:head.x-11.5,y:head.y-11.5},2,2*eyeOpen,"#fff9d9",null);
+ // Heavy brow ridge makes the eye read as part of the skull.
+ segment(ctx,{x:head.x-22,y:head.y-19},{x:head.x-3,y:head.y-23},4.2,"#315b3f","#243d31");
+ segment(ctx,{x:head.x-27,y:head.y-24},{x:head.x-12,y:head.y-27},2,"#d1e79a","#527b4b");
  ellipse(ctx,{x:head.x-29,y:head.y+1},2.5,2,"#315d43",null);
  segment(ctx,{x:head.x-31,y:head.y-16},{x:head.x-14,y:head.y-20},3,"#d1e79a","#527b4b");
- // Nostrils and subtle scales on cheek.
- ellipse(ctx,{x:head.x-28,y:head.y-2},2.2,1.6,"#264638",null);
- for(let i=0;i<3;i++)ellipse(ctx,{x:head.x+9+i*6,y:head.y+2+i*4},2,2,"#c6dd8c",null);
+ // Nostril, cheek scales and fine skin markings.
+ ellipse(ctx,{x:head.x-31,y:head.y-2},2.8,1.8,"#264638",null);
+ ellipse(ctx,{x:head.x-25,y:head.y+8},2,1.5,"#8dbd66",null);
+ for(let i=0;i<4;i++)ellipse(ctx,{x:head.x+10+i*5,y:head.y+2+i*3.3},2.2,2.2,i%2?"#a5cf75":"#c6dd8c",null);
+ // Fine flank scales continue the pattern from the neck across the body.
+ for(let row=0;row<3;row++)for(let col=0;col<6;col++){
+  const x=center.x-31+col*11+(row%2)*4,y=center.y-8+row*11;
+  ellipse(ctx,{x,y},1.5,2.2,(row+col)%2?"#b9d987":"#3c764c",null);
+ }
  ctx.restore();
 }
 function draw(ctx,width,height,rig,type="worker",options={}){if(!ctx||!Number.isFinite(width)||!Number.isFinite(height))return false;ctx.save();if(type==="dinosaur")drawDinosaur(ctx,width,height,rig,options);else drawWorker(ctx,width,height,rig,options);ctx.restore();return true}
