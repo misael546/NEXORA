@@ -36,6 +36,7 @@ function loadEngine() {
   for (const file of [
     "character-skeleton.js",
     "spatial-engine.js",
+    "spatial-rig.js",
     "audio-engine.js",
     "continuity.js",
     "animation-tools.js",
@@ -265,4 +266,24 @@ test("GLB 2.0 importer reads triangle positions and node transforms", () => {
   assert.equal(result.vertexCount,3);
   assert.equal(result.meshes[0].name,"Triangle");
   assert.deepEqual(Array.from(result.meshes[0].positions),[2,1,0,3,1,0,2,2,0]);
+});
+
+
+test("3D skeleton propagates parent rotations through the hierarchy", () => {
+  const { api } = loadEngine();
+  const rig = api.NexoraSpatialRig3D.createHumanoid();
+  const before = rig.worldPosition("head");
+  rig.setPose("spine",{rotation:[0,0,Math.sin(Math.PI/8),Math.cos(Math.PI/8)]});
+  const after = rig.worldPosition("head");
+  assert.notDeepEqual(after,before);
+  const restored = api.NexoraSpatialRig3D.SpatialRig3D.fromJSON(rig.exportJSON());
+  assert.equal(restored.bones.length,16);
+  assert.ok(restored.worldPosition("head").every(Number.isFinite));
+});
+
+test("3D linear blend skinning moves a weighted vertex with its bone", () => {
+  const { api } = loadEngine();
+  const rig = new api.NexoraSpatialRig3D.SpatialRig3D([{name:"root"},{name:"arm",parent:"root",translation:[1,0,0]}]);
+  const result = rig.skinVertices([0,0,0],[1,0,0,0],[1,0,0,0]);
+  assert.deepEqual(Array.from(result),[1,0,0]);
 });
