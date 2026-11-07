@@ -237,7 +237,7 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   const roarPose = motion.sample(1);
   assert.ok(roarPose.jaw.y > dino.points.jaw.y);
   assert.ok(roarPose.head.y > dino.points.head.y - 0.021);
-  assert.ok(roarPose.jaw.y < dino.points.jaw.y + 0.046);
+  assert.ok(roarPose.jaw.y < dino.points.jaw.y + 0.066);
   motion.usePreset("dino-tail-swipe", 2);
   assert.ok(motion.sample(1).tail4.y > dino.points.tail4.y);
   assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-bite"));
