@@ -292,6 +292,8 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   const workerLowerBase = Math.hypot(human.points.footL.x-human.points.kneeL.x,human.points.footL.y-human.points.kneeL.y);
   assert.ok(Math.abs(workerUpper-workerUpperBase)<.004);
   assert.ok(Math.abs(workerLower-workerLowerBase)<.004);
+  assert.ok(workerRun.kneeL.x < workerRun.kneeR.x, "Las rodillas del trabajador no deben cruzarse al correr.");
+  assert.ok(workerRun.footL.x < workerRun.footR.x, "Los pies del trabajador deben conservar su lado al correr.");
   assert.notDeepEqual(workerRun.footL,human.points.footL);
   motion.usePreset("dino-run", 2);
   const dinoRun = motion.sample(.42);
@@ -301,6 +303,8 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   const dinoLowerBase = Math.hypot(dino.points.footR.x-dino.points.kneeR.x,dino.points.footR.y-dino.points.kneeR.y);
   assert.ok(Math.abs(dinoUpper-dinoUpperBase)<.004);
   assert.ok(Math.abs(dinoLower-dinoLowerBase)<.004);
+  assert.ok(dinoRun.kneeL.x < dinoRun.kneeR.x, "Las rodillas del dinosaurio no deben cruzarse al correr.");
+  assert.ok(dinoRun.footL.x < dinoRun.footR.x, "Los pies del dinosaurio deben conservar su lado al correr.");
   assert.notDeepEqual(dinoRun.tail4,dino.points.tail4);
   assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-bite"));
 });
