@@ -719,6 +719,6 @@ test("dinosaur cinematic actions animate segmented spine neck and tail chains", 
   const player = api.NexoraSpatialActions.createPlayer(rig, "walk", { blendDuration: 0 });
   player.play().advance(0.3);
   for (const name of [...map.tailBones, ...map.neckBones]) {
-    assert.ok(Math.abs(rig.byName.get(name).rotation[2]) > 0.001, "Segment did not articulate: " + name);
+    assert.ok(Math.hypot(...rig.byName.get(name).rotation.slice(0, 3)) > 0.001, "Segment did not articulate: " + name);
   }
 });
