@@ -402,3 +402,18 @@ test("GLB importer preserves skin joints, normalized weights and animation chann
   assert.equal(parsed.animations[0].channels[0].path,"translation");
   assert.deepEqual(Array.from(parsed.animations[0].channels[0].times),[0]);
 });
+
+
+test("3D skinning supports eight influences and maps skin joints to rig bone indices", () => {
+  const { api } = loadEngine();
+  const rig = new api.NexoraSpatialRig3D.SpatialRig3D([
+    {name:"root"},
+    {name:"spare",parent:"root",translation:[10,0,0]},
+    {name:"jointA",parent:"root",translation:[1,0,0]},
+    {name:"jointB",parent:"root",translation:[3,0,0]}
+  ]);
+  const joints=[0,0,0,0,1,1,1,1],weights=[.125,.125,.125,.125,.125,.125,.125,.125];
+  const out=rig.skinVertices([0,0,0],joints,weights,[[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]],[2,3]);
+  assert.ok(Math.abs(out[0]-2)<1e-6);
+  assert.throws(()=>rig.skinVertices([0,0,0],[0,0,0,0,0],[1,0,0,0,0]),/Datos de skin/);
+});
