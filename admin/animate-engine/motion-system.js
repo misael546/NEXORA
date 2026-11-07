@@ -126,7 +126,7 @@ function applyWalkKinematics(out,base,preset,progress){
   const minReach=Math.abs(upper-lower)+.002,maxReach=upper+lower-.002;
   const reachable=clamp(rawDistance,minReach,maxReach);
   if(Math.abs(reachable-rawDistance)>.000001)target={x:clamp(root.x+dx/rawDistance*reachable),y:clamp(root.y+dy/rawDistance*reachable)};
-  const joint=solveTwoBoneIK(root,target,upper,lower);
+  const joint=solveTwoBoneIK(root,target,upper,lower,pole);
   out[jointName]=joint;
   out[endName]=target;
  };
