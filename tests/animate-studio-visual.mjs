@@ -136,7 +136,7 @@ try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1100 }, deviceScaleFactor: 1 });
   page = await context.newPage();
   page.on("pageerror", error => pageErrors.push(error.message));
-  page.on("requestfailed", request => failedRequests.push(request.url() + " :: " + request.failure()?.errorText));
+  page.on("requestfailed", request => { if (!/^https:\/\/fonts\.(googleapis|gstatic)\.com\//.test(request.url())) failedRequests.push(request.url() + " :: " + request.failure()?.errorText); });
   await page.route("https://fonts.googleapis.com/**", route => route.abort());
   await page.route("https://fonts.gstatic.com/**", route => route.abort());
   await page.addInitScript(() => {
@@ -168,10 +168,13 @@ try {
   const workerWalk = await capture("worker-walk-motion");
   assert.notEqual(workerWalk.hash, workerWalkStart.hash, "La caminata del trabajador no produjo cambios visibles entre fotogramas.");
 
+  assert.ok(workerWalk.bounds.width < 235, "The worker stride spreads the silhouette too far horizontally.");
   await setAction("worker", "worker-hammer", 0.42);
-  await capture("worker-hammer-motion");
+  const workerHammer = await capture("worker-hammer-motion");
+  assert.notEqual(workerHammer.hash, workerIdle.hash, "The worker hammer action did not change the rendered pose.");
   await setAction("worker", "worker-carry", 0.42);
-  await capture("worker-carry-motion");
+  const workerCarry = await capture("worker-carry-motion");
+  assert.notEqual(workerCarry.hash, workerIdle.hash, "The worker carry action did not change the rendered pose.");
 
   await setAction("dinosaur", "dino-idle", 0.01);
   const dinoIdle = await capture("dinosaur-idle");
@@ -182,9 +185,11 @@ try {
   assert.notEqual(dinoWalk.hash, dinoWalkStart.hash, "La caminata del dinosaurio no produjo cambios visibles entre fotogramas.");
 
   await setAction("dinosaur", "dino-roar", 0.52);
-  await capture("dinosaur-roar-motion");
+  const dinoRoar = await capture("dinosaur-roar-motion");
+  assert.notEqual(dinoRoar.hash, dinoIdle.hash, "The dinosaur roar did not visibly change its pose.");
   await setAction("dinosaur", "dino-tail-swipe", 0.52);
-  await capture("dinosaur-tail-swipe-motion");
+  const dinoTailSwipe = await capture("dinosaur-tail-swipe-motion");
+  assert.notEqual(dinoTailSwipe.hash, dinoIdle.hash, "The dinosaur tail swipe did not visibly change the rendered pose.");
 
   assert.deepEqual(pageErrors, [], "El navegador encontró errores de JavaScript: " + pageErrors.join(" | "));
   assert.equal(await page.evaluate(() => window.__nexoraWebGLRequests), 0, "WebGL se inicializó durante la prueba 2D.");
