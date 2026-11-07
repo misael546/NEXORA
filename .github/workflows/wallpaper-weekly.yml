@@ -1,0 +1,24 @@
+name: NEXORA Wallpaper weekly collection
+on:
+  schedule:
+    - cron: "0 15 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nexora-wallpaper-weekly
+  cancel-in-progress: false
+jobs:
+  publish-weekly-wallpapers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Discover and publish new wallpapers
+        env:
+          WALLPAPER_INGEST_URL: ${{ secrets.WALLPAPER_INGEST_URL }}
+          WALLPAPER_INGEST_TOKEN: ${{ secrets.WALLPAPER_INGEST_TOKEN }}
+        run: node .github/scripts/import-wallpapers.mjs
