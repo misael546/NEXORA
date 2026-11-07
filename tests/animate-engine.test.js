@@ -332,7 +332,12 @@ test("3D dinosaur dialogue demo contains syntactically valid inline JavaScript",
   assert.match(html,/api\/admin\/voice/);
   assert.match(html,/Quiero ser como tú/);
   assert.match(html,/no esculpí estos músculos para pelear/);
-  assert.match(html,/NEXORA-Coelo-y-el-musculo\.webm/);
+  assert.match(html,/NEXORA-Coelo-y-el-musculo-EDICION-MEJORADA\.webm/);
+  assert.match(html,/Para proteger a quienes no pueden defenderse solos/);
+  assert.match(html,/duration=25/);
+  assert.match(html,/function updateEnvironment/);
+  assert.match(html,/function blinkAmount/);
+  assert.match(html,/animate-engine\/facial-animation\.js/);
 });
 
 test("dinosaur 3D rig has articulated jaw, limbs and a three-segment tail", () => {
