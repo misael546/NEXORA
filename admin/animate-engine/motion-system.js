@@ -79,6 +79,14 @@ const cycles={
  "dino-threat":(p,t)=>{const a=t<.22?ease(t/.22):t<.78?1:1-ease((t-.78)/.22);if(p==="head")return{x:-.025*a,y:-.075*a};if(p==="neck")return{x:-.018*a,y:-.055*a};if(p==="jaw")return{x:-.008*a,y:.075*a};if(p==="chest")return{x:0,y:-.028*a};if(p==="hip")return{x:-.012*a,y:0};if(/hand/.test(p))return{x:0,y:-.035*a};if(/^tail[1-4]$/.test(p)){const n=Number(p.slice(4));return{x:0,y:Math.sin(t*Math.PI*4-n*.35)*.025*a*n};}return{x:0,y:0}}
 };
 function chainPoint(root,angle,length){return{x:root.x+Math.sin(angle)*length,y:root.y+Math.cos(angle)*length}}
+function solveTwoBoneIK(root,target,len1,len2,pole=1){
+ const l1=Math.max(.001,Math.abs(Number(len1)||0)),l2=Math.max(.001,Math.abs(Number(len2)||0));
+ const dx=target.x-root.x,dy=target.y-root.y,raw=Math.hypot(dx,dy),safe=raw||.001;
+ const dist=clamp(safe,Math.abs(l1-l2)+.001,l1+l2-.001);
+ const cosine=clamp((l1*l1+dist*dist-l2*l2)/(2*l1*dist),-1,1);
+ const angle=Math.acos(cosine),base=Math.atan2(dy||0,dx||1)+(pole<0?-angle:angle);
+ return{x:root.x+Math.cos(base)*l1,y:root.y+Math.sin(base)*l1};
+}
 function applyWalkKinematics(out,base,preset,progress){
  const phase=progress*Math.PI*4,dinosaur=preset==="dino-walk";
  const stride=dinosaur?.045:.032,liftHeight=dinosaur?.048:.064,armRange=dinosaur?.014:.018;
