@@ -59,7 +59,7 @@ function drawWorker(ctx,w,h,rig,options={}){
   polygon(ctx,[{x:blade.x-10,y:blade.y-2},{x:blade.x+11,y:blade.y-3},{x:blade.x+5,y:blade.y+13},{x:blade.x-5,y:blade.y+13}],"#9aa8b4","#354252",2);
  }
  if(action==="worker-carry"||action==="worker-lift"){
-  const center=mix(hl,hr,.5),boxY=(hl.y+hr.y)/2+7,boxW=action==="worker-lift"?62:56,boxH=action==="worker-lift"?40:36;
+  const center=mix(hl,hr,.5),boxY=(hl.y+hr.y)/2+7,boxW=action==="worker-lift"?134:124,boxH=action==="worker-lift"?46:42;
   polygon(ctx,[{x:center.x-boxW/2,y:boxY-boxH/2},{x:center.x+boxW/2,y:boxY-boxH/2-4},{x:center.x+boxW/2,y:boxY+boxH/2-4},{x:center.x-boxW/2,y:boxY+boxH/2}],"#9a693c","#4e3527",3);
   polygon(ctx,[{x:center.x-boxW/2,y:boxY-boxH/2},{x:center.x,y:boxY-boxH/2-4},{x:center.x,y:boxY+boxH/2-4},{x:center.x-boxW/2,y:boxY+boxH/2}],"#ba874f","#69462d",1.5);
   segment(ctx,{x:center.x-boxW/2+8,y:boxY-4},{x:center.x+boxW/2-8,y:boxY-8},3,"#d4a36d","#69462d");
