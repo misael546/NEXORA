@@ -10,7 +10,7 @@ function polygon(ctx,pts,fill,stroke="#1a2431",line=3){if(pts.length<3)return;ct
 function limb(ctx,a,b,width,fill,highlight){segment(ctx,a,b,width,fill,"#182231",highlight);ellipse(ctx,b,width*.38,width*.38,fill,"#182231",2)}
 function drawWorker(ctx,w,h,rig,options={}){
  const raw=rig?.points||rig||{},p={};for(const[k,v]of Object.entries(raw))p[k]=point(v,w,h);
- const get=(k,x=.5,y=.5)=>p[k]||{x:x*w,y:y*h},head=get("head"),neck=get("neck"),hip=get("hip"),sl=get("shoulderL"),sr=get("shoulderR"),el=get("elbowL"),er=get("elbowR"),hl=get("handL"),hr=get("handR"),kl=get("kneeL"),kr=get("kneeR"),fl=get("footL"),fr=get("footR");
+ const get=(k,x=.5,y=.5)=>p[k]||{x:x*w,y:y*h},head=get("head"),jaw=get("jaw",.5,.153),neck=get("neck"),hip=get("hip"),sl=get("shoulderL"),sr=get("shoulderR"),el=get("elbowL"),er=get("elbowR"),hl=get("handL"),hr=get("handR"),kl=get("kneeL"),kr=get("kneeR"),fl=get("footL"),fr=get("footR");
  const faceAngle=Math.atan2(head.y-neck.y,head.x-neck.x)-Math.PI/2;
  const bodyGrad=gradient(ctx,sl,sr,[[0,"#d96b27"],[.5,"#ff9a42"],[1,"#c94f24"]]);
  const pantGrad=gradient(hip,{x:hip.x,y:h},[[0,"#344258"],[1,"#141f30"]]);
@@ -48,13 +48,16 @@ function drawWorker(ctx,w,h,rig,options={}){
  // Neck and face.
  segment(ctx,neck,head,18,"#d99b70","#5c3e33","#f6c59d");
  ellipse(ctx,head,22,28,gradient(ctx,{x:head.x-17,y:head.y-18},{x:head.x+18,y:head.y+23},[[0,"#f5c99e"],[.62,"#d99a70"],[1,"#a96552"]]),"#5b3b32",3,faceAngle);
- ellipse(ctx,{x:head.x-11,y:head.y-1},3.1,4.2,"#f8f7ee",null);
- ellipse(ctx,{x:head.x+8,y:head.y-1},3.1,4.2,"#f8f7ee",null);
- ellipse(ctx,{x:head.x-10,y:head.y},1.8,2.6,"#263b54",null);
- ellipse(ctx,{x:head.x+9,y:head.y},1.8,2.6,"#263b54",null);
+ const blinkAt=((Number(options.time)||0)+.2)%3.7,eyeOpen=blinkAt<.13?Math.max(.12,Math.abs(blinkAt-.065)/.065):1;
+ ellipse(ctx,{x:head.x-11,y:head.y-1},3.1,4.2*eyeOpen,"#f8f7ee",null);
+ ellipse(ctx,{x:head.x+8,y:head.y-1},3.1,4.2*eyeOpen,"#f8f7ee",null);
+ ellipse(ctx,{x:head.x-10,y:head.y},1.8,2.6*eyeOpen,"#263b54",null);
+ ellipse(ctx,{x:head.x+9,y:head.y},1.8,2.6*eyeOpen,"#263b54",null);
  segment(ctx,{x:head.x-15,y:head.y-8},{x:head.x-7,y:head.y-10},2.7,"#573a31");
  segment(ctx,{x:head.x+5,y:head.y-10},{x:head.x+14,y:head.y-8},2.7,"#573a31");
- segment(ctx,{x:head.x-3,y:head.y+9},{x:head.x+5,y:head.y+10},2,"#8b4a42");
+ const mouthTop=head.y+9.5,mouthGap=Math.max(1.2,jaw.y-mouthTop);
+ polygon(ctx,[{x:head.x-7,y:mouthTop},{x:head.x+7,y:mouthTop},{x:jaw.x+6,y:jaw.y},{x:jaw.x-6,y:jaw.y}],"#5d3034","#75433e",1.2);
+ if(mouthGap>4)polygon(ctx,[{x:head.x-5,y:mouthTop+1},{x:head.x+5,y:mouthTop+1},{x:head.x+3,y:mouthTop+Math.min(4,mouthGap/2)},{x:head.x-3,y:mouthTop+Math.min(4,mouthGap/2)}],"#f1e7d1",null);
  ellipse(ctx,{x:head.x-22,y:head.y+5},4,6,"#d18d69","#5b3b32",1.5);
  // Hair, hard hat shell and rim.
  ellipse(ctx,{x:head.x,y:head.y-21},23,10,"#2b2d36","#182231",2);
@@ -106,9 +109,10 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  segment(ctx,{x:head.x-24,y:head.y+11},{x:jaw.x+5,y:jaw.y+9},3,"#3a2629","#1c2026");
  // Teeth along open jaw.
  for(let i=0;i<4;i++){const x=head.x-17+i*8;polygon(ctx,[{x,y:head.y+9+i*.8},{x:x+4,y:head.y+9+i*.8},{x:x+2,y:head.y+16+i}], "#f1edcf","#b1b28e",.8)}
- ellipse(ctx,{x:head.x-8,y:head.y-9},8,8,"#f3c95c","#4b5035",2);
- ellipse(ctx,{x:head.x-10,y:head.y-9},3.5,4.5,"#202c25",null);
- ellipse(ctx,{x:head.x-11,y:head.y-11},1.5,1.5,"#fff4cf",null);
+ const blinkAt=((Number(options.time)||0)+.35)%3.45,eyeOpen=blinkAt<.14?Math.max(.1,Math.abs(blinkAt-.07)/.07):1;
+ ellipse(ctx,{x:head.x-8,y:head.y-9},8,8*eyeOpen,"#f3c95c","#4b5035",2);
+ ellipse(ctx,{x:head.x-10,y:head.y-9},3.5,4.5*eyeOpen,"#202c25",null);
+ ellipse(ctx,{x:head.x-11,y:head.y-11},1.5,1.5*eyeOpen,"#fff4cf",null);
  ellipse(ctx,{x:head.x-29,y:head.y+1},2.5,2,"#315d43",null);
  segment(ctx,{x:head.x-31,y:head.y-16},{x:head.x-14,y:head.y-20},3,"#d1e79a","#527b4b");
  // Nostrils and subtle scales on cheek.
