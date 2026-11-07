@@ -8,6 +8,18 @@ function segment(ctx,a,b,width,fill,outline="#17202d",highlight=null){if(!a||!b)
 function ellipse(ctx,p,rx,ry,fill,stroke="#1a2431",line=3,rotation=0){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(rotation);ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.lineWidth=line;ctx.strokeStyle=stroke;ctx.stroke()}ctx.restore()}
 function polygon(ctx,pts,fill,stroke="#1a2431",line=3){if(pts.length<3)return;ctx.save();ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=line;ctx.lineJoin="round";ctx.stroke()}ctx.restore()}
 function limb(ctx,a,b,width,fill,highlight){segment(ctx,a,b,width,fill,"#182231",highlight);ellipse(ctx,b,width*.38,width*.38,fill,"#182231",2)}
+function bezierShape(ctx,start,curves,fill,stroke="#182231",line=3){ctx.save();ctx.beginPath();ctx.moveTo(start.x,start.y);for(const c of curves){if(typeof ctx.bezierCurveTo==="function")ctx.bezierCurveTo(c[0],c[1],c[2],c[3],c[4],c[5]);else ctx.lineTo(c[4],c[5])}ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=line;ctx.lineJoin="round";ctx.stroke()}ctx.restore()}
+function organicLimb(ctx,a,b,widthA,widthB,fill,highlight="#d1e0ad",outline="#182231"){
+ const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,v={x:dx/len,y:dy/len},n={x:-dy/len,y:dx/len},ra=widthA/2,rb=widthB/2;
+ const off=(p,d,r)=>({x:p.x+d.x*r,y:p.y+d.y*r}),ap=off(a,n,ra),bp=off(b,n,rb),bm=off(b,n,-rb),am=off(a,n,-ra);
+ bezierShape(ctx,ap,[
+  [a.x+v.x*len*.32+n.x*ra*.92,a.y+v.y*len*.32+n.y*ra*.92,b.x-v.x*len*.3+n.x*rb*.92,b.y-v.y*len*.3+n.y*rb*.92,bp.x,bp.y],
+  [b.x+v.x*rb*.42+n.x*rb*.5,b.y+v.y*rb*.42+n.y*rb*.5,b.x+v.x*rb*.42-n.x*rb*.5,b.y+v.y*rb*.42-n.y*rb*.5,bm.x,bm.y],
+  [b.x-v.x*len*.3-n.x*rb*.92,b.y-v.y*len*.3-n.y*rb*.92,a.x+v.x*len*.32-n.x*ra*.92,a.y+v.y*len*.32-n.y*ra*.92,am.x,am.y],
+  [a.x-v.x*ra*.42-n.x*ra*.5,a.y-v.y*ra*.42-n.y*ra*.5,a.x-v.x*ra*.42+n.x*ra*.5,a.y-v.y*ra*.42+n.y*ra*.5,ap.x,ap.y]
+ ],fill,outline,2.4);
+ if(highlight){ctx.save();ctx.beginPath();const p1=off(a,n,ra*.42),p2=off(b,n,rb*.42);ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.strokeStyle=highlight;ctx.globalAlpha=.55;ctx.lineWidth=Math.max(1.5,Math.min(3.2,widthA*.09));ctx.lineCap="round";ctx.stroke();ctx.restore()}
+}
 function taperedRibbon(ctx,nodes,widths,fill,stroke="#173b35",line=3){const upper=[],lower=[];nodes.forEach((p,i)=>{const prev=nodes[Math.max(0,i-1)],next=nodes[Math.min(nodes.length-1,i+1)],dir=unit(prev,next),normal={x:-dir.y,y:dir.x},half=(widths[i]||4)/2;upper.push({x:p.x-normal.x*half,y:p.y-normal.y*half});lower.push({x:p.x+normal.x*half,y:p.y+normal.y*half})});polygon(ctx,upper.concat(lower.reverse()),fill,stroke,line)}
 function drawWorker(ctx,w,h,rig,options={}){
  const raw=rig?.points||rig||{},p={};for(const[k,v]of Object.entries(raw))p[k]=point(v,w,h);
@@ -20,21 +32,19 @@ function drawWorker(ctx,w,h,rig,options={}){
  ellipse(ctx,{x:(fl.x+fr.x)/2,y:Math.max(fl.y,fr.y)+9},58,9,"rgba(0,0,0,.28)",null);
  // Far leg: start at the right side of the pelvis so the legs never cross unnaturally.
  const farHip={x:hip.x+15,y:hip.y+5};
- limb(ctx,farHip,kr,25,pantGrad,"#8b9aae");
- limb(ctx,kr,fr,19,pantGrad,"#8290a5");
- ellipse(ctx,mix(farHip,kr,.48),13,18,pantGrad,"#263548",2,.28);
+ organicLimb(ctx,farHip,kr,31,23,pantGrad,"#8796aa");
+ organicLimb(ctx,kr,fr,23,17,pantGrad,"#8796aa");
  polygon(ctx,[{x:fr.x-16,y:fr.y-3},{x:fr.x+10,y:fr.y-2},{x:fr.x+22,y:fr.y+8},{x:fr.x+18,y:fr.y+14},{x:fr.x-18,y:fr.y+13}],gradient(ctx,fr,{x:fr.x,y:fr.y+14},[[0,"#596779"],[1,"#161e2c"]]));
  // Near leg, with a visible thigh volume and separate knee articulation.
  const nearHip={x:hip.x-15,y:hip.y+5};
- limb(ctx,nearHip,kl,26,pantGrad,"#91a1b4");
- limb(ctx,kl,fl,19,pantGrad,"#91a1b4");
- ellipse(ctx,mix(nearHip,kl,.46),14,19,pantGrad,"#263548",2,-.28);
- ellipse(ctx,kl,10,10,"#3b4c63","#1c2838",2);
+ organicLimb(ctx,nearHip,kl,33,23,pantGrad,"#a7b3c1");
+ organicLimb(ctx,kl,fl,23,17,pantGrad,"#9eacbd");
+ ellipse(ctx,kl,10,11,"#3b4c63","#1c2838",1.5);
  polygon(ctx,[{x:fl.x-18,y:fl.y-3},{x:fl.x+9,y:fl.y-4},{x:fl.x+23,y:fl.y+8},{x:fl.x+17,y:fl.y+15},{x:fl.x-20,y:fl.y+14}],gradient(ctx,fl,{x:fl.x,y:fl.y+15},[[0,"#68798c"],[1,"#151e2b"]]));
  // Torso silhouette, collar and high-visibility jacket.
  const top=mix(sl,sr,.5),axis=unit(top,hip),perp={x:-axis.y,y:axis.x};
  const torso=[{x:top.x-perp.x*43,y:top.y-perp.y*43},{x:top.x+perp.x*43,y:top.y+perp.y*43},{x:hip.x+perp.x*42,y:hip.y+perp.y*42},{x:hip.x-perp.x*42,y:hip.y-perp.y*42}];
- polygon(ctx,torso,bodyGrad,"#492c24",4);
+ bezierShape(ctx,{x:top.x-43,y:top.y+12},[[top.x-38,top.y-7,top.x-18,top.y-14,top.x,top.y-14],[top.x+24,top.y-16,top.x+42,top.y-6,top.x+43,top.y+12],[hip.x+49,hip.y-5,hip.x+47,hip.y+17,hip.x+40,hip.y+21],[hip.x+24,hip.y+30,hip.x-24,hip.y+30,hip.x-40,hip.y+21],[hip.x-49,hip.y+15,top.x-48,top.y+29,top.x-43,top.y+12]],bodyGrad,"#492c24",4);
  polygon(ctx,[mix(top,hip,.08),mix(top,hip,.08),mix(top,hip,.82),mix(top,hip,.82)],"rgba(255,197,100,.08)",null);
  // Worker safety vest panels and reflective bands.
  const vestA= mix(sl,hip,.18),vestB=mix(sr,hip,.18),vestC=mix(sr,hip,.83),vestD=mix(sl,hip,.83);
@@ -55,15 +65,15 @@ function drawWorker(ctx,w,h,rig,options={}){
  const pocket=mix(mix(sl,sr,.75),hip,.67);polygon(ctx,[{x:pocket.x-9,y:pocket.y-8},{x:pocket.x+9,y:pocket.y-8},{x:pocket.x+8,y:pocket.y+10},{x:pocket.x-8,y:pocket.y+10}],"#b94f25","#73371f",2);
  segment(ctx,{x:pocket.x-5,y:pocket.y-4},{x:pocket.x+5,y:pocket.y-4},2,"#f5b75e",null);
  // Sleeves overlap the torso at the shoulder; cuffs, reflective bands and gloves complete the silhouette.
- limb(ctx,sl,el,25,gradient(ctx,sl,el,[[0,"#f6a14c"],[1,"#c45827"]]),"#ffc16d");
- limb(ctx,el,hl,18,gradient(ctx,el,hl,[[0,"#f6ae59"],[1,"#b94f25"]]),"#ffd08b");
- ellipse(ctx,sl,14,14,"#e98536","#793b23",3);
- ellipse(ctx,el,10,10,"#e77e34","#793b23",2);
+ organicLimb(ctx,sl,el,29,23,gradient(ctx,sl,el,[[0,"#f6a14c"],[1,"#c45827"]]),"#ffc16d");
+ organicLimb(ctx,el,hl,22,17,gradient(ctx,el,hl,[[0,"#f6ae59"],[1,"#b94f25"]]),"#ffd08b");
+ ellipse(ctx,sl,13,13,"#e98536",null,0);
+ ellipse(ctx,el,9,9,"#e77e34",null,0);
  const cuffL=mix(el,hl,.72);segment(ctx,cuffL,{x:cuffL.x+7,y:cuffL.y-5},4,"#e8eee2","#67786e");
- limb(ctx,sr,er,25,gradient(ctx,sr,er,[[0,"#f6a14c"],[1,"#c45827"]]),"#ffc16d");
- limb(ctx,er,hr,18,gradient(ctx,er,hr,[[0,"#f6ae59"],[1,"#b94f25"]]),"#ffd08b");
- ellipse(ctx,sr,14,14,"#e98536","#793b23",3);
- ellipse(ctx,er,10,10,"#e77e34","#793b23",2);
+ organicLimb(ctx,sr,er,29,23,gradient(ctx,sr,er,[[0,"#f6a14c"],[1,"#c45827"]]),"#ffc16d");
+ organicLimb(ctx,er,hr,22,17,gradient(ctx,er,hr,[[0,"#f6ae59"],[1,"#b94f25"]]),"#ffd08b");
+ ellipse(ctx,sr,13,13,"#e98536",null,0);
+ ellipse(ctx,er,9,9,"#e77e34",null,0);
  const cuffR=mix(er,hr,.72);segment(ctx,cuffR,{x:cuffR.x-7,y:cuffR.y-5},4,"#e8eee2","#67786e");
  ellipse(ctx,hl,9,8,"#586574","#1c2734",2);ellipse(ctx,hr,9,8,"#586574","#1c2734",2);
  segment(ctx,{x:hl.x-5,y:hl.y+1},{x:hl.x+5,y:hl.y+1},2,"#c5d0ce","#354252");
@@ -135,10 +145,10 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  taperedRibbon(ctx,[hip,tail1,tail2,tail3,tail4],[38,34,26,17,5],green,"#173b35",4);
  for(let i=1;i<4;i++){const q=mix([hip,tail1,tail2,tail3,tail4][i],[hip,tail1,tail2,tail3,tail4][i+1],.18);ellipse(ctx,q,3.2,5.5,"#b6d77b","#386d49",1.2)}
  // Far hind leg, then near hind leg.
- limb(ctx,hip,kr,26,green,"#b5d57e");limb(ctx,kr,fr,19,green,"#b5d57e");
+ organicLimb(ctx,{x:hip.x+9,y:hip.y+4},kr,34,25,green,"#c2e28d");organicLimb(ctx,kr,fr,25,19,green,"#b5d57e");
  polygon(ctx,[{x:fr.x-14,y:fr.y-6},{x:fr.x+12,y:fr.y-4},{x:fr.x+25,y:fr.y+5},{x:fr.x+24,y:fr.y+11},{x:fr.x-17,y:fr.y+10}],"#538c55","#1e4b3b",3);
  for(let i=0;i<3;i++)polygon(ctx,[{x:fr.x+9+i*5,y:fr.y+5},{x:fr.x+17+i*5,y:fr.y+7},{x:fr.x+22+i*5,y:fr.y+12}],"#d4d8a0","#5c6848",1);
- limb(ctx,hip,kl,29,green,"#b5d57e");limb(ctx,kl,fl,20,green,"#b5d57e");
+ organicLimb(ctx,{x:hip.x-9,y:hip.y+4},kl,36,26,green,"#c2e28d");organicLimb(ctx,kl,fl,26,20,green,"#b5d57e");
  polygon(ctx,[{x:fl.x-15,y:fl.y-6},{x:fl.x+12,y:fl.y-5},{x:fl.x+27,y:fl.y+5},{x:fl.x+25,y:fl.y+12},{x:fl.x-19,y:fl.y+11}],"#659b5c","#1e4b3b",3);
  for(let i=0;i<3;i++)polygon(ctx,[{x:fl.x+9+i*5,y:fl.y+5},{x:fl.x+17+i*5,y:fl.y+7},{x:fl.x+21+i*5,y:fl.y+12}],"#e4dcad","#5c6848",1);
  // Body mass and belly.
@@ -149,11 +159,11 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  for(let i=0;i<4;i++){const x=center.x-26+i*15;segment(ctx,{x,y:center.y+13+i*.5},{x:x+5,y:center.y+25+i*.5},2.2,"#899b64","#455f46")}
  for(let i=0;i<7;i++){const x=center.x-31+(i%4)*17,y=center.y-14+Math.floor(i/4)*17;ellipse(ctx,{x,y},2.4,3.2,i%2?"#4f8d4f":"#c1dc83",null)}
  // Neck joins head and torso as one readable mass; shoulders and short forearms overlap the chest.
- segment(ctx,chest,neck,39,green,"#173b35","#c4df8a");
- segment(ctx,neck,head,42,green,"#173b35","#c4df8a");
+ organicLimb(ctx,chest,neck,42,35,green,"#c4df8a");
+ organicLimb(ctx,neck,head,39,34,green,"#c4df8a");
  ellipse(ctx,neck,20,21,green,"#315f43",2);
- limb(ctx,sl,el,16,green,"#c4df8a");limb(ctx,el,hl,12,green,"#c4df8a");
- limb(ctx,sr,er,15,green,"#c4df8a");limb(ctx,er,hr,11,green,"#c4df8a");
+ organicLimb(ctx,sl,el,19,14,green,"#c4df8a");organicLimb(ctx,el,hl,14,10,green,"#c4df8a");
+ organicLimb(ctx,sr,er,19,14,green,"#c4df8a");organicLimb(ctx,er,hr,14,10,green,"#c4df8a");
  ellipse(ctx,sl,9,10,"#79b75d","#315f43",2);ellipse(ctx,sr,9,10,"#79b75d","#315f43",2);
  for(const hand of [hl,hr])for(let i=0;i<2;i++)segment(ctx,{x:hand.x+i*3,y:hand.y},{x:hand.x+i*3+2,y:hand.y+8},2,"#e2d79f","#526b4a");
  // Dorsal ridge and small plate-like scales.
