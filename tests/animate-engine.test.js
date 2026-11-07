@@ -752,6 +752,8 @@ test("cinematic 3D action sequences combine walk jump and landing with blended t
   assert.equal(restored.totalDuration, sequence.totalDuration);
   assert.ok(restored.remove(1));
   assert.equal(restored.segments.length, 2);
+  assert.throws(() => restored.add("walk", {}, { duration: Number.NaN }), /duración/);
+  assert.throws(() => restored.add("walk", {}, { blendDuration: 3 }), /fundido/);
 });
 
 test("cinematic sequence player can seek to an action and resume from that pose", () => {
