@@ -450,3 +450,14 @@ test("GLB animation player samples translation and quaternion channels", () => {
  assert.ok(Math.abs(player.time-1.5)<1e-6);
  player.pause();
 });
+
+
+test("GLB morph targets apply weighted position deltas without mutating the base mesh", () => {
+ const {api}=loadEngine();
+ const base=[0,0,0,1,0,0,0,1,0];
+ const target={positions:[0,0,1,0,0,1,0,0,1]};
+ const half=api.NexoraSpatialRig3D.applyMorphTargets(base,[target],[.5]);
+ assert.deepEqual(half,[0,0,.5,1,0,.5,0,1,.5]);
+ assert.deepEqual(base,[0,0,0,1,0,0,0,1,0]);
+ assert.deepEqual(api.NexoraSpatialRig3D.applyMorphTargets(base,[target],[0]),base);
+});
