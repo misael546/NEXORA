@@ -117,13 +117,14 @@ test("motion transitions blend from the current pose and return to the target cl
   const target = new api.NexoraMotionSystem.MotionTimeline(rig.points);
   target.usePreset("worker-hammer", 2);
   const expectedMiddle = target.sample(.2);
+  const expectedEnd = target.sample(.4);
   source.setBase(rig.points);
   source.transitionTo("worker-hammer", 2, .4, fromPose);
   assert.deepEqual(source.sample(0), fromPose);
   const middle = source.sample(.2);
   assert.notDeepEqual(middle, fromPose);
   assert.notDeepEqual(middle, expectedMiddle);
-  assert.deepEqual(source.sample(.4), expectedMiddle);
+  assert.deepEqual(source.sample(.4), expectedEnd);
   source.usePreset("worker-idle", 2);
   assert.deepEqual(source.sample(0), rig.points);
   assert.throws(() => source.transitionTo("worker-run", 2, 9, fromPose), /transición/);
