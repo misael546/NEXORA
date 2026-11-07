@@ -29,25 +29,71 @@ const topics=[
 const statePath=".github/data/wallpaper-import-state.json";
 let cursors={};
 try{cursors=JSON.parse(readFileSync(statePath,"utf8"));}catch{cursors={};}
-const pagesPerTopic=Math.max(1,Math.min(20,Number(process.env.WALLPAPER_PAGES_PER_TOPIC||8)));
+const pagesPerTopic=Math.max(1,Math.min(12,Number(process.env.WALLPAPER_PAGES_PER_TOPIC||4)));
 const pageSize=50;
 const clean=s=>String(s||"").replace(/<[^>]*>/g," ").replace(/&nbsp;/g," ").replace(/\s+/g," ").trim().slice(0,500);
-const batch=[];
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+let lastRequestAt=0;
 const seen=new Set();
+let totalScanned=0,totalCandidates=0,totalInserted=0,totalReceived=0;
+
+async function fetchCommons(url,topic){
+ const minimumWait=Math.max(0,1100-(Date.now()-lastRequestAt));
+ if(minimumWait)await pause(minimumWait);
+ for(let attempt=1;attempt<=4;attempt++){
+  lastRequestAt=Date.now();
+  const response=await fetch(url,{headers:{"User-Agent":"NEXORA-WallpaperBot/2.1 (contact: https://nexora-ey8.pages.dev/)"}});
+  if(response.ok)return response;
+  if(response.status!==429&&response.status!==503)throw new Error("Wikimedia falló en '"+topic+"': HTTP "+response.status+" "+(await response.text()).slice(0,180));
+  if(attempt===4)throw new Error("Wikimedia mantiene límite de velocidad para '"+topic+"' después de 4 intentos. Se guardará el progreso anterior.");
+  const retryAfter=Number(response.headers.get("retry-after")||0)*1000;
+  const wait=Math.max(retryAfter,15000*attempt);
+  console.warn("Wikimedia limitó la consulta",topic,"(HTTP",response.status+"). Pausa",Math.round(wait/1000),"s.");
+  await pause(wait);
+ }
+ throw new Error("No se pudo completar la consulta de Wikimedia para "+topic);
+}
+
+async function sendBatch(wallpapers){
+ let inserted=0,received=0;
+ for(let i=0;i<wallpapers.length;i+=200){
+  const headers={"Authorization":"Bearer "+token,"Content-Type":"application/json"};
+  if(accessClientId&&accessClientSecret){
+   headers["CF-Access-Client-Id"]=accessClientId;
+   headers["CF-Access-Client-Secret"]=accessClientSecret;
+  }
+  const response=await fetch(endpoint,{
+   method:"POST",headers,body:JSON.stringify({wallpapers:wallpapers.slice(i,i+200)})
+  });
+  const responseText=await response.text();
+  if(!response.ok)throw new Error("NEXORA API HTTP "+response.status+": "+responseText.slice(0,300));
+  let result;
+  try{result=JSON.parse(responseText);}catch{
+   throw new Error("NEXORA respondió contenido no JSON. Comprueba la política Service Auth de Cloudflare Access.");
+  }
+  inserted+=Number(result.inserted||0);
+  received+=Number(result.received||0);
+  console.log("Lote guardado:",JSON.stringify(result));
+ }
+ return{inserted,received};
+}
+
+function saveState(){
+ mkdirSync(".github/data",{recursive:true});
+ writeFileSync(statePath,JSON.stringify(cursors,null,2)+"\n");
+}
 
 for(const topic of topics){
  let offset=Math.max(0,Number(cursors[topic.key]||0));
  let accepted=0,scanned=0;
+ const topicBatch=[];
  for(let pageNo=0;pageNo<pagesPerTopic;pageNo++){
   const params=new URLSearchParams({
    action:"query",format:"json",generator:"search",gsrsearch:topic.query,gsrnamespace:"6",
-   gsrlimit:String(pageSize),gsroffset:String(offset),prop:"imageinfo",
+   gsrlimit:String(pageSize),gsroffset:String(offset),maxlag:"5",prop:"imageinfo",
    iiprop:"url|size|extmetadata",iiurlwidth:"1600"
   });
-  const response=await fetch("https://commons.wikimedia.org/w/api.php?"+params.toString(),{
-   headers:{"User-Agent":"NEXORA-WallpaperBot/2.0 (open-license wallpaper discovery)"}
-  });
-  if(!response.ok)throw new Error("Wikimedia falló en '"+topic.key+"': HTTP "+response.status);
+  const response=await fetchCommons("https://commons.wikimedia.org/w/api.php?"+params.toString(),topic.key);
   const data=await response.json();
   if(data.errors?.length)throw new Error("Wikimedia API: "+JSON.stringify(data.errors));
   const pages=Object.values(data.query?.pages||{});
@@ -66,7 +112,7 @@ for(const topic of topics){
    const title=clean(page.title).replace(/^File:/,"").replace(/\.[^.]+$/,"").replace(/[_-]+/g," ").slice(0,180);
    const source=String(info.descriptionurl||"");
    if(!source.startsWith("https://commons.wikimedia.org/"))continue;
-   batch.push({
+   topicBatch.push({
     id,title,category:topic.category,tags:clean(meta.ImageDescription?.value||page.title),
     thumb_url:info.thumburl,image_url:info.url,source_url:source,
     author:clean(meta.Artist?.value||"Comunidad").slice(0,120),
@@ -75,38 +121,20 @@ for(const topic of topics){
    accepted++;
   }
   const nextOffset=Number(data.continue?.gsroffset);
-  if(Number.isFinite(nextOffset)&&nextOffset>offset){offset=nextOffset;}
+  if(Number.isFinite(nextOffset)&&nextOffset>offset)offset=nextOffset;
   else{offset=0;break;}
-  await new Promise(resolve=>setTimeout(resolve,120));
+ }
+ totalScanned+=scanned;
+ totalCandidates+=topicBatch.length;
+ if(topicBatch.length){
+  const saved=await sendBatch(topicBatch);
+  totalInserted+=saved.inserted;
+  totalReceived+=saved.received;
  }
  cursors[topic.key]=offset;
- console.log("Wikimedia:",topic.key,"—",scanned,"archivos examinados;",accepted,"fondos aptos; próximo offset:",offset);
+ saveState();
+ console.log("Wikimedia:",topic.key,"—",scanned,"archivos examinados;",accepted,"fondos aptos;",topicBatch.length,"enviados; offset siguiente:",offset);
 }
 
-const unique=batch;
-if(!unique.length)throw new Error("No se encontraron nuevos fondos aptos en esta tanda; no se enviará un lote vacío.");
-let totalInserted=0,totalReceived=0;
-for(let i=0;i<unique.length;i+=200){
- const headers={"Authorization":"Bearer "+token,"Content-Type":"application/json"};
- if(accessClientId&&accessClientSecret){
-  headers["CF-Access-Client-Id"]=accessClientId;
-  headers["CF-Access-Client-Secret"]=accessClientSecret;
- }
- const response=await fetch(endpoint,{
-  method:"POST",headers,body:JSON.stringify({wallpapers:unique.slice(i,i+200)})
- });
- const responseText=await response.text();
- if(!response.ok)throw new Error("NEXORA API HTTP "+response.status+": "+responseText.slice(0,300));
- let result;
- try{result=JSON.parse(responseText);}catch{
-  throw new Error("NEXORA respondió contenido no JSON. Comprueba la política Service Auth de Cloudflare Access.");
- }
- totalInserted+=Number(result.inserted||0);
- totalReceived+=Number(result.received||0);
- console.log("Lote guardado:",JSON.stringify(result));
-}
-
-mkdirSync(".github/data",{recursive:true});
-writeFileSync(statePath,JSON.stringify(cursors,null,2)+"\n");
-console.log("Importación completa:",unique.length,"archivos enviados;",totalReceived,"recibidos por NEXORA;",totalInserted,"nuevos registros guardados.");
-console.log("Objetivo de catálogo: 100000 wallpapers. Esta ejecución es una tanda incremental.");
+console.log("Importación terminada:",totalScanned,"archivos examinados;",totalCandidates,"candidatos enviados;",totalReceived,"recibidos por NEXORA;",totalInserted,"nuevos registros guardados.");
+console.log("Objetivo del catálogo: 100000 wallpapers. Esta ejecución es una tanda incremental.");
