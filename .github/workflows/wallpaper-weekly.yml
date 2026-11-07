@@ -3,6 +3,9 @@ on:
   schedule:
     - cron: "0 15 * * 1"
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/wallpaper-weekly.yml"
 permissions:
   contents: read
 concurrency:
