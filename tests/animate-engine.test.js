@@ -274,6 +274,9 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.ok(roarPose.jaw.y > dino.points.jaw.y);
   assert.ok(roarPose.head.y > dino.points.head.y - 0.021);
   assert.ok(roarPose.jaw.y < dino.points.jaw.y + 0.066);
+  motion.usePreset("dino-bite", 2);
+  const bitePose = motion.sample(1);
+  assert.ok(bitePose.jaw.y - bitePose.head.y > dino.points.jaw.y - dino.points.head.y + 0.07, "La mordida debe abrir la mandíbula antes de cerrarla.");
   motion.usePreset("dino-tail-swipe", 2);
   const tailWhip = motion.sample(1);
   assert.ok(tailWhip.tail4.y > dino.points.tail4.y + .18);
