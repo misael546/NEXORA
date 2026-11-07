@@ -15,7 +15,8 @@ class SpatialRig3D{
  exportJSON(){return{format:"nexora-spatial-rig",version:1,bones:this.bones.map(({name,parent,translation,rotation,scale})=>({name,parent,translation,rotation,scale}))}}
  static fromJSON(data){if(data?.format!=="nexora-spatial-rig"||!Array.isArray(data.bones))throw Error("Rig 3D inválido");return new SpatialRig3D(data.bones)}
 }
-const applyMorphTargets=(positions,targets=[],weights=[])=>{const out=Array.from(positions);for(let t=0;t<targets.length;t++){const delta=targets[t].positions,weight=Number(weights[t]||0);if(!delta||delta.length!==out.length)throw Error("Target morph incompatible con la malla");if(!weight)continue;for(let i=0;i<out.length;i++)out[i]+=delta[i]*weight}return out};\nclass GLBAnimationPlayer{
+const applyMorphTargets=(positions,targets=[],weights=[])=>{const out=Array.from(positions);for(let t=0;t<targets.length;t++){const delta=targets[t].positions,weight=Number(weights[t]||0);if(!delta||delta.length!==out.length)throw Error("Target morph incompatible con la malla");if(!weight)continue;for(let i=0;i<out.length;i++)out[i]+=delta[i]*weight}return out};
+class GLBAnimationPlayer{
 constructor(rig,parsed,imported,animationIndex=0){this.rig=rig;this.parsed=parsed;this.imported=imported;this.animationIndex=animationIndex;this.time=0;this.loop=true;this.playing=false;this.clip=null;this.rest=rig.bones.map(b=>({translation:b.translation.slice(),rotation:b.rotation.slice(),scale:b.scale.slice()}));this.select(animationIndex)}
 select(index){const clip=typeof index==="string"?(this.parsed.animations||[]).findIndex(a=>a.name===index):index;const a=this.parsed.animations?.[clip];if(!a)throw Error("Animación GLB no encontrada");this.animationIndex=clip;this.clip=a;this.duration=Math.max(0,...a.channels.flatMap(c=>c.times));this.time=0;this.apply(0);return this}
 play(){this.playing=true;return this}
