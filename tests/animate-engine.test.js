@@ -494,3 +494,24 @@ test("facial animator supports independent left and right eye blinks", () => {
  face.apply({blinkLeft:.8,blinkRight:.2,browUp:.5});
  assert.deepEqual(mesh.morphWeights,[.8,.2,.5]);
 });
+
+test("3D facial animator resolves camelCase expressions and applies timed viseme states", () => {
+  const { api } = loadEngine();
+  const mesh = {
+    morphTargets: [
+      { name: "eyeBlinkLeft" },
+      { name: "eyeBlinkRight" },
+      { name: "mouthSmile" },
+      { name: "jawOpen" }
+    ],
+    morphWeights: [0, 0, 0, 0]
+  };
+  const face = new api.NexoraFacialAnimation.FacialAnimator([mesh]);
+  face.apply({ expression: "blinkLeft", expressionWeight: 0.8 });
+  assert.equal(mesh.morphWeights[0], 0.8);
+  face.apply({ expression: "smile", expressionWeight: 0.65, viseme: "A", mouthOpen: 0.9 });
+  assert.equal(mesh.morphWeights[2], 0.65);
+  assert.equal(mesh.morphWeights[3], 0.9);
+  face.reset();
+  assert.deepEqual(Array.from(mesh.morphWeights), [0, 0, 0, 0]);
+});
