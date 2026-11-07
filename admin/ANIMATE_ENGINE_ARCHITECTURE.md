@@ -294,3 +294,11 @@ Los clips son animaciones procedurales de articulaciones, y las pistas fonética
 ## Alcance visual 2D actual
 
 El arte incluido es una ilustración vectorial procedimental original, no una secuencia de dibujos anime pintados fotograma a fotograma. Los clips mueven articulaciones y deforman las siluetas vectoriales; todavía hacen falta trabajo adicional de acting, manos y dedos, anatomía secundaria, expresiones más ricas, contacto con objetos, sombras proyectadas, perspectiva de cámara y revisión visual en navegador para alcanzar calidad de producción. No se presenta este prototipo vectorial como un anime terminado.
+
+
+## Actuación facial 2D — boca y parpadeo
+
+- El rig del trabajador incluye una mandíbula independiente conectada a la cabeza. El clip `worker-talk` abre y cierra la boca con gestos pequeños de cabeza y manos.
+- El trabajador y el dinosaurio ejecutan parpadeos temporizados en el dibujo vectorial, usando el mismo reloj de reproducción que la actuación corporal.
+- El rugido y la mordida del dinosaurio ya mueven su mandíbula articulada; los clips de cola y locomoción continúan usando el rig segmentado.
+- Las pruebas cubren la nueva articulación mandibular del trabajador, el clip de habla y la conservación de la actuación dinosaurio.
