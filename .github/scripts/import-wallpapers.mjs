@@ -1,6 +1,9 @@
 const endpoint=process.env.WALLPAPER_INGEST_URL;
 const token=process.env.WALLPAPER_INGEST_TOKEN;
+const accessClientId=process.env.WALLPAPER_ACCESS_CLIENT_ID;
+const accessClientSecret=process.env.WALLPAPER_ACCESS_CLIENT_SECRET;
 if(!endpoint||!token){throw new Error("Faltan los secretos WALLPAPER_INGEST_URL o WALLPAPER_INGEST_TOKEN.");}
+if(Boolean(accessClientId)!==Boolean(accessClientSecret)){throw new Error("Configura ambos secretos WALLPAPER_ACCESS_CLIENT_ID y WALLPAPER_ACCESS_CLIENT_SECRET.");}
 const topics=[
  ["nature wallpaper","naturaleza"],["mountain landscape wallpaper","paisajes"],["space galaxy wallpaper","espacio"],["anime illustration wallpaper","anime"],["gaming digital art wallpaper","gaming"],["minimal abstract wallpaper","minimalista"],["abstract art wallpaper","abstracto"],["architecture wallpaper","arquitectura"]
 ];
@@ -33,9 +36,18 @@ const unique=[...new Map(batch.map(x=>[x.id,x])).values()];
 if(!unique.length)throw new Error("Wikimedia no devolvió fondos aptos. No se enviará un lote vacío.");
 let totalInserted=0;
 for(let i=0;i<unique.length;i+=200){
- const response=await fetch(endpoint,{method:"POST",headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({wallpapers:unique.slice(i,i+200)})});
- if(!response.ok)throw new Error("NEXORA import API returned "+response.status+": "+(await response.text()).slice(0,300));
- const result=await response.json();
+ const headers={"Authorization":"Bearer "+token,"Content-Type":"application/json"};
+ if(accessClientId&&accessClientSecret){
+  headers["CF-Access-Client-Id"]=accessClientId;
+  headers["CF-Access-Client-Secret"]=accessClientSecret;
+ }
+ const response=await fetch(endpoint,{method:"POST",headers,body:JSON.stringify({wallpapers:unique.slice(i,i+200)})});
+ const responseText=await response.text();
+ if(!response.ok)throw new Error("NEXORA import API returned HTTP "+response.status+": "+responseText.slice(0,300));
+ let result;
+ try{result=JSON.parse(responseText);}catch{
+  throw new Error("NEXORA devolvió una página que no es JSON (Content-Type: "+(response.headers.get("content-type")||"desconocido")+"). Cloudflare Access puede estar solicitando inicio de sesión. Configura el service token WALLPAPER_ACCESS_CLIENT_ID y WALLPAPER_ACCESS_CLIENT_SECRET en GitHub Actions.");
+ }
  totalInserted+=Number(result.inserted||0);
  console.log("Lote importado:",JSON.stringify(result));
 }
