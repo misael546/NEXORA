@@ -586,12 +586,12 @@ test("procedural 3D actions preserve the imported bind pose and do not stack old
     { name: "thighL", parent: "pelvis", translation: [0, -0.2, -0.2] },
     { name: "thighR", parent: "pelvis", translation: [0, -0.2, 0.2] }
   ]);
-  const walk = api.NexoraSpatialActions.createPlayer(rig, "walk");
+  const walk = api.NexoraSpatialActions.createPlayer(rig, "walk", { blendDuration: 0 });
   walk.play();
   assert.deepEqual(Array.from(rig.byName.get("root").translation), [2, 3, 4]);
   assert.ok(Math.abs(rig.byName.get("root").rotation[2] - baseRotation[2]) < 1e-8);
   walk.advance(0.3);
-  const talk = api.NexoraSpatialActions.createPlayer(rig, "talk");
+  const talk = api.NexoraSpatialActions.createPlayer(rig, "talk", { blendDuration: 0 });
   talk.play();
   assert.deepEqual(Array.from(rig.byName.get("root").translation), [2, 3, 4]);
   assert.ok(Math.abs(rig.byName.get("root").rotation[2] - baseRotation[2]) < 1e-8);
