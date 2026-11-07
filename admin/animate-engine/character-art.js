@@ -171,13 +171,15 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  for(let i=0;i<8;i++){const t=i/8,a=mix(ridgeStart,ridgeEnd,t),size=14*(1-t*.43);polygon(ctx,[{x:a.x-size,y:a.y-20},{x:a.x-1,y:a.y-25-size},{x:a.x+size,y:a.y-17}],i%2?"#8fc66b":"#c8e68e","#315f43",2)}
  // Head and muzzle, slightly three-quarter profile.
  const headAngle=Math.atan2(neck.y-head.y,neck.x-head.x);
+ const jawMouth={x:jaw.x,y:Math.min(jaw.y,head.y+h*.115)};
  ellipse(ctx,head,37,30,gradient(ctx,{x:head.x-27,y:head.y-27},{x:head.x+20,y:head.y+26},[[0,"#d1ed96"],[.52,"#80bc61"],[1,"#3f794d"]]),"#173b35",4,-.2);
- polygon(ctx,[{x:head.x-28,y:head.y+5},{x:head.x-6,y:head.y+9},{x:jaw.x+10,y:jaw.y+6},{x:jaw.x+3,y:jaw.y+16},{x:head.x-16,y:head.y+19}],gradient(ctx,head,jaw,[[0,"#8fbd65"],[1,"#386c48"]]),"#173b35",3);
- polygon(ctx,[{x:head.x-22,y:head.y+12},{x:head.x-7,y:head.y+14},{x:jaw.x+7,y:jaw.y+8},{x:jaw.x+1,y:jaw.y+7}],"#48282d",null);
- segment(ctx,{x:head.x-24,y:head.y+11},{x:jaw.x+5,y:jaw.y+9},3,"#3a2629","#1c2026");
- // Upper and lower teeth follow the moving jaw instead of floating in place.
- for(let i=0;i<4;i++){const x=head.x-17+i*8;polygon(ctx,[{x,y:head.y+9+i*.8},{x:x+4,y:head.y+9+i*.8},{x:x+2,y:head.y+16+i}], "#f1edcf","#b1b28e",.8)}
- for(let i=0;i<4;i++){const x=head.x-12+i*8;polygon(ctx,[{x,y:jaw.y+8},{x:x+5,y:jaw.y+8},{x:x+2.5,y:jaw.y+2}], "#f1edcf","#b1b28e",.8)}
+ // Keep the lower jaw hinged beneath the muzzle. Its opening is clamped so a roar never stretches the mouth into a spike.
+ polygon(ctx,[{x:head.x-27,y:head.y+7},{x:head.x-9,y:head.y+12},{x:jawMouth.x+12,y:jawMouth.y+2},{x:jawMouth.x+8,y:jawMouth.y+10},{x:head.x-13,y:jawMouth.y+9},{x:head.x-30,y:head.y+14}],gradient(ctx,{x:head.x-8,y:head.y+12},jawMouth,[[0,"#8fbd65"],[1,"#386c48"]]),"#173b35",3);
+ polygon(ctx,[{x:head.x-25,y:head.y+10},{x:head.x-8,y:head.y+14},{x:jawMouth.x+8,y:jawMouth.y+5},{x:jawMouth.x+4,y:jawMouth.y+7}],"#48282d",null);
+ segment(ctx,{x:head.x-25,y:head.y+10},{x:jawMouth.x+7,y:jawMouth.y+4},2.6,"#3a2629","#1c2026");
+ // Upper and lower teeth follow the hinged jaw.
+ for(let i=0;i<4;i++){const x=head.x-17+i*8;polygon(ctx,[{x,y:head.y+9+i*.8},{x:x+4,y:head.y+9+i*.8},{x:x+2,y:head.y+16+i}],"#f1edcf","#b1b28e",.8)}
+ for(let i=0;i<4;i++){const x=head.x-12+i*8;polygon(ctx,[{x,y:jawMouth.y+8},{x:x+5,y:jawMouth.y+8},{x:x+2.5,y:jawMouth.y+2}],"#f1edcf","#b1b28e",.8)}
  const blinkAt=((Number(options.time)||0)+.35)%3.45,eyeOpen=blinkAt<.14?Math.max(.1,Math.abs(blinkAt-.07)/.07):1;
  ellipse(ctx,{x:head.x-8,y:head.y-9},9,9*eyeOpen,"#f4d36d","#405239",2);
  ellipse(ctx,{x:head.x-10,y:head.y-9},4,5*eyeOpen,"#243128",null);
