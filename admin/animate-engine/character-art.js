@@ -84,15 +84,28 @@ function drawWorker(ctx,w,h,rig,options={}){
  // Tools and carried props stay attached to the worker's animated hands.
  const action=options.action||"",time=Number(options.time)||0;
  if(action==="worker-hammer"){
-  const swing=Math.sin(time*Math.PI*2),angle=-1.9+swing*.28,tip={x:hr.x+Math.cos(angle)*35,y:hr.y+Math.sin(angle)*35};
-  segment(ctx,hr,tip,5,"#87532e","#422d23","#d7a16a");
-  const headTip={x:tip.x+Math.cos(angle)*4,y:tip.y+Math.sin(angle)*4};
-  segment(ctx,{x:headTip.x+Math.sin(angle)*9,y:headTip.y-Math.cos(angle)*9},{x:headTip.x-Math.sin(angle)*9,y:headTip.y+Math.cos(angle)*9},11,"#8796a5","#354252","#e2e9ee");
+  const swing=Math.sin(time*Math.PI*2),angle=-1.9+swing*.28,dir={x:Math.cos(angle),y:Math.sin(angle)},normal={x:-Math.sin(angle),y:Math.cos(angle)},headCenter={x:hr.x+dir.x*34,y:hr.y+dir.y*34};
+  segment(ctx,hr,headCenter,5.5,"#87532e","#422d23","#e0b17c");
+  const hammerHead=[
+   {x:headCenter.x+normal.x*15+dir.x*5,y:headCenter.y+normal.y*15+dir.y*5},
+   {x:headCenter.x+normal.x*15-dir.x*8,y:headCenter.y+normal.y*15-dir.y*8},
+   {x:headCenter.x-normal.x*15-dir.x*8,y:headCenter.y-normal.y*15-dir.y*8},
+   {x:headCenter.x-normal.x*15+dir.x*5,y:headCenter.y-normal.y*15+dir.y*5},
+   {x:headCenter.x-normal.x*11+dir.x*11,y:headCenter.y-normal.y*11+dir.y*11},
+   {x:headCenter.x+normal.x*11+dir.x*11,y:headCenter.y+normal.y*11+dir.y*11}
+  ];
+  polygon(ctx,hammerHead,gradient(ctx,headCenter,{x:headCenter.x+normal.x*14,y:headCenter.y+normal.y*14},[[0,"#d7e0e8"],[.55,"#8998a8"],[1,"#445568"]]),"#263746",2.5);
+  segment(ctx,{x:headCenter.x+normal.x*11+dir.x*1,y:headCenter.y+normal.y*11+dir.y*1},{x:headCenter.x-normal.x*11+dir.x*1,y:headCenter.y-normal.y*11+dir.y*1},2,"#edf3f6",null);
  }
  if(action==="worker-dig"){
   const grip=mix(hl,hr,.48),shaft={x:hr.x+22,y:hr.y+33},blade={x:shaft.x+10,y:shaft.y+11};
   segment(ctx,grip,shaft,5,"#87532e","#422d23","#d7a16a");
-  polygon(ctx,[{x:blade.x-10,y:blade.y-2},{x:blade.x+11,y:blade.y-3},{x:blade.x+5,y:blade.y+13},{x:blade.x-5,y:blade.y+13}],"#9aa8b4","#354252",2);
+  bezierShape(ctx,{x:blade.x-11,y:blade.y-5},[
+   [blade.x-4,blade.y-7,blade.x+6,blade.y-8,blade.x+12,blade.y-5],
+   [blade.x+12,blade.y+2,blade.x+8,blade.y+10,blade.x+1,blade.y+17],
+   [blade.x-5,blade.y+10,blade.x-11,blade.y+2,blade.x-11,blade.y-5]
+  ],gradient(ctx,blade,{x:blade.x+5,y:blade.y+14},[[0,"#dce3e8"],[.5,"#91a3b2"],[1,"#425669"]]),"#2d4051",2.5);
+  segment(ctx,{x:blade.x-5,y:blade.y+1},{x:blade.x+5,y:blade.y+1},1.5,"#edf3f6",null);
  }
  if(action==="worker-carry"||action==="worker-lift"){
   const center=mix(hl,hr,.5),boxY=(hl.y+hr.y)/2+7,boxW=action==="worker-lift"?134:124,boxH=action==="worker-lift"?46:42;
