@@ -308,7 +308,7 @@ test("3D two-bone IK returns a reachable elbow and clamps unreachable targets", 
   const { api } = loadEngine();
   const ik=api.NexoraSpatialMotion.solveTwoBoneIK([0,0,0],[1,0,0],1,1,[0,0,1]);
   assert.ok(Math.abs(Math.hypot(...ik.elbow)-1)<1e-5);
-  assert.ok(Math.hypot(...ik.end)<=2 && Math.hypot(...ik.end)>1.999);
+  assert.ok(Math.abs(Math.hypot(...ik.end)-1)<1e-5);assert.ok(Math.abs(Math.hypot(ik.end[0]-ik.elbow[0],ik.end[1]-ik.elbow[1],ik.end[2]-ik.elbow[2])-1)<1e-5);
   const far=api.NexoraSpatialMotion.solveTwoBoneIK([0,0,0],[10,0,0],1,1);
   assert.equal(far.clamped,true);
 });
