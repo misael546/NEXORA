@@ -245,3 +245,16 @@ Al actualizar posiciones de una malla deformada, el renderer vuelve a calcular n
 - La exportación del navegador usa el nombre `NEXORA-Coelo-y-el-musculo-EDICION-MEJORADA.webm`.
 
 La escena sigue usando dinosaurios procedurales de mallas esféricas, no modelos de dinosaurios realistas importados. Las voces dependen de la configuración de Workers AI y de la sesión de administrador. La exportación real solo se produce al reproducir/exportar desde el navegador.
+
+## Evolución 1.3 — actuación cinematográfica 3D
+
+- `animate-engine/spatial-actions.js` proporciona clips reutilizables para reposo, caminar, correr, saltar, aterrizar, girar, hablar, reaccionar a impactos y agacharse.
+- El catálogo adapta sus canales a nombres de huesos habituales de rigs humanoides y de dinosaurios. Las mallas deben incluir esqueleto y pesos de influencia para que las poses se reflejen en la geometría.
+- Los clips son editables/exportables con el formato de animación espacial y pueden combinarse con animaciones incluidas en archivos GLB.
+- El rig conserva una pose de reposo y permite restaurarla. Las acciones respetan las transformaciones iniciales del modelo y evitan acumular desplazamientos al cambiar de movimiento.
+- Las transiciones entre acciones pueden mezclarse con interpolación de posición, escala y cuaterniones; el estudio expone un control de duración del fundido.
+- Las pruebas cubren locomoción, salto, respuesta corporal, rigs humanoides, conservación de pose inicial y transición entre acciones.
+
+## Límites de esta etapa
+
+Las actuaciones son clips procedurales de esqueleto, no un sistema de captura de movimiento ni una herramienta de animación generativa. La calidad visible depende de la topología, el peso de piel, el nombre y orientación de los huesos, y la calidad del modelo GLB importado. El sistema no crea por sí solo músculos, pliegues, contactos con el suelo ni deformaciones secundarias.
