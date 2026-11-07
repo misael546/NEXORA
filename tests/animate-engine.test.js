@@ -400,5 +400,5 @@ test("GLB importer preserves skin joints, normalized weights and animation chann
   assert.deepEqual(parsed.meshes[0].skin.jointNames,["Root","Arm"]);
   assert.deepEqual(Array.from(parsed.meshes[0].skin.weights[0]),[1,0,0,0]);
   assert.equal(parsed.animations[0].channels[0].path,"translation");
-  assert.deepEqual(parsed.animations[0].channels[0].times,[0]);
+  assert.deepEqual(Array.from(parsed.animations[0].channels[0].times),[0]);
 });
