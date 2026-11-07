@@ -325,7 +325,7 @@ test("3D renderer geometry provides normals and reusable model transforms", () =
 
 test("3D dinosaur dialogue demo contains syntactically valid inline JavaScript", () => {
   const html=fs.readFileSync(path.join(__dirname,"../admin/animate-dino-dialogue.html"),"utf8");
-  const scripts=[...html.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)];
+  const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
   assert.equal(scripts.length,1);
   assert.doesNotThrow(()=>new vm.Script(scripts[0][1],{filename:"animate-dino-dialogue.html"}));
   assert.match(html,/Exportar vídeo con audio/);
