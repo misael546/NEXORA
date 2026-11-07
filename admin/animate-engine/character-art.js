@@ -96,7 +96,17 @@ function drawWorker(ctx,w,h,rig,options={}){
  // Tools and carried props stay attached to the worker's animated hands.
  const action=options.action||"",time=Number(options.time)||0;
  if(action==="worker-hammer"){
-  const duration=Math.max(.1,Number(options.duration)||2),phase=((time/duration)%1+1)%1,strike=phase<.48?0:phase<.63?ease((phase-.48)/.15):phase<.8?1-ease((phase-.63)/.17):0,angle=-1.58+strike*2.05,dir={x:Math.cos(angle),y:Math.sin(angle)},normal={x:-Math.sin(angle),y:Math.cos(angle)},headCenter={x:hr.x+dir.x*39,y:hr.y+dir.y*39};
+  const duration=Math.max(.1,Number(options.duration)||2),phase=((time/duration)%1+1)%1,strike=phase<.48?0:phase<.60?ease((phase-.48)/.12):phase<.70?1:phase<.84?1-ease((phase-.70)/.14):0;
+  const target={x:w*.65,y:h*.79},angle=-1.58+strike*2.6,dir={x:Math.cos(angle),y:Math.sin(angle)},normal={x:-Math.sin(angle),y:Math.cos(angle)},headCenter={x:hr.x+dir.x*39,y:hr.y+dir.y*39};
+  // A small timber and nail give the hammer a fixed contact point in the scene.
+  polygon(ctx,[{x:target.x-43,y:target.y-13},{x:target.x+43,y:target.y-13},{x:target.x+39,y:target.y+12},{x:target.x-39,y:target.y+12}],"#80502f","#3c2a23",2.5);
+  polygon(ctx,[{x:target.x-39,y:target.y-13},{x:target.x+39,y:target.y-13},{x:target.x+34,y:target.y-5},{x:target.x-34,y:target.y-5}],"#b67b49","#5b3b27",1.4);
+  segment(ctx,{x:target.x,y:target.y-26},{x:target.x,y:target.y-7},2.2,"#c5d0d8","#46515b");
+  segment(ctx,{x:target.x-4,y:target.y-25},{x:target.x+4,y:target.y-25},2.2,"#e9edf0","#46515b");
+  if(strike>.88){
+   const burst=1-(phase-.60)/.10;
+   for(let i=0;i<4;i++){const a=-Math.PI*.9+i*Math.PI*.6,from={x:target.x+Math.cos(a)*9,y:target.y-22+Math.sin(a)*6},to={x:target.x+Math.cos(a)*16*burst,y:target.y-22+Math.sin(a)*12*burst};segment(ctx,from,to,1.7,"#f6d27c",null)}
+  }
   segment(ctx,hr,headCenter,5.5,"#87532e","#422d23","#e0b17c");
   const hammerHead=[
    {x:headCenter.x+normal.x*15+dir.x*5,y:headCenter.y+normal.y*15+dir.y*5},
