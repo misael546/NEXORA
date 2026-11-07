@@ -253,17 +253,26 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  // Neck joins head and torso as one readable mass; shoulders and short forearms overlap the chest.
  organicLimb(ctx,chest,neck,42,35,green,"#c4df8a");
  organicLimb(ctx,neck,head,39,34,green,"#c4df8a");
- // Neck and tiny forelimbs are integrated into the chest; no exposed circular joints.
+ // Shoulder roots grow out of the chest before the forearms articulate.
+ organicLimb(ctx,{x:chest.x-18,y:chest.y-8},sl,30,21,green,"#c4df8a");
  organicLimb(ctx,sl,el,20,15,green,"#c4df8a");
  organicLimb(ctx,el,hl,15,11,green,"#c4df8a");
+ organicLimb(ctx,{x:chest.x+16,y:chest.y-8},sr,29,20,green,"#c4df8a");
  organicLimb(ctx,sr,er,20,15,green,"#c4df8a");
  organicLimb(ctx,er,hr,15,11,green,"#c4df8a");
  segment(ctx,{x:sl.x-6,y:sl.y+5},{x:sl.x+7,y:sl.y+7},2.2,"#c6e58e","#386748");
  segment(ctx,{x:sr.x-6,y:sr.y+5},{x:sr.x+7,y:sr.y+7},2.2,"#c6e58e","#386748");
  for(const hand of [hl,hr])for(let i=0;i<2;i++)segment(ctx,{x:hand.x+i*3,y:hand.y},{x:hand.x+i*3+2,y:hand.y+8},2,"#e2d79f","#526b4a");
- // Dorsal ridge and small plate-like scales.
- const ridgeStart=mix(neck,chest,.25),ridgeEnd=mix(chest,hip,.48);
- for(let i=0;i<10;i++){const t=i/10,a=mix(ridgeStart,ridgeEnd,t),size=9*(1-t*.32);polygon(ctx,[{x:a.x-size,y:a.y-18},{x:a.x-1,y:a.y-19-size},{x:a.x+size,y:a.y-15}],i%2?"#8fc66b":"#c8e68e","#315f43",1.5)}
+ // A short dorsal crest sits along the back instead of running down the throat.
+ const ridgeStart=mix(chest,hip,.04),ridgeEnd=mix(chest,hip,.62);
+ for(let i=0;i<7;i++){
+  const t=i/6,a=mix(ridgeStart,ridgeEnd,t),size=10*(1-t*.36);
+  polygon(ctx,[
+   {x:a.x-size,y:a.y-9},
+   {x:a.x-1,y:a.y-12-size},
+   {x:a.x+size,y:a.y-7}
+  ],i%2?"#8fc66b":"#c8e68e","#315f43",1.7);
+ }
  // Head and muzzle, slightly three-quarter profile.
  const headAngle=Math.atan2(neck.y-head.y,neck.x-head.x);
  const jawMouth={x:jaw.x,y:Math.min(jaw.y,head.y+h*.17)};
