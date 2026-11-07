@@ -8,7 +8,7 @@ on:
       - ".github/workflows/wallpaper-weekly.yml"
       - ".github/scripts/import-wallpapers.mjs"
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: nexora-wallpaper-weekly
   cancel-in-progress: false
@@ -28,6 +28,16 @@ jobs:
           WALLPAPER_INGEST_TOKEN: ${{ secrets.WALLPAPER_INGEST_TOKEN }}
           WALLPAPER_ACCESS_CLIENT_ID: ${{ secrets.WALLPAPER_ACCESS_CLIENT_ID }}
           WALLPAPER_ACCESS_CLIENT_SECRET: ${{ secrets.WALLPAPER_ACCESS_CLIENT_SECRET }}
+          WALLPAPER_PAGES_PER_TOPIC: "8"
         run: node .github/scripts/import-wallpapers.mjs
-
-# Manual verification trigger: wallpaper import retry
+      - name: Save Wikimedia search progress
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/data/wallpaper-import-state.json
+          if git diff --cached --quiet; then
+            echo "No cursor changes to save."
+          else
+            git commit -m "chore: advance NEXORA wallpaper import cursors"
+            git push
+          fi
