@@ -515,3 +515,22 @@ test("3D facial animator resolves camelCase expressions and applies timed viseme
   face.reset();
   assert.deepEqual(Array.from(mesh.morphWeights), [0, 0, 0, 0]);
 });
+
+test("3D facial acting generates timed blinks and reads phoneme viseme tracks", () => {
+  const { api } = loadEngine();
+  const faceApi = api.NexoraFacialAnimation;
+  assert.ok(faceApi.blinkAt(0.07, { interval: 3.6, duration: 0.14 }) > 0.99);
+  assert.equal(faceApi.blinkAt(0.5, { interval: 3.6, duration: 0.14 }), 0);
+  const track = [
+    { start: 0.1, end: 0.2, phoneme: "M" },
+    { start: 0.2, end: 0.35, phoneme: "A" }
+  ];
+  assert.equal(faceApi.visemeAt(track, 0.15), "M");
+  assert.equal(faceApi.visemeAt(track, 0.25), "A");
+  const mesh = { morphTargets: [{ name: "eyeBlinkLeft" }, { name: "eyeBlinkRight" }, { name: "jawOpen" }], morphWeights: [0, 0, 0] };
+  const animator = new faceApi.FacialAnimator([mesh]);
+  animator.applyAt(0.07, { visemeTrack: track, mouthOpen: 0.75 });
+  assert.ok(mesh.morphWeights[0] > 0.99);
+  assert.ok(mesh.morphWeights[1] > 0.99);
+  assert.equal(mesh.morphWeights[2], 0.75);
+});
