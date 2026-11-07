@@ -37,6 +37,7 @@ function loadEngine() {
     "character-skeleton.js",
     "spatial-engine.js",
     "spatial-rig.js",
+    "spatial-motion.js",
     "audio-engine.js",
     "continuity.js",
     "animation-tools.js",
@@ -286,4 +287,28 @@ test("3D linear blend skinning moves a weighted vertex with its bone", () => {
   const rig = new api.NexoraSpatialRig3D.SpatialRig3D([{name:"root"},{name:"arm",parent:"root",translation:[1,0,0]}]);
   const result = rig.skinVertices([0,0,0],[1,0,0,0],[1,0,0,0]);
   assert.deepEqual(Array.from(result),[1,0,0]);
+});
+
+
+test("3D animation clip interpolates bone transforms and applies the sampled pose", () => {
+  const { api } = loadEngine();
+  const rig = api.NexoraSpatialRig3D.createHumanoid();
+  const clip = new api.NexoraSpatialMotion.SpatialAnimationClip({
+    name:"Inclinarse",duration:1,tracks:[{bone:"spine",keyframes:[
+      {time:0,rotation:[0,0,0,1],translation:[0,.35,0]},
+      {time:1,rotation:[0,0,Math.sin(Math.PI/8),Math.cos(Math.PI/8)],translation:[0,.35,0]}
+    ]}]
+  });
+  clip.apply(rig,.5);
+  assert.ok(rig.worldPosition("head").every(Number.isFinite));
+  assert.equal(clip.sample(.5).time,.5);
+});
+
+test("3D two-bone IK returns a reachable elbow and clamps unreachable targets", () => {
+  const { api } = loadEngine();
+  const ik=api.NexoraSpatialMotion.solveTwoBoneIK([0,0,0],[1,0,0],1,1,[0,0,1]);
+  assert.ok(Math.abs(Math.hypot(...ik.elbow)-1)<1e-5);
+  assert.ok(Math.abs(Math.hypot(...ik.end)-2)<1e-5);
+  const far=api.NexoraSpatialMotion.solveTwoBoneIK([0,0,0],[10,0,0],1,1);
+  assert.equal(far.clamped,true);
 });
