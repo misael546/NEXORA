@@ -312,3 +312,22 @@ test("3D two-bone IK returns a reachable elbow and clamps unreachable targets", 
   const far=api.NexoraSpatialMotion.solveTwoBoneIK([0,0,0],[10,0,0],1,1);
   assert.equal(far.clamped,true);
 });
+
+
+test("3D renderer geometry provides normals and reusable model transforms", () => {
+  const { api } = loadEngine();
+  const sphere=api.NexoraSpatialEngine.geometry.sphere([.2,.4,.6,1],8,6);
+  assert.equal(sphere.positions.length,sphere.colors.length/4*3);
+  assert.equal(sphere.positions.length%3,0);
+  const m=api.NexoraSpatialEngine.transform([2,3,4],[0,0,0,1],[2,3,4]);
+  assert.deepEqual(Array.from(m),[2,0,0,0,0,3,0,0,0,0,4,0,2,3,4,1]);
+});
+
+test("3D dinosaur dialogue demo contains syntactically valid inline JavaScript", () => {
+  const html=fs.readFileSync(path.join(__dirname,"../admin/animate-dino-dialogue.html"),"utf8");
+  const scripts=[...html.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)];
+  assert.equal(scripts.length,1);
+  assert.doesNotThrow(()=>new vm.Script(scripts[0][1],{filename:"animate-dino-dialogue.html"}));
+  assert.match(html,/Exportar vídeo con audio/);
+  assert.match(html,/api\/admin\/voice/);
+});
