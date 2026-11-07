@@ -3,7 +3,7 @@
 function layoutActors(count){
  const n=Math.max(0,Math.min(4,Math.floor(Number(count)||0)));
  if(n===0)return[];
- if(n===1)return[{x:.5,y:.5,scale:1,flip:false}];
+ if(n===1)return[{x:.5,y:.52,scale:.88,flip:false}];
  if(n===2)return[{x:.34,y:.53,scale:.7,flip:false},{x:.68,y:.53,scale:.7,flip:false}];
  if(n===3)return[{x:.2,y:.55,scale:.49,flip:false},{x:.5,y:.55,scale:.49,flip:false},{x:.8,y:.55,scale:.49,flip:false}];
  return[{x:.2,y:.56,scale:.43,flip:false},{x:.4,y:.56,scale:.43,flip:false},{x:.6,y:.56,scale:.43,flip:false},{x:.8,y:.56,scale:.43,flip:false}];
