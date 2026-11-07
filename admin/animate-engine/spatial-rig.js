@@ -15,6 +15,23 @@ class SpatialRig3D{
  exportJSON(){return{format:"nexora-spatial-rig",version:1,bones:this.bones.map(({name,parent,translation,rotation,scale})=>({name,parent,translation,rotation,scale}))}}
  static fromJSON(data){if(data?.format!=="nexora-spatial-rig"||!Array.isArray(data.bones))throw Error("Rig 3D inválido");return new SpatialRig3D(data.bones)}
 }
+class GLBAnimationPlayer{
+constructor(rig,parsed,imported,animationIndex=0){this.rig=rig;this.parsed=parsed;this.imported=imported;this.animationIndex=animationIndex;this.time=0;this.loop=true;this.playing=false;this.clip=null;this.rest=rig.bones.map(b=>({translation:b.translation.slice(),rotation:b.rotation.slice(),scale:b.scale.slice()}));this.select(animationIndex)}
+select(index){const clip=typeof index==="string"?(this.parsed.animations||[]).findIndex(a=>a.name===index):index;const a=this.parsed.animations?.[clip];if(!a)throw Error("Animación GLB no encontrada");this.animationIndex=clip;this.clip=a;this.duration=Math.max(0,...a.channels.flatMap(c=>c.times));this.time=0;this.apply(0);return this}
+play(){this.playing=true;return this}
+pause(){this.playing=false;return this}
+seek(seconds){this.time=Math.max(0,Math.min(this.duration,Number(seconds)||0));this.apply(this.time);return this}
+advance(delta){if(!this.playing)return this;if(this.duration>0){this.time+=Math.max(0,delta);if(this.loop)this.time%=this.duration;else if(this.time>=this.duration){this.time=this.duration;this.playing=false}}this.apply(this.time);return this}
+sample(channel,time){const times=channel.times,values=channel.values,n=times.length;if(!n)return null;let hi=times.findIndex(t=>t>=time);if(hi<0)hi=n-1;if(hi===0){const ix=channel.interpolation==="CUBICSPLINE"?1:0;return values[ix]}const lo=hi-1,dt=times[hi]-times[lo]||1,u=Math.max(0,Math.min(1,(time-times[lo])/dt)),mode=channel.interpolation||"LINEAR",path=channel.path;
+if(mode==="STEP")return values[lo*(mode==="CUBICSPLINE"?3:1)+(mode==="CUBICSPLINE"?1:0)];
+if(mode==="CUBICSPLINE"){const a=values[lo*3+1],out=values[lo*3+2],b=values[hi*3+1],incoming=values[hi*3],u2=u*u,u3=u2*u;return a.map((v,i)=>(2*u3-3*u2+1)*v+(u3-2*u2+u)*dt*out[i]+(-2*u3+3*u2)*b[i]+(u3-u2)*dt*incoming[i])}
+const a=values[lo],b=values[hi];if(path==="rotation"){let cos=a.reduce((sum,v,i)=>sum+v*b[i],0),end=b;if(cos<0){cos=-cos;end=b.map(v=>-v)}if(cos>.9995){const q=a.map((v,i)=>v+(end[i]-v)*u),len=Math.hypot(...q)||1;return q.map(v=>v/len)}const theta=Math.acos(Math.max(-1,Math.min(1,cos))),sin=Math.sin(theta),wa=Math.sin((1-u)*theta)/sin,wb=Math.sin(u*theta)/sin;return a.map((v,i)=>v*wa+end[i]*wb)}
+return a.map((v,i)=>v+(b[i]-v)*u)}
+apply(time){for(let i=0;i<this.rig.bones.length;i++){const b=this.rig.bones[i],r=this.rest[i];b.translation=r.translation.slice();b.rotation=r.rotation.slice();b.scale=r.scale.slice()}
+for(const channel of this.clip.channels){const index=this.imported.nodeBoneIndices.get(channel.node);if(index===undefined)continue;const value=this.sample(channel,time);if(!value)continue;const bone=this.rig.bones[index];if(channel.path==="translation")bone.translation=value.slice();else if(channel.path==="rotation")bone.rotation=value.slice();else if(channel.path==="scale")bone.scale=value.slice()}
+this.rig.updateWorld();return this.rig}
+}
+const createAnimationPlayer=(parsed,imported,animationIndex=0)=>new GLBAnimationPlayer(imported.rig,parsed,imported,animationIndex);
 const createFromGLB=(parsed,skinIndex=0)=>{
 if(!parsed?.nodes?.length||!parsed?.skins?.[skinIndex])throw Error("GLB sin nodos o skin válido");
 const nodes=parsed.nodes,skin=parsed.skins[skinIndex],state=new Map(),ordered=[];
@@ -50,5 +67,5 @@ const dinosaur=()=>new SpatialRig3D([
 {name:"tailTip",parent:"tailMid",translation:[-.34,-.02,0]}
 ]);
 const humanoid=()=>new SpatialRig3D([{name:"root",translation:[0,0,0]},{name:"pelvis",parent:"root",translation:[0,1,0]},{name:"spine",parent:"pelvis",translation:[0,.35,0]},{name:"chest",parent:"spine",translation:[0,.35,0]},{name:"neck",parent:"chest",translation:[0,.3,0]},{name:"head",parent:"neck",translation:[0,.2,0]},{name:"shoulderL",parent:"chest",translation:[-.28,.15,0]},{name:"armUpperL",parent:"shoulderL",translation:[-.22,0,0]},{name:"armLowerL",parent:"armUpperL",translation:[-.3,0,0]},{name:"shoulderR",parent:"chest",translation:[.28,.15,0]},{name:"armUpperR",parent:"shoulderR",translation:[.22,0,0]},{name:"armLowerR",parent:"armUpperR",translation:[.3,0,0]},{name:"thighL",parent:"pelvis",translation:[-.14,-.1,0]},{name:"shinL",parent:"thighL",translation:[0,-.42,0]},{name:"thighR",parent:"pelvis",translation:[.14,-.1,0]},{name:"shinR",parent:"thighR",translation:[0,-.42,0]}]);
-window.NexoraSpatialRig3D={SpatialRig3D,createHumanoid:humanoid,createDinosaur:dinosaur,createFromGLB,math:{identity:I,multiply:mul,compose,transform,inverse}};
+window.NexoraSpatialRig3D={SpatialRig3D,GLBAnimationPlayer,createAnimationPlayer,createHumanoid:humanoid,createDinosaur:dinosaur,createFromGLB,math:{identity:I,multiply:mul,compose,transform,inverse}};
 })();
