@@ -233,7 +233,10 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   const dino = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
   const motion = new api.NexoraMotionSystem.MotionTimeline(dino.points);
   motion.usePreset("dino-roar", 2);
-  assert.ok(motion.sample(1).jaw.y > dino.points.jaw.y);
+  const roarPose = motion.sample(1);
+  assert.ok(roarPose.jaw.y > dino.points.jaw.y);
+  assert.ok(roarPose.head.y > dino.points.head.y - 0.021);
+  assert.ok(roarPose.jaw.y < dino.points.jaw.y + 0.026);
   motion.usePreset("dino-tail-swipe", 2);
   assert.ok(motion.sample(1).tail4.y > dino.points.tail4.y);
   assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-bite"));
