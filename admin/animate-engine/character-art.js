@@ -1,5 +1,6 @@
 /* NEXORA ANIMATE — original 2D character artwork rendered as articulated vector layers. */
 (()=>{"use strict";
+const ease=t=>{const v=Math.max(0,Math.min(1,Number(t)||0));return v*v*(3-2*v)};
 const point=(p,w,h)=>({x:p.x*w,y:p.y*h});
 const mix=(a,b,t)=>({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t});
 const unit=(a,b)=>{const dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1;return{x:dx/l,y:dy/l}};
@@ -95,7 +96,7 @@ function drawWorker(ctx,w,h,rig,options={}){
  // Tools and carried props stay attached to the worker's animated hands.
  const action=options.action||"",time=Number(options.time)||0;
  if(action==="worker-hammer"){
-  const phase=((time/2)%1+1)%1,strike=phase<.48?0:phase<.63?ease((phase-.48)/.15):phase<.8?1-ease((phase-.63)/.17):0,angle=-1.58+strike*2.05,dir={x:Math.cos(angle),y:Math.sin(angle)},normal={x:-Math.sin(angle),y:Math.cos(angle)},headCenter={x:hr.x+dir.x*39,y:hr.y+dir.y*39};
+  const duration=Math.max(.1,Number(options.duration)||2),phase=((time/duration)%1+1)%1,strike=phase<.48?0:phase<.63?ease((phase-.48)/.15):phase<.8?1-ease((phase-.63)/.17):0,angle=-1.58+strike*2.05,dir={x:Math.cos(angle),y:Math.sin(angle)},normal={x:-Math.sin(angle),y:Math.cos(angle)},headCenter={x:hr.x+dir.x*39,y:hr.y+dir.y*39};
   segment(ctx,hr,headCenter,5.5,"#87532e","#422d23","#e0b17c");
   const hammerHead=[
    {x:headCenter.x+normal.x*15+dir.x*5,y:headCenter.y+normal.y*15+dir.y*5},
