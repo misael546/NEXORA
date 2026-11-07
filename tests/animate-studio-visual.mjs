@@ -175,6 +175,13 @@ try {
   await setAction("worker", "worker-carry", 0.42);
   const workerCarry = await capture("worker-carry-motion");
   assert.notEqual(workerCarry.hash, workerIdle.hash, "The worker carry action did not change the rendered pose.");
+  await setAction("worker", "worker-dig", 0.38);
+  const workerDig = await capture("worker-dig-motion");
+  assert.notEqual(workerDig.hash, workerIdle.hash, "The worker dig action did not change the rendered pose.");
+  await setAction("worker", "worker-lift", 0.45);
+  await capture("worker-lift-motion");
+  await setAction("worker", "worker-wave", 0.42);
+  await capture("worker-wave-motion");
 
   await setAction("dinosaur", "dino-idle", 0.01);
   const dinoIdle = await capture("dinosaur-idle");
@@ -190,6 +197,11 @@ try {
   await setAction("dinosaur", "dino-tail-swipe", 0.52);
   const dinoTailSwipe = await capture("dinosaur-tail-swipe-motion");
   assert.notEqual(dinoTailSwipe.hash, dinoIdle.hash, "The dinosaur tail swipe did not visibly change the rendered pose.");
+  await setAction("dinosaur", "dino-bite", 0.5);
+  const dinoBite = await capture("dinosaur-bite-motion");
+  assert.notEqual(dinoBite.hash, dinoIdle.hash, "The dinosaur bite did not visibly change the rendered pose.");
+  await setAction("dinosaur", "dino-crouch", 0.45);
+  await capture("dinosaur-crouch-motion");
 
   assert.deepEqual(pageErrors, [], "El navegador encontró errores de JavaScript: " + pageErrors.join(" | "));
   assert.equal(await page.evaluate(() => window.__nexoraWebGLRequests), 0, "WebGL se inicializó durante la prueba 2D.");
