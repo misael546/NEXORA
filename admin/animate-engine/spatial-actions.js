@@ -39,6 +39,9 @@ function findBone(rig,role,side){
 function roleMap(rig){
  const map={};for(const role of Object.keys(patterns)){if(["thigh","shin","foot","arm"].includes(role))continue;map[role]=findBone(rig,role)}
  for(const role of ["thigh","shin","foot","arm"]){map[role+"L"]=findBone(rig,role,"L");map[role+"R"]=findBone(rig,role,"R")}
+ map.spineBones=rig.bones.filter(b=>patterns.spine.test(clean(b.name))&&!/(chest|neck)/i.test(clean(b.name))).map(b=>b.name);
+ map.neckBones=rig.bones.filter(b=>patterns.neck.test(clean(b.name))).map(b=>b.name);
+ map.tailBones=rig.bones.filter(b=>patterns.tail.test(clean(b.name))).map(b=>b.name);
  return map;
 }
 function makeTrack(rig,bone,frames,axis=[0,0,1]){
@@ -51,53 +54,54 @@ function createClip(rig,action,options={}){
  if(!duration)throw Error("Acción cinematográfica desconocida: "+action);
  const loop=["idle","walk","run","talk"].includes(action),tracks=[];
  const add=(role,frames,axis)=>{const name=map[role];const t=makeTrack(rig,name,frames,axis);if(t)tracks.push(t)};
+ const addChain=(key,frames,axis=[0,0,1],baseGain=.55,tipGain=1.3)=>{const names=map[key]||[];names.forEach((name,index)=>{const gain=names.length===1?1:baseGain+(tipGain-baseGain)*index/(names.length-1),scaled=frames.map(frame=>[frame[0],(Number(frame[1])||0)*gain,frame[2]||axis,frame[3]]);const track=makeTrack(rig,name,scaled,axis);if(track)tracks.push(track)})};
  const cyc=(angles,axis=[0,0,1],translations=null)=>angles.map((a,i)=>[duration*i/(angles.length-1),a,axis,translations?.[i]]);
  if(action==="idle"){
   add("pelvis",cyc([0,.012,0,-.012,0],[0,0,1],[[0,0,0],[0,.012,0],[0,0,0],[0,.012,0],[0,0,0]]));
   add("chest",cyc([0,.018,0,-.018,0]));
-  add("neck",cyc([0,-.025,0,.025,0]));
+  addChain("neckBones",cyc([0,-.025,0,.025,0]));
   add("head",cyc([0,.018,0,-.018,0]));
-  add("tail",cyc([-.035,.035,-.035,.035,-.035],[0,1,0]));
+  addChain("tailBones",cyc([-.035,.035,-.035,.035,-.035],[0,1,0]));
   add("jaw",cyc([0,.015,0,.01,0]));
  }else if(action==="walk"||action==="run"){
   const fast=action==="run",s=fast?1.35:1,leg=[0,.62*s,0,-.62*s,0],legR=leg.map(v=>-v),shin=[0,-.32*s,0,.32*s,0],shinR=shin.map(v=>-v),arm=[0,-.28*s,0,.28*s,0],armR=arm.map(v=>-v);
   const bob=fast?[0,.08,0,.08,0]:[0,.035,0,.035,0];
   add("root",cyc([0,0,0,0,0],[0,0,1],bob.map(v=>[0,v,0])));
   add("pelvis",cyc([-.025,.035,-.025,.035,-.025]));
-  add("spine",cyc([.02,-.025,.02,-.025,.02]));
+  addChain("spineBones",cyc([.02,-.025,.02,-.025,.02]));
   add("thighL",cyc(leg));add("thighR",cyc(legR));
   add("shinL",cyc(shin));add("shinR",cyc(shinR));
   add("footL",cyc(shin.map(v=>-v*.55)));add("footR",cyc(shinR.map(v=>-v*.55)));
   add("armL",cyc(arm));add("armR",cyc(armR));
-  add("neck",cyc([.025,-.035,.025,-.035,.025]));
+  addChain("neckBones",cyc([.025,-.035,.025,-.035,.025]));
   add("head",cyc([-.018,.025,-.018,.025,-.018]));
-  add("tail",cyc([-.13,.13,-.13,.13,-.13],[0,1,0]));
+  addChain("tailBones",cyc([-.13,.13,-.13,.13,-.13],[0,1,0]));
  }else if(action==="jump"){
   add("root",[[0,0,[0,0,1],[0,0,0]],[.16,0,[0,0,1],[0,-.16,0]],[.42,0,[0,0,1],[0,.48,0]],[.58,0,[0,0,1],[0,.52,0]],[.8,0,[0,0,1],[0,.08,0]],[.95,0,[0,0,1],[0,0,0]]]);
   add("pelvis",cyc([-.06,.08,.02,-.04,0]));
   add("thighL",cyc([-.15,.8,.62,.4,0]));add("thighR",cyc([-.15,.8,.62,.4,0]));
   add("shinL",cyc([.05,-.72,-.55,-.2,0]));add("shinR",cyc([.05,-.72,-.55,-.2,0]));
   add("armL",cyc([-.05,-.65,-.55,-.2,0]));add("armR",cyc([.05,.65,.55,.2,0]));
-  add("neck",cyc([0,-.12,-.08,.04,0]));add("head",cyc([0,.1,.08,-.03,0]));
-  add("tail",cyc([-.1,.28,.18,-.08,0],[0,1,0]));
+  addChain("neckBones",cyc([0,-.12,-.08,.04,0]));add("head",cyc([0,.1,.08,-.03,0]));
+  addChain("tailBones",cyc([-.1,.28,.18,-.08,0],[0,1,0]));
  }else if(action==="land"){
   add("root",[[0,0,[0,0,1],[0,.12,0]],[.12,0,[0,0,1],[0,-.14,0]],[.28,0,[0,0,1],[0,0,0]],[.55,0,[0,0,1],[0,0,0]]]);
-  add("pelvis",cyc([.1,-.18,.06,0,0]));add("spine",cyc([-.1,.08,-.025,0,0]));add("thighL",cyc([.4,-.18,-.08,0,0]));add("thighR",cyc([.4,-.18,-.08,0,0]));add("tail",cyc([.32,-.22,.12,0,0],[0,1,0]));
+  add("pelvis",cyc([.1,-.18,.06,0,0]));addChain("spineBones",cyc([-.1,.08,-.025,0,0]));add("thighL",cyc([.4,-.18,-.08,0,0]));add("thighR",cyc([.4,-.18,-.08,0,0]));addChain("tailBones",cyc([.32,-.22,.12,0,0],[0,1,0]));
  }else if(action==="turn"){
   const direction=options.direction==="right"?-1:1;
   add("root",[[0,0,[0,1,0],[0,0,0]],[.2,direction*.15,[0,1,0]],[.55,direction*1.35,[0,1,0]],[.8,direction*Math.PI/2,[0,1,0]]]);
-  add("spine",cyc([0,-.04,-.06,0,0]));add("head",cyc([0,-.16,-.08,.02,0]));add("tail",cyc([0,-.12,-.2,-.08,0],[0,1,0]));
+  addChain("spineBones",cyc([0,-.04,-.06,0,0]));add("head",cyc([0,-.16,-.08,.02,0]));addChain("tailBones",cyc([0,-.12,-.2,-.08,0],[0,1,0]));
  }else if(action==="talk"){
   add("jaw",cyc([.05,.24,.08,.34,.05]));
   add("head",cyc([0,.045,-.025,.035,0]));
-  add("neck",cyc([0,.025,-.018,.025,0]));
+  addChain("neckBones",cyc([0,.025,-.018,.025,0]));
   add("armL",cyc([0,-.12,-.22,-.08,0]));add("armR",cyc([0,.12,.22,.08,0]));
-  add("tail",cyc([0,.025,0,-.025,0],[0,1,0]));
+  addChain("tailBones",cyc([0,.025,0,-.025,0],[0,1,0]));
  }else if(action==="hit"){
   add("root",[[0,0,[0,0,1],[0,0,0]],[.12,-.14,[0,0,1],[-.08,-.04,0]],[.28,.12,[0,0,1],[-.16,.02,0]],[.48,.05,[0,0,1],[-.06,0,0]],[.68,0,[0,0,1],[0,0,0]]]);
-  add("pelvis",cyc([0,-.16,.1,.035,0]));add("spine",cyc([0,.22,-.1,-.025,0]));add("neck",cyc([0,.28,-.1,-.02,0]));add("head",cyc([0,.24,-.16,-.03,0]));add("armL",cyc([0,.4,.2,.08,0]));add("armR",cyc([0,-.4,-.2,-.08,0]));add("tail",cyc([0,.35,-.25,.1,0],[0,1,0]));
+  add("pelvis",cyc([0,-.16,.1,.035,0]));addChain("spineBones",cyc([0,.22,-.1,-.025,0]));addChain("neckBones",cyc([0,.28,-.1,-.02,0]));add("head",cyc([0,.24,-.16,-.03,0]));add("armL",cyc([0,.4,.2,.08,0]));add("armR",cyc([0,-.4,-.2,-.08,0]));addChain("tailBones",cyc([0,.35,-.25,.1,0],[0,1,0]));
  }else if(action==="crouch"){
-  add("pelvis",[[0,0],[.22,-.3],[.7,-.3]]);add("thighL",[[0,0],[.22,.55],[.7,.55]]);add("thighR",[[0,0],[.22,.55],[.7,.55]]);add("shinL",[[0,0],[.22,-.7],[.7,-.7]]);add("shinR",[[0,0],[.22,-.7],[.7,-.7]]);add("spine",[[0,0],[.22,.12],[.7,.12]]);add("head",[[0,0],[.22,-.08],[.7,-.08]]);
+  add("pelvis",[[0,0],[.22,-.3],[.7,-.3]]);add("thighL",[[0,0],[.22,.55],[.7,.55]]);add("thighR",[[0,0],[.22,.55],[.7,.55]]);add("shinL",[[0,0],[.22,-.7],[.7,-.7]]);add("shinR",[[0,0],[.22,-.7],[.7,-.7]]);addChain("spineBones",[[0,0],[.22,.12],[.7,.12]]);add("head",[[0,0],[.22,-.08],[.7,-.08]]);
  }
  if(!tracks.length)throw Error("El rig no contiene huesos compatibles para "+action);
  const {SpatialAnimationClip}=window.NexoraSpatialMotion;
