@@ -204,6 +204,18 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-bite"));
 });
 
+test("worker lift action raises and closes both hands around the load", () => {
+  const { api } = loadEngine();
+  const rig = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const timeline = new api.NexoraMotionSystem.MotionTimeline(rig.points);
+  timeline.usePreset("worker-lift", 2);
+  const pose = timeline.sample(.56);
+  assert.ok(pose.handL.x > rig.points.handL.x);
+  assert.ok(pose.handR.x < rig.points.handR.x);
+  assert.ok(pose.handL.y < rig.points.handL.y);
+  assert.ok(pose.handR.y < rig.points.handR.y);
+});
+
 test("worker carry action brings both hands inward around the load", () => {
   const { api } = loadEngine();
   const rig = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
