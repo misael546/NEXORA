@@ -14,7 +14,16 @@ const cycles={
  talk:(p,t)=>{const s=cyc(t*4);if(p==="head")return{x:0,y:-.006*Math.abs(s)};if(/hand|elbow/.test(p))return{x:s*.012,y:-.012*Math.abs(s)};return{x:0,y:0}},
  hit:(p,t)=>{const recoil=pulse(Math.min(1,t*2));if(p==="head"||p==="neck")return{x:-.045*recoil,y:.018*recoil};if(/shoulder|elbow|hand/.test(p))return{x:-.035*recoil,y:.025*recoil};if(p==="hip")return{x:-.018*recoil,y:.01*recoil};return{x:0,y:0}},
  "worker-idle":(p,t)=>{const s=cyc(t);if(p==="head")return{x:.002*s,y:-.006*s};if(p==="neck"||p==="hip")return{x:0,y:-.006*s};if(/shoulder/.test(p))return{x:0,y:-.008*s};if(/hand/.test(p))return{x:0,y:.004*s};return{x:0,y:0}},
- "worker-walk":(p,t)=>cycles.walk(p,t),
+ "worker-walk":(p,t)=>{
+  const phase=t*Math.PI*2,s=Math.sin(phase),side=p.endsWith("L")?0:Math.PI,legPhase=phase+side,stride=Math.sin(legPhase),lift=Math.max(0,Math.cos(legPhase));
+  if(p==="hip")return{x:0,y:-.014*Math.abs(s)};
+  if(p==="neck"||p==="head")return{x:.003*s,y:-.009*Math.abs(s)};
+  if(p==="shoulderL"||p==="shoulderR")return{x:0,y:-.004*Math.abs(s)};
+  if(/elbow|hand/.test(p))return{x:.012*Math.cos(phase+(p.endsWith("L")?0:Math.PI)),y:(p.endsWith("L")?-1:1)*s*(p==="handL"||p==="handR"?.038:.025)};
+  if(/knee/.test(p))return{x:stride*.045,y:-lift*.014};
+  if(/foot/.test(p))return{x:stride*.065,y:-lift*.065};
+  return{x:0,y:0}
+ },
  "worker-run":(p,t)=>cycles.run(p,t),
  "worker-work":(p,t)=>{const s=cyc(t*1.5),lift=Math.max(0,s);if(p==="head"||p==="neck")return{x:.005*s,y:.025+Math.abs(s)*.008};if(p==="hip")return{x:0,y:.018};if(/elbowL/.test(p))return{x:-.018*lift,y:-.035*lift};if(/handL/.test(p))return{x:-.025*lift,y:-.075*lift};if(/elbowR/.test(p))return{x:.012*lift,y:-.018*lift};if(/handR/.test(p))return{x:.025*lift,y:-.05*lift};return{x:0,y:0}},
  "worker-lift":(p,t)=>{const lift=t<.28?ease(t/.28):t<.72?1:1-ease((t-.72)/.28);if(p==="head"||p==="neck")return{x:0,y:.035-.025*lift};if(p==="hip")return{x:0,y:.025-.012*lift};if(p==="shoulderL")return{x:.018*lift,y:-.035*lift};if(p==="shoulderR")return{x:-.018*lift,y:-.035*lift};if(p==="elbowL")return{x:.025*lift,y:-.065*lift};if(p==="elbowR")return{x:-.025*lift,y:-.065*lift};if(p==="handL")return{x:.015*lift,y:-.15*lift};if(p==="handR")return{x:-.015*lift,y:-.15*lift};if(/knee/.test(p))return{x:0,y:.025*(1-lift)};return{x:0,y:0}},
@@ -28,7 +37,19 @@ const cycles={
  "worker-kneel":(p,t)=>{const a=ease(Math.min(1,t/.72));if(p==="hip")return{x:0,y:.07*a};if(p==="head"||p==="neck")return{x:.008*a,y:.035*a};if(p==="kneeL")return{x:.015*a,y:.08*a};if(p==="kneeR")return{x:-.02*a,y:.06*a};if(p==="footL"||p==="footR")return{x:0,y:.025*a};if(p==="handL")return{x:.07*a,y:.015*a};if(p==="handR")return{x:-.04*a,y:-.025*a};return{x:0,y:0}},
  "worker-point":(p,t)=>{const a=t<.2?ease(t/.2):t>.88?1-ease((t-.88)/.12):1;if(p==="shoulderR")return{x:.015*a,y:-.045*a};if(p==="elbowR")return{x:.035*a,y:-.12*a};if(p==="handR")return{x:.12*a,y:-.16*a};if(p==="head")return{x:.008*a,y:-.012*a};return{x:0,y:0}},
  "dino-idle":(p,t)=>{const s=cyc(t);if(p==="chest"||p==="spine")return{x:0,y:-.012*s};if(p==="head")return{x:-.004*s,y:-.007*s};if(p==="neck")return{x:-.006*s,y:-.01*s};if(/^tail[1-4]$/.test(p))return{x:0,y:Math.sin(t*Math.PI*2-Number(p.slice(4))*.42)*.012*Number(p.slice(4))};if(/knee|foot/.test(p))return{x:0,y:.003*Math.abs(s)};return{x:0,y:0}},
- "dino-walk":(p,t)=>{const s=cyc(t),phase=t*Math.PI*2;if(p==="hip"||p==="chest")return{x:0,y:-.018*Math.abs(s)};if(p==="head"||p==="neck")return{x:-.008*s,y:-.01*Math.abs(s)};if(p==="kneeL"||p==="footL")return{x:.028*s,y:Math.max(0,Math.cos(phase))*.025};if(p==="kneeR"||p==="footR")return{x:-.028*s,y:Math.max(0,-Math.cos(phase))*.025};if(/handL/.test(p))return{x:.012*s,y:-.012};if(/handR/.test(p))return{x:-.012*s,y:.012};if(/^tail[1-4]$/.test(p)){const n=Number(p.slice(4));return{x:0,y:Math.sin(phase-n*.38)*(.008+n*.004)}}return{x:0,y:0}},
+ "dino-walk":(p,t)=>{
+  const phase=t*Math.PI*2,s=Math.sin(phase),side=p.endsWith("L")?0:Math.PI,legPhase=phase+side,stride=Math.sin(legPhase),lift=Math.max(0,Math.cos(legPhase));
+  if(p==="hip")return{x:0,y:-.022*Math.abs(s)};
+  if(p==="chest"||p==="neck")return{x:.004*s,y:-.012*Math.abs(s)};
+  if(p==="head")return{x:.006*s,y:-.014*Math.abs(s)};
+  if(p==="jaw")return{x:0,y:.004*Math.max(0,s)};
+  if(/^tail[1-4]$/.test(p)){const n=Number(p.slice(4));return{x:0,y:Math.sin(phase-n*.48)*(.009*n)}}
+  if(/knee/.test(p))return{x:stride*.052,y:-lift*.022};
+  if(/foot/.test(p))return{x:stride*.075,y:-lift*.09};
+  if(/elbow|hand/.test(p))return{x:.012*s,y:-.018*s};
+  if(/shoulder/.test(p))return{x:0,y:-.006*Math.abs(s)};
+  return{x:0,y:0}
+ },
  "dino-run":(p,t)=>{const s=cyc(t*1.3),phase=t*Math.PI*2*1.3;if(p==="hip"||p==="chest")return{x:0,y:-.04*Math.abs(s)};if(p==="head"||p==="neck")return{x:-.018*s,y:-.022*Math.abs(s)};if(p==="kneeL"||p==="footL")return{x:.055*s,y:Math.max(0,Math.cos(phase))*.05};if(p==="kneeR"||p==="footR")return{x:-.055*s,y:Math.max(0,-Math.cos(phase))*.05};if(/hand/.test(p))return{x:0,y:-.025+.02*s};if(/^tail[1-4]$/.test(p)){const n=Number(p.slice(4));return{x:.004*n,y:Math.sin(phase-n*.34)*(.014+n*.006)}}return{x:0,y:0}},
  "dino-roar":(p,t)=>{const a=pulse(t);if(p==="head")return{x:-.02*a,y:-.085*a};if(p==="neck")return{x:-.015*a,y:-.055*a};if(p==="jaw")return{x:-.012*a,y:.095*a};if(p==="chest")return{x:0,y:-.025*a};if(/hand/.test(p))return{x:0,y:-.025*a};if(/^tail[1-4]$/.test(p))return{x:0,y:.012*a*Number(p.slice(4))};return{x:0,y:0}},
  "dino-bite":(p,t)=>{const a=Math.sin(Math.PI*clamp(t));if(p==="head")return{x:-.075*a,y:.055*a};if(p==="neck")return{x:-.045*a,y:.035*a};if(p==="jaw")return{x:-.025*a,y:.06*a};if(p==="chest")return{x:-.008*a,y:.01*a};if(/^tail[1-4]$/.test(p))return{x:.008*a,y:-.008*a*Number(p.slice(4))};return{x:0,y:0}},
