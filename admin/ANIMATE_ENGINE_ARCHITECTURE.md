@@ -304,3 +304,5 @@ El arte incluido es una ilustración vectorial procedimental original, no una se
 - Las pruebas cubren la nueva articulación mandibular del trabajador, el clip de habla y la conservación de la actuación dinosaurio.
 
 - En el modo de trabajo actual, la interfaz 3D permanece oculta y el renderizador WebGL no se inicializa (`ENABLE_3D_STUDIO=false`). Sus módulos y herramientas siguen conservados en el repositorio para reactivarlos cuando vuelva a ser prioridad.
+
+- Las acciones de oficio del trabajador ahora llevan utilería dibujada y sincronizada con el clip: martillo en `worker-hammer`, pala en `worker-dig`, y caja/carga en `worker-carry` y `worker-lift`. La pose de carga aproxima ambas manos al objeto, y el renderizador recibe el nombre de la acción para dibujar el accesorio correspondiente.
