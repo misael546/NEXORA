@@ -351,7 +351,7 @@ test("2D studio defaults to the worker and hides the preserved 3D controls", () 
   assert.match(bridge,/characterStage.setActors\(cast\)/);
   assert.match(bridge,/secondaryMotionPreset:secondaryActorType===/);
   assert.match(bridge,/action:activeAction/);
-  assert.match(bridge,/activeAction=motionName/);
+  assert.match(bridge,/activeAction=primary\.action/);
   assert.match(html,/animate-engine\/character-art\.js/);
 });
 
