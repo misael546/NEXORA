@@ -421,3 +421,14 @@ test("3D skinning supports eight influences and maps skin joints to rig bone ind
   assert.ok(Math.abs(out[0]-2)<1e-6);
   assert.throws(()=>rig.skinVertices([0,0,0],[0,0,0,0,0],[1,0,0,0,0]),/Datos de skin/);
 });
+
+
+test("GLB rig skinning applies inverse mesh transform and updates GPU vertex buffers", () => {
+  const { api } = loadEngine();
+  const rig = new api.NexoraSpatialRig3D.SpatialRig3D([{name:"root",translation:[5,0,0]}]);
+  const inverse=api.NexoraSpatialRig3D.math.inverse(rig.bones[0].world);
+  const out=rig.skinVertices([1,0,0],[0,0,0,0],[1,0,0,0],[[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]],[0],inverse);
+  assert.deepEqual(Array.from(out),[1,0,0]);
+  const m=api.NexoraSpatialRig3D.math.inverse(api.NexoraSpatialRig3D.math.compose([2,3,4],[0,0,0,1],[2,2,2]));
+  assert.ok(Math.abs(m[12]+1)<1e-6 && Math.abs(m[13]+1.5)<1e-6 && Math.abs(m[14]+2)<1e-6);
+});
