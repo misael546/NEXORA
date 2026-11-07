@@ -258,3 +258,16 @@ La escena sigue usando dinosaurios procedurales de mallas esféricas, no modelos
 ## Límites de esta etapa
 
 Las actuaciones son clips procedurales de esqueleto, no un sistema de captura de movimiento ni una herramienta de animación generativa. La calidad visible depende de la topología, el peso de piel, el nombre y orientación de los huesos, y la calidad del modelo GLB importado. El sistema no crea por sí solo músculos, pliegues, contactos con el suelo ni deformaciones secundarias.
+
+## Evolución 1.4 — actuación facial y secuencias cinematográficas
+
+- El reloj del escenario 3D puede actualizar morph targets faciales junto con el esqueleto y la geometría deformada.
+- La interfaz permite seleccionar expresiones y cargar pistas de fonemas/visemas temporizadas en JSON. Se validan los intervalos y los símbolos admitidos.
+- La transición entre visemas incluye coarticulación: las formas de boca próximas se mezclan progresivamente, en vez de cambiar de forma instantánea.
+- `spatial-actions.js` ahora permite construir secuencias reutilizables de varias acciones por personaje, con duración individual y fundidos entre segmentos.
+- El estudio permite agregar, reordenar, quitar, reproducir, importar y exportar un guion de acciones. La secuencia y las pistas faciales comparten el reloj de reproducción.
+- Se añadieron pruebas para sincronización facial, coarticulación, cadenas de cuello/cola, reproducción de secuencias, serialización y validación de límites.
+
+## Límites de las secuencias
+
+Los clips son animaciones procedurales de articulaciones, y las pistas fonéticas mueven morph targets nombrados. Para una actuación de calidad profesional se necesita que cada modelo tenga rigging bien orientado, morph targets faciales compatibles y pistas fonéticas reales o alineación de voz. Las pruebas automatizadas verifican la lógica y no sustituyen la revisión visual de cada personaje.
