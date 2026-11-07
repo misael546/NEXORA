@@ -103,10 +103,15 @@ function worker(t){
  ctx.strokeStyle='#557f91';ctx.lineWidth=28;ctx.lineCap='round';
  ctx.beginPath();ctx.moveTo(450,armY);ctx.quadraticCurveTo(425,420,handLx,handLy);ctx.stroke();
  ctx.beginPath();ctx.moveTo(550,armY);ctx.quadraticCurveTo(640,415,handRx,handRy);ctx.stroke();
+ if(rub>.05){ctx.strokeStyle='#557f91';ctx.lineWidth=28;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(450,armY);ctx.quadraticCurveTo(465,395,490,380);ctx.stroke();ctx.strokeStyle='#d59d7b';ctx.lineWidth=15;ctx.beginPath();ctx.moveTo(490,380);ctx.quadraticCurveTo(505,350,headX-30,headY+headDroop-8);ctx.stroke();ctx.fillStyle='#e2b18e';ctx.beginPath();ctx.ellipse(headX-30,headY+headDroop-8,17,10,-.5,0,Math.PI*2);ctx.fill();}
  ctx.fillStyle='#e2b18e';ctx.beginPath();ctx.ellipse(handLx,handLy,22,12,0,0,Math.PI*2);ctx.ellipse(handRx,handRy,22,12,0,0,Math.PI*2);ctx.fill();
  // hands rest on table during sleep
  if(sleep>.5){line(560,515,650,520,'#e2b18e',16);line(620,520,690,520,'#e2b18e',16)}
  ctx.restore();
+ // warm monitor glow on the character and desktop
+ const glow=ctx.createRadialGradient(930,355,8,930,355,360);glow.addColorStop(0,'rgba(95,204,220,.13)');glow.addColorStop(1,'rgba(95,204,220,0)');ctx.fillStyle=glow;ctx.fillRect(560,180,670,430);
+ // drifting dust catches the desk light
+ for(let i=0;i<22;i++){const x=(i*137+Math.sin(t*.55+i)*13)%980+140,y=(i*71-t*(3+i%3))%470+160;ctx.fillStyle='rgba(255,226,177,.22)';ctx.beginPath();ctx.arc(x,y,1+i%2,0,Math.PI*2);ctx.fill()}
  // typing sparks / completion
  if(t<10){for(let i=0;i<3;i++){let x=620+i*22+Math.sin(t*11+i)*4,y=474+Math.cos(t*12+i)*3;ctx.fillStyle='rgba(133,220,216,.7)';ctx.fillRect(x,y,3,3)}}
 }
