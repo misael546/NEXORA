@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - "admin/animate-engine/**"
+      - "admin/animate-dino-dialogue.html"
+      - "admin/animate-studio.html"
       - "tests/animate-engine.test.js"
       - ".github/workflows/animate-engine-tests.yml"
   pull_request:
