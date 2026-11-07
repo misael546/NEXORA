@@ -470,3 +470,21 @@ test("deformed GLB geometry receives recomputed triangle normals", () => {
  const degenerate=api.NexoraSpatialEngine.flatNormals([0,0,0,1,0,0,2,0,0]);
  assert.deepEqual(degenerate,[0,0,0,0,0,0,0,0,0]);
 });
+
+
+test("facial animator maps expression, blink and viseme aliases to morph targets", () => {
+ const {api}=loadEngine();
+ const mesh={morphTargets:[{name:"Smile"},{name:"EyeBlinkLeft"},{name:"Jaw_Open"},{name:"viseme_O"}],morphWeights:[0,0,0,0]};
+ const face=new api.NexoraFacialAnimation.FacialAnimator([mesh]);
+ face.apply({expression:"smile",expressionWeight:.7,blink:.9,viseme:"O",mouthOpen:.8});
+ assert.deepEqual(mesh.morphWeights,[.7,.9,.8,.8]);
+ face.reset();
+ assert.deepEqual(mesh.morphWeights,[0,0,0,0]);
+});
+test("facial animator supports independent left and right eye blinks", () => {
+ const {api}=loadEngine();
+ const mesh={morphTargets:[{name:"BlinkLeft"},{name:"BlinkRight"},{name:"BrowUp"}],morphWeights:[0,0,0]};
+ const face=new api.NexoraFacialAnimation.FacialAnimator([mesh]);
+ face.apply({blinkLeft:.8,blinkRight:.2,browUp:.5});
+ assert.deepEqual(mesh.morphWeights,[.8,.2,.5]);
+});
