@@ -204,6 +204,33 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-bite"));
 });
 
+test("worker carry action brings both hands inward around the load", () => {
+  const { api } = loadEngine();
+  const rig = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const timeline = new api.NexoraMotionSystem.MotionTimeline(rig.points);
+  timeline.usePreset("worker-carry", 2);
+  const pose = timeline.sample(.06);
+  assert.ok(pose.handL.x > rig.points.handL.x);
+  assert.ok(pose.handR.x < rig.points.handR.x);
+});
+
+test("worker tool actions draw the hammer shovel and carry props", () => {
+  const { api } = loadEngine();
+  const rig = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const drawCount = action => {
+    let calls = 0;
+    const noop = () => { calls++; };
+    const ctx = {createLinearGradient(){return{addColorStop(){}}},save:noop,restore:noop,translate:noop,rotate:noop,beginPath:noop,moveTo:noop,lineTo:noop,closePath:noop,fill:noop,stroke:noop,ellipse:noop};
+    api.NexoraCharacterArt.draw(ctx,640,360,rig,"worker",{action,time:.35});
+    return calls;
+  };
+  const idle = drawCount("worker-idle");
+  assert.ok(drawCount("worker-hammer") > idle);
+  assert.ok(drawCount("worker-dig") > idle);
+  assert.ok(drawCount("worker-carry") > idle);
+  assert.ok(drawCount("worker-lift") > idle);
+});
+
 test("worker talk clip animates its jaw and is available in 2D worker actions", () => {
   const { api } = loadEngine();
   const worker = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
@@ -240,6 +267,8 @@ test("2D studio defaults to the worker and hides the preserved 3D controls", () 
   assert.match(bridge,/Motor 3D conservado · inactivo para priorizar el estudio 2D/);
   assert.match(bridge,/id="nvCharacterType"/);
   assert.match(bridge,/id="nvRigDino"/);
+  assert.match(bridge,/action:activeAction/);
+  assert.match(bridge,/activeAction=motionName/);
   assert.match(html,/animate-engine\/character-art\.js/);
 });
 
