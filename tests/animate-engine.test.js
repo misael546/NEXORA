@@ -680,7 +680,7 @@ test("studio validates facial cue controls and drives face animation beside body
   assert.ok(bridge.includes('id="n3dVisemeTrack"'));
   assert.ok(bridge.includes('id="n3dFaceValidate"'));
   assert.ok(bridge.includes("applyFacialFrame(facialTime)"));
-  assert.ok(bridge.includes("spatialRenderer.applyFacialAnimation"));
+  assert.ok(bridge.includes("applyFacialAnimation(time,facialTrack"));
 });
 
 test("facial visemes coarticulate smoothly across adjacent phoneme cues", () => {
