@@ -263,15 +263,15 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  segment(ctx,{x:sl.x-6,y:sl.y+5},{x:sl.x+7,y:sl.y+7},2.2,"#c6e58e","#386748");
  segment(ctx,{x:sr.x-6,y:sr.y+5},{x:sr.x+7,y:sr.y+7},2.2,"#c6e58e","#386748");
  for(const hand of [hl,hr])for(let i=0;i<2;i++)segment(ctx,{x:hand.x+i*3,y:hand.y},{x:hand.x+i*3+2,y:hand.y+8},2,"#e2d79f","#526b4a");
- // Raised dorsal plates follow the top contour of the back, beginning behind the neck.
+ // Low rounded dorsal scutes follow the back contour; no oversized triangular spikes.
  const ridgeStart={x:center.x-47,y:center.y-49},ridgeEnd={x:center.x+72,y:center.y-37};
- for(let i=0;i<7;i++){
-  const t=i/6,a=mix(ridgeStart,ridgeEnd,t),size=11*(1-t*.4);
-  polygon(ctx,[
-   {x:a.x-size,y:a.y+2},
-   {x:a.x-1,y:a.y-10-size},
-   {x:a.x+size,y:a.y+3}
-  ],i%2?"#8fc66b":"#c8e68e","#315f43",1.8);
+ for(let i=0;i<8;i++){
+  const t=i/7,a=mix(ridgeStart,ridgeEnd,t),size=7.5*(1-t*.24),height=7.5*(1-t*.2);
+  bezierShape(ctx,{x:a.x-size,y:a.y+2},[
+   [a.x-size*.9,a.y-height*.75,a.x-size*.28,a.y-height,a.x,y:a.y-height][0],
+   [a.x+size*.28,a.y-height,a.x+size*.9,a.y-height*.75,a.x+size,a.y+2],
+   [a.x+size*.65,a.y+4,a.x-size*.65,a.y+4,a.x-size,a.y+2]
+  ],i%2?"#8fc66b":"#c8e68e","#315f43",1.35);
  }
  // Head and muzzle, slightly three-quarter profile.
  const headAngle=Math.atan2(neck.y-head.y,neck.x-head.x);
