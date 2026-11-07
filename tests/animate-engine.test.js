@@ -401,6 +401,10 @@ test("GLB importer preserves skin joints, normalized weights and animation chann
   assert.deepEqual(Array.from(parsed.meshes[0].skin.weights[0]),[1,0,0,0]);
   assert.equal(parsed.animations[0].channels[0].path,"translation");
   assert.deepEqual(Array.from(parsed.animations[0].channels[0].times),[0]);
+  const imported=api.NexoraSpatialRig3D.createFromGLB(parsed,0);
+  assert.deepEqual(Array.from(imported.jointBoneIndices),[1,2]);
+  assert.equal(imported.rig.bones.length,3);
+  assert.equal(imported.skinIndex,0);
 });
 
 
