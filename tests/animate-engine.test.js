@@ -204,6 +204,16 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-bite"));
 });
 
+test("worker talk clip animates its jaw and is available in 2D worker actions", () => {
+  const { api } = loadEngine();
+  const worker = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const timeline = new api.NexoraMotionSystem.MotionTimeline(worker.points);
+  timeline.usePreset("worker-talk", 2);
+  const talking = timeline.sample(.06);
+  assert.ok(talking.jaw.y > worker.points.jaw.y);
+  assert.ok(api.NexoraMotionSystem.profiles.worker.includes("worker-talk"));
+});
+
 test("2D character art renders worker and dinosaur figures through the canvas API", () => {
   const { api } = loadEngine();
   const calls = [];
@@ -247,7 +257,8 @@ test("2D rig inverse kinematics and phoneme-to-viseme mapping return usable resu
 test("2D humanoid rig creates symmetric landmarks and solves arm and leg IK without stretching", () => {
   const { api } = loadEngine();
   const rig = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
-  assert.equal(Object.keys(rig.points).length, 13);
+  assert.equal(Object.keys(rig.points).length, 14);
+  assert.ok(rig.points.jaw && rig.bones.some(b => b.name === "jaw"));
   const upper = Math.hypot(rig.points.elbowL.x-rig.points.shoulderL.x, rig.points.elbowL.y-rig.points.shoulderL.y);
   const lower = Math.hypot(rig.points.handL.x-rig.points.elbowL.x, rig.points.handL.y-rig.points.elbowL.y);
   const result = rig.applyIK("handL", 0.08, 0.34);
