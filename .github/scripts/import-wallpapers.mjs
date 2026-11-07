@@ -149,5 +149,85 @@ for(const topic of topics){
  console.log("Wikimedia:",topic.key,"—",scanned,"archivos examinados;",accepted,"fondos aptos;",topicBatch.length,"enviados; offset siguiente:",offset);
 }
 
-console.log("Importación terminada:",totalScanned,"archivos examinados;",totalCandidates,"candidatos enviados;",totalReceived,"recibidos por NEXORA;",totalInserted,"nuevos registros guardados.");
+
+const openverseTopics=[
+ ["nature","nature forest flowers photography","naturaleza"],
+ ["landscapes","mountain ocean waterfall landscape","paisajes"],
+ ["wildlife","wildlife animal bird photography","animales"],
+ ["pets","cats dogs pets photography","animales"],
+ ["space","galaxy nebula astronomy space","espacio"],
+ ["anime","anime manga illustration","anime"],
+ ["gaming","video game pixel art game environment","gaming"],
+ ["cars","automobile sports car motorcycle","autos"],
+ ["architecture","modern architecture interior buildings","arquitectura"],
+ ["technology","computer technology circuit electronics","tecnologia"],
+ ["cities","city skyline urban night photography","ciudades"],
+ ["digital-art","fantasy digital illustration concept art","arte"],
+ ["abstract","abstract art texture geometric","abstracto"],
+ ["minimal","minimalist geometric simple composition","minimalista"],
+ ["flowers","flower botanical macro photography","naturaleza"],
+ ["travel","travel scenic road mountains coast","paisajes"],
+ ["ocean","ocean sea marine coast photography","paisajes"]
+];
+const openversePages=Math.max(1,Math.min(8,Number(process.env.OPENVERSE_PAGES_PER_TOPIC||2)));
+let openverseScanned=0,openverseCandidates=0,openverseInserted=0,openverseReceived=0;
+const acceptedLicenses=new Set(["cc0","pdm","by","by-sa"]);
+
+for(const [key,query,category] of openverseTopics){
+ const stateKey="openverse:"+key;
+ let page=Math.max(1,Number(cursors[stateKey]||1));
+ let accepted=0,scanned=0;
+ const topicBatch=[];
+ for(let pageNo=0;pageNo<openversePages;pageNo++){
+  const params=new URLSearchParams({
+   q:query,page:String(page),page_size:"20",
+   license:"cc0,pdm,by,by-sa",filter_dead:"true",mature:"false"
+  });
+  const response=await fetchCommons("https://api.openverse.org/v1/images/?"+params.toString(),"Openverse "+key);
+  const data=await response.json();
+  if(!Array.isArray(data.results))throw new Error("Openverse devolvió una respuesta inesperada para '"+key+"'.");
+  const pageCount=Math.max(1,Number(data.page_count||1));
+  scanned+=data.results.length;
+  for(const item of data.results){
+   const width=Number(item.width||0),height=Number(item.height||0);
+   const minSide=Math.min(width,height),maxSide=Math.max(width,height),ratio=width/height;
+   if(!item.id||!item.url||!item.thumbnail||!item.foreign_landing_url)continue;
+   if(!String(item.url).startsWith("https://")||!String(item.thumbnail).startsWith("https://")||!String(item.foreign_landing_url).startsWith("https://"))continue;
+   if(minSide<700||maxSide<1000||ratio<0.42||ratio>2.45)continue;
+   const license=String(item.license||"").toLowerCase();
+   if(!acceptedLicenses.has(license))continue;
+   const id="openverse-"+item.id;
+   if(seen.has(id))continue;
+   seen.add(id);
+   const title=clean(item.title||"Wallpaper Openverse").slice(0,180);
+   const tags=Array.isArray(item.tags)?item.tags.map(tag=>tag?.name).filter(Boolean).join(", "):"";
+   const provider=clean(item.provider||item.source||"Openverse").slice(0,70);
+   topicBatch.push({
+    id,title,category,tags:clean(tags||title),thumb_url:item.thumbnail,
+    image_url:item.url,source_url:item.foreign_landing_url,
+    source_name:"Openverse · "+provider,
+    author:clean(item.creator||"Autor no indicado").slice(0,120),
+    license:(license.toUpperCase()+(item.license_version?" "+item.license_version:"")).slice(0,80),
+    width,height
+   });
+   accepted++;
+  }
+  if(page>=pageCount){page=1;break;}
+  page++;
+ }
+ openverseScanned+=scanned;
+ openverseCandidates+=topicBatch.length;
+ if(topicBatch.length){
+  const saved=await sendBatch(topicBatch);
+  openverseInserted+=saved.inserted;
+  openverseReceived+=saved.received;
+ }
+ cursors[stateKey]=page;
+ saveState();
+ console.log("Openverse:",key,"—",scanned,"resultados;",accepted,"fondos aptos;",topicBatch.length,"enviados; página siguiente:",page);
+}
+
+console.log("Wikimedia:",totalScanned,"archivos examinados;",totalCandidates,"candidatos;",totalInserted,"nuevos registros.");
+console.log("Openverse:",openverseScanned,"resultados examinados;",openverseCandidates,"candidatos;",openverseInserted,"nuevos registros.");
+console.log("Total de esta ejecución:",totalInserted+openverseInserted,"nuevos fondos guardados en NEXORA.");
 console.log("Objetivo del catálogo: 100000 wallpapers. Esta ejecución es una tanda incremental.");
