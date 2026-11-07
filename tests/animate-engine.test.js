@@ -226,6 +226,13 @@ test("2D dinosaur rig contains a multi-joint tail and persists its character typ
   const rig = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
   assert.equal(rig.kind, "dinosaur");
   assert.ok(rig.points.tail1 && rig.points.tail4 && rig.points.jaw);
+  assert.ok(rig.points.jaw.y - rig.points.head.y <= 0.04, "La mandíbula debe quedar casi cerrada en reposo.");
+  const idleGap = rig.points.jaw.y - rig.points.head.y;
+  const roar = new api.NexoraMotionSystem.MotionTimeline(rig.points);
+  roar.usePreset("dino-roar", 2);
+  const roarPose = roar.sample(1);
+  const roarGap = roarPose.jaw.y - roarPose.head.y;
+  assert.ok(roarGap > idleGap + 0.04, "El rugido debe abrir la mandíbula de forma visible.");
   assert.equal(Array.from(rig.bones.filter(b => /^tail/.test(b.name)), b => b.name).join(","), "tail1,tail2,tail3,tail4");
   const copy = new api.NexoraAnimationTools.CharacterRig();
   copy.load(rig.save());
