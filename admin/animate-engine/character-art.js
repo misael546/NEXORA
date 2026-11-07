@@ -268,7 +268,7 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  for(let i=0;i<8;i++){
   const t=i/7,a=mix(ridgeStart,ridgeEnd,t),size=7.5*(1-t*.24),height=7.5*(1-t*.2);
   bezierShape(ctx,{x:a.x-size,y:a.y+2},[
-   [a.x-size*.9,a.y-height*.75,a.x-size*.28,a.y-height,a.x,y:a.y-height][0],
+   [a.x-size*.9,a.y-height*.75,a.x-size*.28,a.y-height,a.x,a.y-height],
    [a.x+size*.28,a.y-height,a.x+size*.9,a.y-height*.75,a.x+size,a.y+2],
    [a.x+size*.65,a.y+4,a.x-size*.65,a.y+4,a.x-size,a.y+2]
   ],i%2?"#8fc66b":"#c8e68e","#315f43",1.35);
