@@ -332,5 +332,5 @@ test("3D dinosaur dialogue demo contains syntactically valid inline JavaScript",
   assert.match(html,/api\/admin\/voice/);
   assert.match(html,/Quiero ser como tú/);
   assert.match(html,/no esculpí estos músculos para pelear/);
-  assert.match(html,/NEXORA-Coelo-y-el-musculo\\.webm/);
+  assert.match(html,/NEXORA-Coelo-y-el-musculo\.webm/);
 });
