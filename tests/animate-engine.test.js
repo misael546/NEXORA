@@ -529,7 +529,7 @@ test("3D facial acting generates timed blinks and reads phoneme viseme tracks", 
   assert.equal(faceApi.visemeAt(track, 0.25), "A");
   const mesh = { morphTargets: [{ name: "eyeBlinkLeft" }, { name: "eyeBlinkRight" }, { name: "jawOpen" }], morphWeights: [0, 0, 0] };
   const animator = new faceApi.FacialAnimator([mesh]);
-  animator.applyAt(0.07, { visemeTrack: track, mouthOpen: 0.75 });
+  animator.applyAt(0.25, { visemeTrack: track, mouthOpen: 0.75, blinkOffset: 3.42 });
   assert.ok(mesh.morphWeights[0] > 0.99);
   assert.ok(mesh.morphWeights[1] > 0.99);
   assert.equal(mesh.morphWeights[2], 0.75);
