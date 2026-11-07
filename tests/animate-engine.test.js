@@ -31,6 +31,7 @@ function loadEngine() {
   for (const file of [
     "character-skeleton.js",
     "spatial-engine.js",
+    "audio-engine.js",
     "continuity.js",
     "animation-tools.js",
     "motion-system.js",
@@ -211,4 +212,21 @@ test("spatial camera supports front back side top and three-quarter projections"
   assert.equal(camera.project(point,1280,720).visible,true);
   camera.orbit(.2,.1).dolly(-.1);
   assert.ok(camera.distance>0);
+});
+
+
+test("audio timeline exposes separate voice music effects and ambience tracks", () => {
+  const { api } = loadEngine();
+  const audio = new api.NexoraAudio.AudioTimeline();
+  assert.deepEqual(Array.from(api.NexoraAudio.kinds), ["voice","narration","music","sfx","ambience"]);
+  assert.equal(audio.tracks.length, 0);
+  assert.equal(audio.serialize().format, "nexora-audio-timeline");
+});
+
+test("WebGL spatial engine supplies real triangle geometry for 3D objects", () => {
+  const { api } = loadEngine();
+  const geometry = api.NexoraSpatialEngine.geometry.cube(2);
+  assert.equal(geometry.positions.length, 108);
+  assert.equal(geometry.colors.length, 144);
+  assert.ok(geometry.positions.every(Number.isFinite));
 });
