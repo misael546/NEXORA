@@ -5,7 +5,7 @@ const uid=()=> "shot_"+Date.now().toString(36)+"_"+Math.random().toString(36).sl
 const clone=x=>JSON.parse(JSON.stringify(x));
 class SceneProject{
  constructor(storage=localStorage){this.storage=storage;this.data=this.load()}
- load(){try{const d=JSON.parse(this.storage.getItem(KEY)||"null");if(d?.format==="nexora-scene"&&Array.isArray(d.shots))return d}catch{}return{format:"nexora-scene",version:1,title:"Mi primera escena",fps:24,shots:[],updatedAt:new Date().toISOString()}}
+ load(){try{const d=JSON.parse(this.storage.getItem(KEY)||"null");if(d?.format==="nexora-scene"&&Array.isArray(d.shots)){for(const s of d.shots){s.actorType=s.actorType==="dinosaur"?"dinosaur":"worker";const fallback=s.actorType==="dinosaur"?"dino-idle":"worker-idle";if(typeof s.motionPreset!=="string"||!/^(worker|dino)-/.test(s.motionPreset))s.motionPreset=fallback}return d}}catch{}return{format:"nexora-scene",version:1,title:"Mi primera escena",fps:24,shots:[],updatedAt:new Date().toISOString()}}
  save(){this.data.updatedAt=new Date().toISOString();this.storage.setItem(KEY,JSON.stringify(this.data));return this.snapshot()}
  snapshot(){return clone(this.data)}
  setTitle(title){this.data.title=String(title||"Escena sin título").trim().slice(0,100);this.save()}
