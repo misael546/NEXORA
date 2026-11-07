@@ -1122,3 +1122,18 @@ test("2D walk cycles preserve bone lengths and articulate legs and dinosaur tail
     }
   }
 });
+
+test("worker walk keeps its stride inside a readable range and dinosaur tail swipe has a clear arc", () => {
+  const { api } = loadEngine();
+  const worker = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const workerMotion = new api.NexoraMotionSystem.MotionTimeline(worker.points);
+  workerMotion.usePreset("worker-walk", 2);
+  const workerPose = workerMotion.sample(0.37);
+  assert.ok(workerPose.footR.x - workerPose.footL.x < 0.29, "Worker stride should not split into an exaggerated side-to-side pose.");
+  const dino = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
+  const tailMotion = new api.NexoraMotionSystem.MotionTimeline(dino.points);
+  tailMotion.usePreset("dino-tail-swipe", 2);
+  const tailPose = tailMotion.sample(1.04);
+  assert.ok(tailPose.tail4.x > dino.points.tail4.x + 0.08);
+  assert.ok(tailPose.tail4.y > dino.points.tail4.y + 0.1);
+});
