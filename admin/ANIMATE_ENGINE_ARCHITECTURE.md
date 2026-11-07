@@ -140,3 +140,16 @@ El visor WebGL ya rasteriza geometría 3D, pero aún no importa modelos GLB/FBX,
 - Solver IK 3D de dos huesos basado en longitudes y vector pole; resuelve la articulación intermedia y limita objetivos fuera del alcance.
 - El estudio expone `NEXORA_ANIMATE_ENGINE.motion3d`; versión 2.1.0.
 - Pruebas para interpolación de poses, aplicación al esqueleto y límites del IK.
+
+
+## Evolución 2.2 — iluminación por malla y escena de diálogo 3D
+
+- `animate-engine/spatial-engine.js`: el renderizador acepta transformaciones individuales por malla, geometría esférica reutilizable y normales por vértice con iluminación direccional. Esto permite montar personajes 3D por piezas y darles profundidad visual.
+- `admin/animate-dino-dialogue.html`: prueba cinematográfica de dos dinosaurios low-poly construidos con mallas 3D, animación de cuerpo, cabeza, cola, brazos y mandíbula, planos generales y primeros planos.
+- La escena intenta generar tres líneas de voz en español mediante `/api/admin/voice`; añade ambiente de viento, música tonal original y llamadas de aves sintetizadas. La mezcla se incorpora al WebM mediante MediaRecorder cuando el navegador lo admite.
+- El diálogo incluye a Coelo y al dinosaurio mayor. La boca usa pulsos aproximados sincronizados con cada intervención; no es todavía alineación fonética precisa.
+- Pruebas de geometría, transformaciones y sintaxis de la escena.
+- Versión expuesta del motor: 2.2.0.
+
+### Límites de esta prueba
+Los dinosaurios son personajes procedurales de piezas 3D, no modelos escaneados ni personajes GLB con rig importado. La actuación es una animación programada para esta escena. La generación de voz requiere el binding Workers AI y autorización de administración en Cloudflare; si no está disponible, se conservan subtítulos y ambiente.
