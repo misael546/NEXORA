@@ -97,3 +97,15 @@ Limitaciones: es deformación geométrica de píxeles existentes. No separa auto
 El deformador acepta regiones poligonales con el método setRegions([{ name, boneNames, points, feather }]). Cada región limita los huesos enumerados en boneNames a una zona de la imagen; feather suaviza la transición en el borde. Las regiones se serializan en el formato de malla versión 3 y el importador mantiene compatibilidad con las versiones 1 y 2.
 
 Las coordenadas de los polígonos usan el espacio normalizado de la imagen (0–1). Esta API permite construir máscaras independientes para brazos, piernas, torso u otras piezas, pero todavía requiere que los polígonos sean definidos manualmente. No segmenta automáticamente una ilustración ni crea píxeles ocultos. El editor aún no incluye un trazador visual de polígonos; las máscaras pueden crearse mediante la API o un archivo de malla JSON.
+
+
+## Evolución 1.8 — jerarquía corporal y base espacial 3D
+
+- `animate-engine/character-skeleton.js`: esqueleto jerárquico 2D con transformaciones locales y mundiales. La inclinación se distribuye entre columna, pecho, cuello, cabeza y hombros; incluye una pose de inclinación coordinada y serialización.
+- `animate-engine/spatial-engine.js`: base matemática 3D con cámara perspectiva y ortográfica, órbita, dolly, proyección de puntos y vistas frontal, trasera, izquierda, derecha, superior, inferior y tres cuartos.
+- Las APIs se exponen desde `window.NEXORA_ANIMATE_ENGINE.skeleton` y `window.NEXORA_ANIMATE_ENGINE.spatial`.
+- La escena de prueba del oficinista ahora rota el conjunto superior alrededor de la cadera para que torso, cuello, cabeza y brazos acompañen el descenso.
+
+### Límite importante de esta etapa 3D
+
+Esta entrega añade jerarquía corporal 2D y matemáticas/cámara de espacio 3D. Todavía no es un renderizador 3D completo: no dibuja mallas 3D con materiales, iluminación física, esqueleto 3D, texturas ni animación de modelos GLB/FBX. Es la base para construir esos subsistemas sin fingir que ya están terminados.
