@@ -598,3 +598,23 @@ test("procedural 3D actions preserve the imported bind pose and do not stack old
   rig.resetPose();
   assert.deepEqual(Array.from(rig.byName.get("root").translation), [2, 3, 4]);
 });
+
+test("3D action transitions blend from the current acting pose instead of snapping", () => {
+  const { api } = loadEngine();
+  const rig = api.NexoraSpatialRig3D.createDinosaur();
+  const walk = api.NexoraSpatialActions.createPlayer(rig, "walk", { blendDuration: 0 });
+  walk.play().advance(0.3);
+  const movingPose = rig.byName.get("pelvis").rotation.slice();
+  assert.ok(Math.abs(movingPose[2]) > 0.001);
+
+  const talk = api.NexoraSpatialActions.createPlayer(rig, "talk", { blendDuration: 0.4 });
+  talk.play();
+  const atStart = rig.byName.get("pelvis").rotation.slice();
+  assert.ok(Math.abs(atStart[2] - movingPose[2]) < 1e-7);
+  talk.advance(0.2);
+  const halfway = rig.byName.get("pelvis").rotation.slice();
+  assert.ok(Math.abs(halfway[2]) < Math.abs(movingPose[2]));
+  assert.ok(Math.abs(halfway[2]) > 0.001);
+  talk.advance(0.2);
+  assert.ok(Math.abs(rig.byName.get("pelvis").rotation[2]) < 1e-8);
+});
