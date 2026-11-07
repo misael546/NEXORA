@@ -15,6 +15,6 @@ class CharacterSkeleton{
 function createHumanUpperBodySkeleton(){return new CharacterSkeleton([
 {name:"root",x:0,y:0},{name:"hip",parent:"root",x:0,y:0},{name:"spine",parent:"hip",x:0,y:-.22,limits:{min:-.8,max:.8}},{name:"chest",parent:"spine",x:0,y:-.2,limits:{min:-.9,max:.9}},{name:"neck",parent:"chest",x:0,y:-.12,limits:{min:-.7,max:.7}},{name:"head",parent:"neck",x:0,y:-.13,limits:{min:-.8,max:.8}},{name:"shoulderL",parent:"chest",x:-.14,y:-.04},{name:"shoulderR",parent:"chest",x:.14,y:-.04},{name:"elbowL",parent:"shoulderL",x:-.12,y:.17},{name:"handL",parent:"elbowL",x:0,y:.16},{name:"elbowR",parent:"shoulderR",x:.12,y:.17},{name:"handR",parent:"elbowR",x:0,y:.16}
 ])}
-function buildLeanPose(amount){const t=clamp(amount,0,1);return{spine:{rotation:-.16*t},chest:{rotation:-.2*t},neck:{rotation:-.12*t},head:{rotation:.48*t},shoulderL:{rotation:-.1*t},shoulderR:{rotation:.1*t},elbowL:{rotation:-.12*t},elbowR:{rotation:.12*t}}}
+function buildLeanPose(amount){const t=clamp(amount,0,1);return{spine:{rotation:.16*t},chest:{rotation:.2*t},neck:{rotation:.12*t},head:{rotation:.48*t},shoulderL:{rotation:.1*t},shoulderR:{rotation:.1*t},elbowL:{rotation:.12*t},elbowR:{rotation:.12*t}}}
 window.NexoraCharacterSkeleton={CharacterSkeleton,createHumanUpperBodySkeleton,buildLeanPose};
 })();
