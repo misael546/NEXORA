@@ -47,15 +47,23 @@ const cycles={
  "worker-hammer":(p,t)=>{
   const raise=t<.36?ease(t/.36):t<.48?1:t<.56?1-ease((t-.48)/.08):0;
   const strike=t<.48?0:t<.60?ease((t-.48)/.12):t<.70?1:t<.84?1-ease((t-.70)/.14):0;
-  if(p==="head"||p==="neck")return{x:.004*raise,y:.014*strike-.01*raise};
+  const brace=strike*(1-.35*raise);
+  if(p==="head")return{x:.004*raise+.014*strike,y:.014*strike-.01*raise};
+  if(p==="neck")return{x:.008*strike,y:.014*strike-.01*raise};
   if(p==="jaw")return{x:0,y:.012*raise+.024*strike};
-  if(p==="hip")return{x:-.008*raise,y:.01*strike};
+  if(p==="hip")return{x:-.008*raise+.018*strike,y:.01*strike+.006*brace};
   if(p==="shoulderR")return{x:-.018*raise+.025*strike,y:-.08*raise+.045*strike};
   if(p==="elbowR")return{x:-.03*raise+.04*strike,y:-.18*raise+.12*strike};
   if(p==="handR")return{x:-.05*raise+.08*strike,y:-.32*raise+.13*strike};
-  if(p==="shoulderL")return{x:-.008*raise,y:-.012*raise};
-  if(p==="elbowL")return{x:-.012,y:-.025};
-  if(p==="handL")return{x:-.02,y:-.05};
+  // The free arm counterbalances the hammer arc instead of hanging at the side.
+  if(p==="shoulderL")return{x:-.008*raise-.008*strike,y:-.012*raise-.008*brace};
+  if(p==="elbowL")return{x:-.012-.012*brace,y:-.025-.018*brace};
+  if(p==="handL")return{x:-.02-.02*brace,y:-.05-.025*brace};
+  // The knees absorb the impact; the feet make a small corrective plant.
+  if(p==="kneeL")return{x:-.008*brace,y:.022*brace};
+  if(p==="kneeR")return{x:.014*brace,y:.026*brace};
+  if(p==="footL")return{x:-.006*brace,y:.004*brace};
+  if(p==="footR")return{x:.012*brace,y:.004*brace};
   return{x:0,y:0}
  },
  "worker-dig":(p,t)=>{const s=cyc(t*1.4);if(p==="head"||p==="neck")return{x:.018,y:.04+Math.max(0,s)*.012};if(p==="hip")return{x:0,y:.02};if(/shoulder/.test(p))return{x:0,y:.025};if(p==="elbowL"||p==="elbowR")return{x:s*.025,y:-.045};if(p==="handL"||p==="handR")return{x:s*.035,y:-.09-Math.max(0,s)*.025};if(/knee/.test(p))return{x:0,y:.035};return{x:0,y:0}},
