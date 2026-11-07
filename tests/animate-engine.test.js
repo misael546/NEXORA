@@ -236,6 +236,8 @@ test("2D studio defaults to the worker and hides the preserved 3D controls", () 
   const bridge = fs.readFileSync(path.join(__dirname,"../admin/animate-engine/studio-bridge.js"),"utf8");
   const html = fs.readFileSync(path.join(__dirname,"../admin/animate-studio.html"),"utf8");
   assert.match(bridge,/id="n3dHiddenTools" hidden/);
+  assert.match(bridge,/const ENABLE_3D_STUDIO=false/);
+  assert.match(bridge,/Motor 3D conservado · inactivo para priorizar el estudio 2D/);
   assert.match(bridge,/id="nvCharacterType"/);
   assert.match(bridge,/id="nvRigDino"/);
   assert.match(html,/animate-engine\/character-art\.js/);
