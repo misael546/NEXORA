@@ -169,9 +169,14 @@ try {
   assert.notEqual(workerWalk.hash, workerWalkStart.hash, "La caminata del trabajador no produjo cambios visibles entre fotogramas.");
 
   assert.ok(workerWalk.bounds.width < 235, "The worker stride spreads the silhouette too far horizontally.");
-  await setAction("worker", "worker-hammer", 0.42);
-  const workerHammer = await capture("worker-hammer-motion");
-  assert.notEqual(workerHammer.hash, workerIdle.hash, "The worker hammer action did not change the rendered pose.");
+  await setAction("worker", "worker-hammer", 0.26);
+  const hammerRaise = await capture("worker-hammer-raise");
+  await setAction("worker", "worker-hammer", 0.60);
+  const hammerStrike = await capture("worker-hammer-strike");
+  await setAction("worker", "worker-hammer", 0.90);
+  const hammerRecover = await capture("worker-hammer-recover");
+  assert.notEqual(hammerRaise.hash, hammerStrike.hash, "The hammer must visibly move from the raised pose into the strike.");
+  assert.notEqual(hammerStrike.hash, hammerRecover.hash, "The hammer must visibly return to its resting pose.");
   await setAction("worker", "worker-carry", 0.42);
   const workerCarry = await capture("worker-carry-motion");
   assert.notEqual(workerCarry.hash, workerIdle.hash, "The worker carry action did not change the rendered pose.");
