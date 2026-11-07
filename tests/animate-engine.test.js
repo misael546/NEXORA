@@ -45,6 +45,7 @@ function loadEngine() {
     "animation-tools.js",
     "motion-system.js",
     "character-art.js",
+    "character-stage.js",
     "scene-project.js",
     "mesh-deformer.js"
   ]) {
@@ -135,14 +136,19 @@ test("scene shots store actor type and the exact 2D action clip", () => {
   const { api } = loadEngine();
   const scene = new api.NexoraSceneProject.SceneProject({getItem:()=>null,setItem(){}});
   const worker = scene.addShot({name:"Trabajo",characterId:"worker-id",duration:2});
-  const dino = scene.addShot({name:"Rugido",characterId:"dino-id",actorType:"dinosaur",motionPreset:"dino-roar",duration:3});
+  const dino = scene.addShot({name:"Rugido",characterId:"dino-id",actorType:"dinosaur",motionPreset:"dino-roar",secondaryActorType:"worker",secondaryMotionPreset:"worker-wave",duration:3});
   assert.equal(worker.actorType,"worker");
   assert.equal(worker.motionPreset,"worker-idle");
   assert.equal(dino.actorType,"dinosaur");
   assert.equal(dino.motionPreset,"dino-roar");
+  assert.equal(worker.secondaryActorType,"none");
+  assert.equal(dino.secondaryActorType,"worker");
+  assert.equal(dino.secondaryMotionPreset,"worker-wave");
   const restored = new api.NexoraSceneProject.SceneProject({getItem:()=>null,setItem(){}});
   restored.importJSON(scene.exportJSON());
   assert.equal(restored.data.shots[1].motionPreset,"dino-roar");
+  assert.equal(restored.data.shots[1].secondaryActorType,"worker");
+  assert.equal(restored.data.shots[1].secondaryMotionPreset,"worker-wave");
 });
 
 test("saved pre-2D scenes migrate to worker idle without losing shot data", () => {
@@ -153,7 +159,35 @@ test("saved pre-2D scenes migrate to worker idle without losing shot data", () =
   const scene = new api.NexoraSceneProject.SceneProject(storage);
   assert.equal(scene.data.shots[0].actorType,"worker");
   assert.equal(scene.data.shots[0].motionPreset,"worker-idle");
+  assert.equal(scene.data.shots[0].secondaryActorType,"none");
+  assert.equal(scene.data.shots[0].secondaryMotionPreset,"");
   assert.equal(scene.data.shots[0].name,"Plano antiguo");
+});
+
+test("2D character stage composes worker and dinosaur with independent rigs and timelines", () => {
+  const { api } = loadEngine();
+  const worker = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const dinosaur = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
+  const workerMotion = new api.NexoraMotionSystem.MotionTimeline(worker.points);
+  workerMotion.usePreset("worker-wave", 2);
+  const dinoMotion = new api.NexoraMotionSystem.MotionTimeline(dinosaur.points);
+  dinoMotion.usePreset("dino-threat", 2);
+  const drawn = [];
+  const stage = new api.NexoraCharacterStage.CharacterStage((ctx,w,h,rig,type,options) => drawn.push({type,action:options.action,time:options.time,head:{...rig.points.head}}));
+  stage.setActors([
+    {id:"worker",type:"worker",rig:worker,motion:workerMotion,action:"worker-wave",time:.5},
+    {id:"dino",type:"dinosaur",rig:dinosaur,motion:dinoMotion,action:"dino-threat",time:1}
+  ]);
+  const transforms = [];
+  const ctx = {save(){},restore(){},translate(x,y){transforms.push(["translate",x,y])},scale(x,y){transforms.push(["scale",x,y])}};
+  assert.equal(stage.render(ctx,640,360,0),2);
+  assert.deepEqual(drawn.map(x=>x.type),["worker","dinosaur"]);
+  assert.deepEqual(drawn.map(x=>x.action),["worker-wave","dino-threat"]);
+  assert.deepEqual(drawn.map(x=>x.time),[.5,1]);
+  assert.equal(transforms.filter(x=>x[0]==="scale").length,2);
+  assert.equal(api.NexoraCharacterStage.layoutActors(2).length,2);
+  assert.equal(api.NexoraCharacterStage.layoutActors(4).length,4);
+  assert.throws(()=>stage.setActors([1,2,3,4,5].map((_,i)=>({rig:worker}))),/cuatro actores/);
 });
 
 test("2D scene compositor binds the selected per-shot actor action", () => {
@@ -313,6 +347,8 @@ test("2D studio defaults to the worker and hides the preserved 3D controls", () 
   assert.match(bridge,/Motor 3D conservado · inactivo para priorizar el estudio 2D/);
   assert.match(bridge,/id="nvCharacterType"/);
   assert.match(bridge,/id="nvRigDino"/);
+  assert.match(bridge,/characterStage.setActors\(cast\)/);
+  assert.match(bridge,/secondaryMotionPreset:\$\("ns2DSecondAction"\)\.value/);
   assert.match(bridge,/action:activeAction/);
   assert.match(bridge,/activeAction=motionName/);
   assert.match(html,/animate-engine\/character-art\.js/);
