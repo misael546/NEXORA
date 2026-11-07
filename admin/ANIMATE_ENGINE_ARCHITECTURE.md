@@ -280,3 +280,17 @@ Los clips son animaciones procedurales de articulaciones, y las pistas fonética
 - Las articulaciones laterales pueden espejarse respecto al eje central del personaje.
 - Las poses clave admiten interpolación suave, lineal, entrada, salida y mantenimiento. Las claves en el segundo cero se respetan y los archivos antiguos sin tipo de interpolación siguen cargándose.
 - Las pruebas verifican IK, simetría, interpolación en el inicio, compatibilidad de movimientos anteriores y rechazo de datos numéricos inválidos.
+
+
+## Ruta principal 2D — actuación de trabajador y dinosaurio
+
+- El estudio visible queda orientado a 2D. El panel 3D y sus controles se conservan en el código, pero se mantienen ocultos para no interferir con el trabajo actual.
+- `animate-engine/character-art.js` dibuja dos personajes vectoriales originales por capas: trabajador con casco, chaleco reflectante, ropa de trabajo y botas; dinosaurio terópodo de perfil con mandíbula, brazos, piernas, placas dorsales y cola segmentada.
+- `animation-tools.js` incorpora rigs base reutilizables. El trabajador usa un rig humano; el dinosaurio usa articulaciones separadas en cabeza, mandíbula, cuello, torso, extremidades y cuatro segmentos de cola. Ambos admiten cinemática inversa de dos segmentos en manos y pies.
+- `motion-system.js` incorpora clips específicos del trabajador (reposo, caminar, correr, trabajo, levantar, cargar, martillar, excavar y saludar) y del dinosaurio (reposo, caminar, correr, rugir, morder, barrido de cola, impacto y agacharse).
+- Cada plano de escena guarda `actorType` y `motionPreset`. `syncSceneCompositor` evalúa la actuación según el tiempo local del plano, por lo que la exportación de escena ya no se limita a mover la cámara sobre una pose fija.
+- Los proyectos antiguos migran a trabajador en reposo sin perder sus datos. El estudio carga fichas base de ambos personajes para permitir crear planos sin empezar por una ficha vacía.
+
+## Alcance visual 2D actual
+
+El arte incluido es una ilustración vectorial procedimental original, no una secuencia de dibujos anime pintados fotograma a fotograma. Los clips mueven articulaciones y deforman las siluetas vectoriales; todavía hacen falta trabajo adicional de acting, manos y dedos, anatomía secundaria, expresiones más ricas, contacto con objetos, sombras proyectadas, perspectiva de cámara y revisión visual en navegador para alcanzar calidad de producción. No se presenta este prototipo vectorial como un anime terminado.
