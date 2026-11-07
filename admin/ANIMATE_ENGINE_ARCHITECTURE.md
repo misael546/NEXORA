@@ -122,3 +122,13 @@ Esta entrega añade jerarquía corporal 2D y matemáticas/cámara de espacio 3D.
 ### Alcance actual del 3D y audio
 
 El visor WebGL ya rasteriza geometría 3D, pero aún no importa modelos GLB/FBX, no tiene esqueleto 3D, materiales PBR, sombras avanzadas ni animación de personajes 3D. La mezcla multipista trabaja con archivos de audio que aporte el usuario y la voz generada disponible en NEXORA VOICE; todavía no es una biblioteca comercial integrada de música y efectos ni genera voces personalizadas por clonación. El lipsync exacto requiere marcas de tiempo fonéticas/alineación por palabra.
+
+
+## Evolución 2.0 — importación GLB y rig 3D
+
+- `animate-engine/spatial-engine.js`: importa archivos GLB 2.0 con chunks JSON/BIN embebidos, mallas triangulares, índices, colores base de materiales y transformaciones jerárquicas de nodos. El visor encuadra automáticamente el modelo, y permite orbitar con ratón o tacto.
+- El importador reporta número de mallas y vértices. En esta etapa las mallas se importan como geometría estática; todavía no se leen skins ni clips de animación GLB.
+- `animate-engine/spatial-rig.js`: jerarquía de huesos 3D, transformaciones locales/globales, pose por hueso, plantilla humanoide de 16 articulaciones y deformación CPU por pesos lineales (LBS).
+- El rig 3D es una base de animación; aún falta conectar JOINTS/WEIGHTS y inverse-bind matrices de los GLB al rig, así como editor visual, IK 3D, clips y retargeting.
+- El estudio expone `NEXORA_ANIMATE_ENGINE.rig3d`; versión 2.0.0.
+- Pruebas de regresión para importación GLB, jerarquía 3D y skinning.
