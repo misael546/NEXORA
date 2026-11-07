@@ -204,6 +204,40 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-bite"));
 });
 
+test("expanded worker actions include push pull kneel and point poses", () => {
+  const { api } = loadEngine();
+  const rig = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const timeline = new api.NexoraMotionSystem.MotionTimeline(rig.points);
+  timeline.usePreset("worker-push", 2);
+  const push = timeline.sample(.8);
+  assert.ok(push.handL.y < rig.points.handL.y);
+  assert.ok(push.handR.y < rig.points.handR.y);
+  timeline.usePreset("worker-pull", 2);
+  const pull = timeline.sample(.8);
+  assert.ok(pull.handL.x > rig.points.handL.x);
+  assert.ok(pull.handR.x < rig.points.handR.x);
+  timeline.usePreset("worker-kneel", 2);
+  assert.ok(timeline.sample(1).hip.y > rig.points.hip.y);
+  timeline.usePreset("worker-point", 2);
+  assert.ok(timeline.sample(.8).handR.x > rig.points.handR.x);
+  assert.ok(api.NexoraMotionSystem.profiles.worker.includes("worker-kneel"));
+});
+
+test("expanded dinosaur acting includes sniff stomp pounce and threat poses", () => {
+  const { api } = loadEngine();
+  const rig = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
+  const timeline = new api.NexoraMotionSystem.MotionTimeline(rig.points);
+  timeline.usePreset("dino-sniff", 2);
+  assert.ok(timeline.sample(.5).head.y > rig.points.head.y);
+  timeline.usePreset("dino-stomp", 2);
+  assert.ok(timeline.sample(1).footL.y < rig.points.footL.y);
+  timeline.usePreset("dino-pounce", 2);
+  assert.ok(timeline.sample(1.1).hip.y < rig.points.hip.y);
+  timeline.usePreset("dino-threat", 2);
+  assert.ok(timeline.sample(1).jaw.y > rig.points.jaw.y);
+  assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-pounce"));
+});
+
 test("worker lift action raises and closes both hands around the load", () => {
   const { api } = loadEngine();
   const rig = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
