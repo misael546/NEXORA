@@ -229,3 +229,7 @@ El control actual permite probar el primer target de una malla. Aún falta expon
 ### Corrección visual — normales tras deformar
 
 Al actualizar posiciones de una malla deformada, el renderer vuelve a calcular normales por triángulo y actualiza también el búfer de normales de GPU. Esto evita conservar la iluminación radial aproximada de la geometría original después del skinning o de un morph target. El cálculo actual es plano por triángulo; el suavizado de normales y tangentes queda como mejora posterior.
+
+
+- Los morph targets conservan sus nombres desde `mesh.extras.targetNames` cuando están presentes.
+- El panel del estudio genera un control deslizante por cada target encontrado, agrupado por malla, y permite pesos negativos y positivos.
