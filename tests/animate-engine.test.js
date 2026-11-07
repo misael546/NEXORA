@@ -382,7 +382,7 @@ test("GLB importer preserves skin joints, normalized weights and animation chann
     asset:{version:"2.0"},buffers:[{byteLength:72}],
     bufferViews:[{buffer:0,byteOffset:0,byteLength:36},{buffer:0,byteOffset:36,byteLength:12},{buffer:0,byteOffset:48,byteLength:12},{buffer:0,byteOffset:60,byteLength:4},{buffer:0,byteOffset:64,byteLength:8}],
     accessors:[{bufferView:0,componentType:5126,count:3,type:"VEC3"},{bufferView:1,componentType:5121,count:3,type:"VEC4"},{bufferView:2,componentType:5121,count:3,type:"VEC4",normalized:true},{bufferView:3,componentType:5126,count:1,type:"SCALAR"},{bufferView:4,componentType:5126,count:1,type:"VEC2"}],
-    meshes:[{name:"Skinned",primitives:[{attributes:{POSITION:0,JOINTS_0:1,WEIGHTS_0:2}}]}],
+    meshes:[{name:"Skinned",weights:[0.25],primitives:[{attributes:{POSITION:0,JOINTS_0:1,WEIGHTS_0:2},targets:[{POSITION:0}]}]}],
     nodes:[{name:"Mesh",mesh:0,skin:0},{name:"Root"},{name:"Arm"}],
     skins:[{name:"Character",joints:[1,2],skeleton:1}],
     animations:[{name:"Wave",samplers:[{input:3,output:4}],channels:[{sampler:0,target:{node:2,path:"translation"}}]}],
