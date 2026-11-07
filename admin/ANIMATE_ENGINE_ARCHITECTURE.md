@@ -109,3 +109,16 @@ Las coordenadas de los polígonos usan el espacio normalizado de la imagen (0–
 ### Límite importante de esta etapa 3D
 
 Esta entrega añade jerarquía corporal 2D y matemáticas/cámara de espacio 3D. Todavía no es un renderizador 3D completo: no dibuja mallas 3D con materiales, iluminación física, esqueleto 3D, texturas ni animación de modelos GLB/FBX. Es la base para construir esos subsistemas sin fingir que ya están terminados.
+
+
+## Evolución 1.9 — mezcla de audio y visor WebGL
+
+- `animate-engine/audio-engine.js`: línea de tiempo multipista para voces de personajes, narración, música, efectos y ambiente. Incluye posición de entrada, volumen, paneo, fundidos, repetición, preescucha y exportación de la configuración de pistas.
+- `animate-engine/compositor.js`: mezcla múltiples pistas de audio en la exportación WebM, con volumen, paneo, fundidos y repetición.
+- El estudio permite importar varios audios, clasificarlos, ajustar sus parámetros, escuchar la mezcla y añadirlos al render final.
+- `animate-engine/spatial-engine.js`: ahora incluye un renderizador WebGL que dibuja geometría triangular 3D con búfer de profundidad, cámara perspectiva/ortográfica y órbita. El visor del estudio muestra una malla cúbica de prueba y permite cambiar de perspectiva.
+- El API del estudio expone `audio` y `spatial`; versión 1.9.0.
+
+### Alcance actual del 3D y audio
+
+El visor WebGL ya rasteriza geometría 3D, pero aún no importa modelos GLB/FBX, no tiene esqueleto 3D, materiales PBR, sombras avanzadas ni animación de personajes 3D. La mezcla multipista trabaja con archivos de audio que aporte el usuario y la voz generada disponible en NEXORA VOICE; todavía no es una biblioteca comercial integrada de música y efectos ni genera voces personalizadas por clonación. El lipsync exacto requiere marcas de tiempo fonéticas/alineación por palabra.
