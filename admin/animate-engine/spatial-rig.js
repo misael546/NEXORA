@@ -14,6 +14,19 @@ class SpatialRig3D{
  exportJSON(){return{format:"nexora-spatial-rig",version:1,bones:this.bones.map(({name,parent,translation,rotation,scale})=>({name,parent,translation,rotation,scale}))}}
  static fromJSON(data){if(data?.format!=="nexora-spatial-rig"||!Array.isArray(data.bones))throw Error("Rig 3D inválido");return new SpatialRig3D(data.bones)}
 }
+const createFromGLB=(parsed,skinIndex=0)=>{
+if(!parsed?.nodes?.length||!parsed?.skins?.[skinIndex])throw Error("GLB sin nodos o skin válido");
+const nodes=parsed.nodes,skin=parsed.skins[skinIndex],state=new Map(),ordered=[];
+const visit=(index)=>{if(state.get(index)===1)throw Error("Jerarquía GLB circular");if(state.get(index)===2)return;const node=nodes[index];if(!node)throw Error("Nodo GLB inexistente: "+index);state.set(index,1);if(node.parent!==-1)visit(node.parent);state.set(index,2);if(!ordered.includes(index))ordered.push(index)};
+for(let i=0;i<nodes.length;i++)visit(i);
+const unique=new Map(),nameByIndex=new Map(),bones=[];
+for(const index of ordered){const n=nodes[index];let name=n.name||"Node "+index;if(unique.has(name))name=name+"#"+index;unique.set(name,true);nameByIndex.set(index,name);
+let translation=n.translation||[0,0,0],rotation=n.rotation||[0,0,0,1],scale=n.scale||[1,1,1];
+if(n.matrix){const m=n.matrix,sx=Math.hypot(m[0],m[1],m[2])||1,sy=Math.hypot(m[4],m[5],m[6])||1,sz=Math.hypot(m[8],m[9],m[10])||1;translation=[m[12],m[13],m[14]];scale=[sx,sy,sz];const a=m[0]/sx,b=m[4]/sy,c=m[8]/sz,d=m[1]/sx,e=m[5]/sy,f=m[9]/sz,g=m[2]/sx,h=m[6]/sy,i=m[10]/sz,tr=a+e+i;let x,y,z,w;if(tr>0){const q=Math.sqrt(tr+1)*2;w=.25*q;x=(h-f)/q;y=(c-g)/q;z=(d-b)/q}else if(a>e&&a>i){const q=Math.sqrt(1+a-e-i)*2;w=(h-f)/q;x=.25*q;y=(b+d)/q;z=(c+g)/q}else if(e>i){const q=Math.sqrt(1+e-a-i)*2;w=(c-g)/q;x=(b+d)/q;y=.25*q;z=(f+h)/q}else{const q=Math.sqrt(1+i-a-e)*2;w=(d-b)/q;x=(c+g)/q;y=(f+h)/q;z=.25*q}rotation=[x,y,z,w]}
+bones.push({name,parent:n.parent===-1?null:nameByIndex.get(n.parent),translation,rotation,scale})}
+const rig=new SpatialRig3D(bones),boneIndex=new Map(rig.bones.map((b,i)=>[ordered[i],i])),jointBoneIndices=skin.joints.map(j=>{const index=boneIndex.get(j.node);if(index===undefined)throw Error("Articulación GLB no incluida en la jerarquía");return index});
+return{rig,skinIndex,jointBoneIndices,inverseBindMatrices:skin.inverseBindMatrices.map(m=>m.slice()),skin};
+};
 const dinosaur=()=>new SpatialRig3D([
 {name:"root",translation:[0,0,0]},
 {name:"pelvis",parent:"root",translation:[0,.78,0]},
@@ -36,5 +49,5 @@ const dinosaur=()=>new SpatialRig3D([
 {name:"tailTip",parent:"tailMid",translation:[-.34,-.02,0]}
 ]);
 const humanoid=()=>new SpatialRig3D([{name:"root",translation:[0,0,0]},{name:"pelvis",parent:"root",translation:[0,1,0]},{name:"spine",parent:"pelvis",translation:[0,.35,0]},{name:"chest",parent:"spine",translation:[0,.35,0]},{name:"neck",parent:"chest",translation:[0,.3,0]},{name:"head",parent:"neck",translation:[0,.2,0]},{name:"shoulderL",parent:"chest",translation:[-.28,.15,0]},{name:"armUpperL",parent:"shoulderL",translation:[-.22,0,0]},{name:"armLowerL",parent:"armUpperL",translation:[-.3,0,0]},{name:"shoulderR",parent:"chest",translation:[.28,.15,0]},{name:"armUpperR",parent:"shoulderR",translation:[.22,0,0]},{name:"armLowerR",parent:"armUpperR",translation:[.3,0,0]},{name:"thighL",parent:"pelvis",translation:[-.14,-.1,0]},{name:"shinL",parent:"thighL",translation:[0,-.42,0]},{name:"thighR",parent:"pelvis",translation:[.14,-.1,0]},{name:"shinR",parent:"thighR",translation:[0,-.42,0]}]);
-window.NexoraSpatialRig3D={SpatialRig3D,createHumanoid:humanoid,createDinosaur:dinosaur,math:{identity:I,multiply:mul,compose,transform}};
+window.NexoraSpatialRig3D={SpatialRig3D,createHumanoid:humanoid,createDinosaur:dinosaur,createFromGLB,math:{identity:I,multiply:mul,compose,transform}};
 })();
