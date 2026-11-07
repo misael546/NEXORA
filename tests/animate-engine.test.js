@@ -722,3 +722,47 @@ test("dinosaur cinematic actions animate segmented spine neck and tail chains", 
     assert.ok(Math.hypot(...rig.byName.get(name).rotation.slice(0, 3)) > 0.001, "Segment did not articulate: " + name);
   }
 });
+
+test("cinematic 3D action sequences combine walk jump and landing with blended transitions", () => {
+  const { api } = loadEngine();
+  const rig = api.NexoraSpatialRig3D.createDinosaur();
+  const sequence = new api.NexoraSpatialActions.SpatialActionSequence(rig, { name: "Coelo - salto y aterrizaje" });
+  sequence.add("walk", {}, { duration: 0.6, blendDuration: 0.12 });
+  sequence.add("jump", {}, { duration: 0.95, blendDuration: 0.16 });
+  sequence.add("land", {}, { duration: 0.55, blendDuration: 0.12 });
+  assert.equal(sequence.totalDuration, 2.1);
+  assert.deepEqual(Array.from(sequence.timeline().map(x => x.action)), ["walk", "jump", "land"]);
+
+  const player = sequence.createPlayer();
+  player.play().advance(0.7);
+  assert.equal(player.currentIndex, 1);
+  assert.ok(Math.abs(player.time - 0.7) < 1e-8);
+  player.advance(1);
+  assert.equal(player.currentIndex, 2);
+  player.advance(0.5);
+  assert.equal(player.playing, false);
+  assert.equal(player.time, sequence.totalDuration);
+
+  const restored = api.NexoraSpatialActions.SpatialActionSequence.fromJSON(rig, sequence.exportJSON());
+  assert.equal(restored.name, "Coelo - salto y aterrizaje");
+  assert.equal(restored.segments.length, 3);
+  assert.equal(restored.totalDuration, sequence.totalDuration);
+  assert.ok(restored.remove(1));
+  assert.equal(restored.segments.length, 2);
+});
+
+test("cinematic sequence player can seek to an action and resume from that pose", () => {
+  const { api } = loadEngine();
+  const rig = api.NexoraSpatialRig3D.createDinosaur();
+  const sequence = new api.NexoraSpatialActions.SpatialActionSequence(rig);
+  sequence.add("walk", {}, { duration: 0.6 });
+  sequence.add("talk", {}, { duration: 1.4 });
+  const player = sequence.createPlayer();
+  player.seek(0.9);
+  assert.equal(player.currentIndex, 1);
+  assert.equal(player.time, 0.9);
+  player.play().advance(0.2);
+  assert.ok(Math.abs(player.time - 1.1) < 1e-8);
+  player.pause();
+  assert.equal(player.playing, false);
+});
