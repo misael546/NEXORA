@@ -629,6 +629,9 @@ test("animation studio loads the 3D action library and parses its bridge script"
   assert.ok(studio.includes('<script src="animate-engine/spatial-actions.js"></script>'));
   assert.ok(bridge.includes('id="n3dAction"'));
   assert.ok(bridge.includes('id="n3dBlend"'));
+  assert.ok(bridge.includes('id="n3dSequenceAction"'));
+  assert.ok(bridge.includes('id="n3dSequencePlay"'));
+  assert.ok(bridge.includes('id="n3dSequenceExport"'));
   assert.ok(bridge.includes("updateSkinnedMeshes()"));
 });
 
