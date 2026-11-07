@@ -21,7 +21,7 @@ export const onRequest:PagesFunction<Env>=async({request,env})=>{
   if(category&&allowed.has(category)){clauses.push("category=?");values.push(category);}
   if(device==="desktop")clauses.push("width>=height");if(device==="mobile")clauses.push("height>width");
   const where=clauses.join(" AND "),countRow:any=await env.DB.prepare("SELECT COUNT(*) AS total FROM wallpapers WHERE "+where).bind(...values).first();
-  const order=sort==="popular"?"downloads DESC,published_at DESC":"published_at DESC";
+  const order=sort==="title"?"title COLLATE NOCASE ASC":"published_at DESC";
   const {results}=await env.DB.prepare("SELECT id,title,category,tags,thumb_url,image_url,source_url,source_name,author,license,width,height,downloads FROM wallpapers WHERE "+where+" ORDER BY "+order+" LIMIT ? OFFSET ?").bind(...values,limit,(page-1)*limit).all();
   const total=Number(countRow?.total||0);return json({wallpapers:results,total,page,limit,has_more:page*limit<total});
  }catch(error){console.warn("Wallpaper database unavailable; using live Commons discovery.",error);const live=await liveSearch(q,category,device);return json({...live,notice:"Catálogo persistente pendiente de inicialización."});}
