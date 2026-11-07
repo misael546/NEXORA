@@ -136,7 +136,7 @@ test("2D dinosaur rig contains a multi-joint tail and persists its character typ
   const rig = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
   assert.equal(rig.kind, "dinosaur");
   assert.ok(rig.points.tail1 && rig.points.tail4 && rig.points.jaw);
-  assert.deepEqual(Array.from(rig.bones.filter(b => /^tail/.test(b.name)), b => b.name), ["tail1","tail2","tail3","tail4"]);
+  assert.equal(Array.from(rig.bones.filter(b => /^tail/.test(b.name)), b => b.name).join(","), "tail1,tail2,tail3,tail4");
   const copy = new api.NexoraAnimationTools.CharacterRig();
   copy.load(rig.save());
   assert.equal(copy.kind, "dinosaur");
@@ -174,11 +174,13 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
 test("2D character art renders worker and dinosaur figures through the canvas API", () => {
   const { api } = loadEngine();
   const calls = [];
-  const gradient = { addColorStop() {} };
-  const ctx = new Proxy({ createLinearGradient: () => gradient }, {
-    get(target,key){if(key in target)return target[key];return (...args)=>{calls.push(String(key))}},
-    set(target,key,value){target[key]=value;return true}
-  });
+  const noop = name => (...args) => { calls.push(name); };
+  const ctx = {
+    createLinearGradient() { return { addColorStop() {} }; },
+    save: noop("save"), restore: noop("restore"), translate: noop("translate"), rotate: noop("rotate"),
+    beginPath: noop("beginPath"), moveTo: noop("moveTo"), lineTo: noop("lineTo"),
+    closePath: noop("closePath"), fill: noop("fill"), stroke: noop("stroke"), ellipse: noop("ellipse")
+  };
   const worker = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
   const dinosaur = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
   assert.equal(api.NexoraCharacterArt.draw(ctx,640,360,worker,"worker"),true);
