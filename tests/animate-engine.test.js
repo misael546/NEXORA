@@ -704,3 +704,21 @@ test("facial visemes coarticulate smoothly across adjacent phoneme cues", () => 
   assert.ok(Math.abs(mesh.morphWeights[0] - 0.5) < 1e-8);
   assert.ok(Math.abs(mesh.morphWeights[1] - 0.5) < 1e-8);
 });
+
+test("dinosaur cinematic actions animate segmented spine neck and tail chains", () => {
+  const { api } = loadEngine();
+  const rig = api.NexoraSpatialRig3D.createDinosaur();
+  const map = api.NexoraSpatialActions.roleMap(rig);
+  assert.deepEqual(Array.from(map.tailBones), ["tailBase", "tailMid", "tailTip"]);
+  assert.deepEqual(Array.from(map.neckBones), ["neckBase", "neckMid"]);
+  assert.deepEqual(Array.from(map.spineBones), ["spine"]);
+  const clip = api.NexoraSpatialActions.createClip(rig, "walk");
+  for (const name of [...map.tailBones, ...map.neckBones]) {
+    assert.ok(clip.tracks.some(track => track.bone === name), "Missing segmented track for " + name);
+  }
+  const player = api.NexoraSpatialActions.createPlayer(rig, "walk", { blendDuration: 0 });
+  player.play().advance(0.3);
+  for (const name of [...map.tailBones, ...map.neckBones]) {
+    assert.ok(Math.abs(rig.byName.get(name).rotation[2]) > 0.001, "Segment did not articulate: " + name);
+  }
+});
