@@ -80,35 +80,33 @@ const cycles={
 };
 function chainPoint(root,angle,length){return{x:root.x+Math.sin(angle)*length,y:root.y+Math.cos(angle)*length}}
 function applyWalkKinematics(out,base,preset,progress){
- const phase=progress*Math.PI*4,amplitude=preset==="dino-walk"?.12:.07,bend=preset==="dino-walk"?.34:.52;
- const solve=(rootName,jointName,endName,phaseOffset,swing,bendAmount)=>{
-  const r=out[rootName],bRoot=base[rootName],bJoint=base[jointName],bEnd=base[endName];
-  if(!r||!bRoot||!bJoint||!bEnd)return;
-  const dx1=bJoint.x-bRoot.x,dy1=bJoint.y-bRoot.y,dx2=bEnd.x-bJoint.x,dy2=bEnd.y-bJoint.y;
-  const len1=Math.hypot(dx1,dy1),len2=Math.hypot(dx2,dy2);
-  if(len1<.001||len2<.001)return;
-  const angle1=Math.atan2(dx1,dy1),angle2=Math.atan2(dx2,dy2),phaseNow=phase+phaseOffset;
-  const wave=Math.sin(phaseNow),lift=Math.max(0,Math.cos(phaseNow));
-  // Shorter stride with a clearer knee/ankle fold: feet stay under the hips instead of skating sideways.
-  const nextAngle=angle1+swing*wave;
-  const joint=chainPoint(r,nextAngle,len1);
-  const bendSign=Math.sign(angle1)||1;
-  const lowerAngle=angle2+swing*.32*wave+bendSign*bendAmount*lift;
-  const end=chainPoint(joint,lowerAngle,len2);
-  out[jointName]=joint;out[endName]=end;
+ const phase=progress*Math.PI*4,dinosaur=preset==="dino-walk";
+ const stride=dinosaur?.045:.032,liftHeight=dinosaur?.048:.064,armRange=dinosaur?.014:.018;
+ const solveChain=(rootName,jointName,endName,phaseOffset,range,lift,pole)=>{
+  const root=out[rootName],baseRoot=base[rootName],baseJoint=base[jointName],baseEnd=base[endName];
+  if(!root||!baseRoot||!baseJoint||!baseEnd)return;
+  const upper=Math.hypot(baseJoint.x-baseRoot.x,baseJoint.y-baseRoot.y);
+  const lower=Math.hypot(baseEnd.x-baseJoint.x,baseEnd.y-baseJoint.y);
+  if(upper<.001||lower<.001)return;
+  const p=phase+phaseOffset,step=Math.sin(p),air=Math.max(0,Math.cos(p));
+  const target={x:clamp(baseEnd.x+step*range),y:clamp(baseEnd.y-air*lift)};
+  const joint=solveTwoBoneIK(root,target,upper,lower,pole);
+  out[jointName]=joint;
+  out[endName]=target;
  };
- // Feet alternate; arms counter-swing against the same stride phase.
- solve("hip","kneeL","footL",0,amplitude,bend);
- solve("hip","kneeR","footR",Math.PI,amplitude,bend);
- solve("shoulderL","elbowL","handL",Math.PI,amplitude*.58,bend*.28);
- solve("shoulderR","elbowR","handR",0,amplitude*.58,bend*.28);
- if(preset==="dino-walk"){
+ // Each foot has a planted half-cycle and a lifted return. The knee is solved from fixed bone lengths.
+ solveChain("hip","kneeL","footL",0,stride,liftHeight,1);
+ solveChain("hip","kneeR","footR",Math.PI,stride,liftHeight,-1);
+ // Arms counter-swing against the legs, with smaller travel than the feet.
+ solveChain("shoulderL","elbowL","handL",Math.PI,armRange,dinosaur?.008:.012,1);
+ solveChain("shoulderR","elbowR","handR",0,armRange,dinosaur?.008:.012,-1);
+ if(dinosaur){
   let root=out.hip;
   const names=["tail1","tail2","tail3","tail4"],parents=["hip","tail1","tail2","tail3"];
   names.forEach((name,i)=>{
    const parent=parents[i],a=base[parent],b=base[name];if(!a||!b)return;
    const length=Math.hypot(b.x-a.x,b.y-a.y),baseAngle=Math.atan2(b.x-a.x,b.y-a.y);
-   const sway=Math.sin(phase-(i+1)*.62)*(.045+(i+1)*.016);
+   const sway=Math.sin(phase-(i+1)*.62)*(.035+(i+1)*.012);
    root=chainPoint(root,baseAngle+sway,length);out[name]=root;
   });
  }
