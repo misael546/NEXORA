@@ -14,6 +14,27 @@ class SpatialRig3D{
  exportJSON(){return{format:"nexora-spatial-rig",version:1,bones:this.bones.map(({name,parent,translation,rotation,scale})=>({name,parent,translation,rotation,scale}))}}
  static fromJSON(data){if(data?.format!=="nexora-spatial-rig"||!Array.isArray(data.bones))throw Error("Rig 3D inválido");return new SpatialRig3D(data.bones)}
 }
+const dinosaur=()=>new SpatialRig3D([
+{name:"root",translation:[0,0,0]},
+{name:"pelvis",parent:"root",translation:[0,.78,0]},
+{name:"spine",parent:"pelvis",translation:[.12,.12,0]},
+{name:"chest",parent:"spine",translation:[.34,.12,0]},
+{name:"neckBase",parent:"chest",translation:[.28,.16,0]},
+{name:"neckMid",parent:"neckBase",translation:[.18,.22,0]},
+{name:"head",parent:"neckMid",translation:[.16,.18,0]},
+{name:"jaw",parent:"head",translation:[.16,-.12,0]},
+{name:"armL",parent:"chest",translation:[.02,-.12,-.25]},
+{name:"armR",parent:"chest",translation:[.02,-.12,.25]},
+{name:"thighL",parent:"pelvis",translation:[-.12,-.18,-.2]},
+{name:"shinL",parent:"thighL",translation:[-.04,-.3,0]},
+{name:"footL",parent:"shinL",translation:[.12,-.1,.02]},
+{name:"thighR",parent:"pelvis",translation:[-.12,-.18,.2]},
+{name:"shinR",parent:"thighR",translation:[-.04,-.3,0]},
+{name:"footR",parent:"shinR",translation:[.12,-.1,-.02]},
+{name:"tailBase",parent:"pelvis",translation:[-.3,.04,0]},
+{name:"tailMid",parent:"tailBase",translation:[-.38,.02,0]},
+{name:"tailTip",parent:"tailMid",translation:[-.34,-.02,0]}
+]);
 const humanoid=()=>new SpatialRig3D([{name:"root",translation:[0,0,0]},{name:"pelvis",parent:"root",translation:[0,1,0]},{name:"spine",parent:"pelvis",translation:[0,.35,0]},{name:"chest",parent:"spine",translation:[0,.35,0]},{name:"neck",parent:"chest",translation:[0,.3,0]},{name:"head",parent:"neck",translation:[0,.2,0]},{name:"shoulderL",parent:"chest",translation:[-.28,.15,0]},{name:"armUpperL",parent:"shoulderL",translation:[-.22,0,0]},{name:"armLowerL",parent:"armUpperL",translation:[-.3,0,0]},{name:"shoulderR",parent:"chest",translation:[.28,.15,0]},{name:"armUpperR",parent:"shoulderR",translation:[.22,0,0]},{name:"armLowerR",parent:"armUpperR",translation:[.3,0,0]},{name:"thighL",parent:"pelvis",translation:[-.14,-.1,0]},{name:"shinL",parent:"thighL",translation:[0,-.42,0]},{name:"thighR",parent:"pelvis",translation:[.14,-.1,0]},{name:"shinR",parent:"thighR",translation:[0,-.42,0]}]);
-window.NexoraSpatialRig3D={SpatialRig3D,createHumanoid:humanoid,math:{identity:I,multiply:mul,compose,transform}};
+window.NexoraSpatialRig3D={SpatialRig3D,createHumanoid:humanoid,createDinosaur:dinosaur,math:{identity:I,multiply:mul,compose,transform}};
 })();
