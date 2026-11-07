@@ -95,7 +95,7 @@ function drawWorker(ctx,w,h,rig,options={}){
  // Tools and carried props stay attached to the worker's animated hands.
  const action=options.action||"",time=Number(options.time)||0;
  if(action==="worker-hammer"){
-  const swing=Math.sin(time*Math.PI*2),angle=-1.55+swing*.68,dir={x:Math.cos(angle),y:Math.sin(angle)},normal={x:-Math.sin(angle),y:Math.cos(angle)},headCenter={x:hr.x+dir.x*39,y:hr.y+dir.y*39};
+  const phase=((time/2)%1+1)%1,strike=phase<.48?0:phase<.63?ease((phase-.48)/.15):phase<.8?1-ease((phase-.63)/.17):0,angle=-1.58+strike*2.05,dir={x:Math.cos(angle),y:Math.sin(angle)},normal={x:-Math.sin(angle),y:Math.cos(angle)},headCenter={x:hr.x+dir.x*39,y:hr.y+dir.y*39};
   segment(ctx,hr,headCenter,5.5,"#87532e","#422d23","#e0b17c");
   const hammerHead=[
    {x:headCenter.x+normal.x*15+dir.x*5,y:headCenter.y+normal.y*15+dir.y*5},
