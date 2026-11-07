@@ -9,8 +9,8 @@ class CharacterSkeleton{
  setPose(pose={}){for(const [name,p]of Object.entries(pose))this.setLocalPose(name,p);return this.worldPose()}
  resetPose(){this.pose={};return this.worldPose()}
  worldPose(){const out={},visiting=new Set();const resolve=name=>{if(out[name])return out[name];const n=this.nodes.get(name);if(!n)return null;if(visiting.has(name))throw new Error("Ciclo en jerarquía: "+name);visiting.add(name);const p=this.pose[name]||n,parent=n.parent?resolve(n.parent):null,local={x:p.x??n.x,y:p.y??n.y,rotation:p.rotation??n.rotation};let result;if(parent){const offset=rotate(local, parent.rotation);result={x:parent.x+offset.x,y:parent.y+offset.y,rotation:parent.rotation+local.rotation}}else result=local;visiting.delete(name);out[name]=result;return result};for(const name of this.nodes.keys())resolve(name);return out}
- exportJSON(){return{format:"nexora-character-skeleton",version:1,nodes:[...this.nodes.values()]}}
- static fromJSON(data){if(data?.format!=="nexora-character-skeleton"||data.version!==1||!Array.isArray(data.nodes))throw new Error("Esqueleto incompatible");return new CharacterSkeleton(data.nodes)}
+ exportJSON(){return{format:"nexora-character-skeleton",version:1,nodes:[...this.nodes.values()],pose:{...this.pose}}}
+ static fromJSON(data){if(data?.format!=="nexora-character-skeleton"||data.version!==1||!Array.isArray(data.nodes))throw new Error("Esqueleto incompatible");const rig=new CharacterSkeleton(data.nodes);if(data.pose)rig.setPose(data.pose);return rig}
 }
 function createHumanUpperBodySkeleton(){return new CharacterSkeleton([
 {name:"root",x:0,y:0},{name:"hip",parent:"root",x:0,y:0},{name:"spine",parent:"hip",x:0,y:-.22,limits:{min:-.8,max:.8}},{name:"chest",parent:"spine",x:0,y:-.2,limits:{min:-.9,max:.9}},{name:"neck",parent:"chest",x:0,y:-.12,limits:{min:-.7,max:.7}},{name:"head",parent:"neck",x:0,y:-.13,limits:{min:-.8,max:.8}},{name:"shoulderL",parent:"chest",x:-.14,y:-.04},{name:"shoulderR",parent:"chest",x:.14,y:-.04},{name:"elbowL",parent:"shoulderL",x:-.12,y:.17},{name:"handL",parent:"elbowL",x:0,y:.16},{name:"elbowR",parent:"shoulderR",x:.12,y:.17},{name:"handR",parent:"elbowR",x:0,y:.16}
