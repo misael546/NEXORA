@@ -74,10 +74,10 @@ async function readCanvasMetrics(canvas) {
     for (let y = 0; y < el.height; y++) {
       for (let x = 0; x < el.width; x++) {
         const i = (y * el.width + x) * 4;
-        const dr = Math.abs(pixels[i] - background[0]);
-        const dg = Math.abs(pixels[i + 1] - background[1]);
-        const db = Math.abs(pixels[i + 2] - background[2]);
-        if (dr + dg + db > 34) {
+        const high = Math.max(pixels[i], pixels[i + 1], pixels[i + 2]);
+        const low = Math.min(pixels[i], pixels[i + 1], pixels[i + 2]);
+        // Count saturated character colors, not the dark gradient and floor grid behind them.
+        if (high > 88 && high - low > 28) {
           painted++;
           if (x < minX) minX = x;
           if (x > maxX) maxX = x;
