@@ -16,12 +16,17 @@ const cycles={
  "worker-idle":(p,t)=>{const s=cyc(t);if(p==="head")return{x:.002*s,y:-.006*s};if(p==="neck"||p==="hip")return{x:0,y:-.006*s};if(/shoulder/.test(p))return{x:0,y:-.008*s};if(/hand/.test(p))return{x:0,y:.004*s};return{x:0,y:0}},
  "worker-walk":(p,t)=>{
   const phase=t*Math.PI*2,s=Math.sin(phase),side=p.endsWith("L")?0:Math.PI,legPhase=phase+side,stride=Math.sin(legPhase),lift=Math.max(0,Math.cos(legPhase));
-  if(p==="hip")return{x:0,y:-.014*Math.abs(s)};
-  if(p==="neck"||p==="head")return{x:.003*s,y:-.009*Math.abs(s)};
-  if(p==="shoulderL"||p==="shoulderR")return{x:0,y:-.004*Math.abs(s)};
-  if(/elbow|hand/.test(p))return{x:.012*Math.cos(phase+(p.endsWith("L")?0:Math.PI)),y:(p.endsWith("L")?-1:1)*s*(p==="handL"||p==="handR"?.038:.025)};
-  if(/knee/.test(p))return{x:stride*.045,y:-lift*.014};
-  if(/foot/.test(p))return{x:stride*.065,y:-lift*.065};
+  if(p==="hip")return{x:.006*s,y:-.018*Math.abs(s)};
+  if(p==="neck")return{x:-.006*s,y:-.01*Math.abs(s)};
+  if(p==="head")return{x:-.008*s,y:-.012*Math.abs(s)};
+  if(p==="shoulderL")return{x:-.008*s,y:-.006*Math.abs(s)};
+  if(p==="shoulderR")return{x:.008*s,y:-.006*Math.abs(s)};
+  if(p==="elbowL"||p==="elbowR"||p==="handL"||p==="handR"){
+   const armPhase=phase+(p.endsWith("L")?Math.PI:0),hand=p==="handL"||p==="handR",sideSign=p.endsWith("L")?-1:1;
+   return{x:sideSign*.018*Math.cos(armPhase),y:(hand?.064:.042)*Math.sin(armPhase)};
+  }
+  if(/knee/.test(p))return{x:stride*.052,y:-lift*.02};
+  if(/foot/.test(p))return{x:stride*.075,y:-lift*.085};
   return{x:0,y:0}
  },
  "worker-run":(p,t)=>cycles.run(p,t),
@@ -51,7 +56,7 @@ const cycles={
   return{x:0,y:0}
  },
  "dino-run":(p,t)=>{const s=cyc(t*1.3),phase=t*Math.PI*2*1.3;if(p==="hip"||p==="chest")return{x:0,y:-.04*Math.abs(s)};if(p==="head"||p==="neck")return{x:-.018*s,y:-.022*Math.abs(s)};if(p==="kneeL"||p==="footL")return{x:.055*s,y:Math.max(0,Math.cos(phase))*.05};if(p==="kneeR"||p==="footR")return{x:-.055*s,y:Math.max(0,-Math.cos(phase))*.05};if(/hand/.test(p))return{x:0,y:-.025+.02*s};if(/^tail[1-4]$/.test(p)){const n=Number(p.slice(4));return{x:.004*n,y:Math.sin(phase-n*.34)*(.014+n*.006)}}return{x:0,y:0}},
- "dino-roar":(p,t)=>{const a=pulse(t);if(p==="head")return{x:-.02*a,y:-.085*a};if(p==="neck")return{x:-.015*a,y:-.055*a};if(p==="jaw")return{x:-.012*a,y:.095*a};if(p==="chest")return{x:0,y:-.025*a};if(/hand/.test(p))return{x:0,y:-.025*a};if(/^tail[1-4]$/.test(p))return{x:0,y:.012*a*Number(p.slice(4))};return{x:0,y:0}},
+ "dino-roar":(p,t)=>{const a=pulse(t);if(p==="head")return{x:-.012*a,y:-.02*a};if(p==="neck")return{x:-.008*a,y:-.015*a};if(p==="jaw")return{x:-.008*a,y:.025*a};if(p==="chest")return{x:0,y:-.02*a};if(/hand/.test(p))return{x:0,y:-.025*a};if(/^tail[1-4]$/.test(p))return{x:0,y:.012*a*Number(p.slice(4))};return{x:0,y:0}},
  "dino-bite":(p,t)=>{const a=Math.sin(Math.PI*clamp(t));if(p==="head")return{x:-.075*a,y:.055*a};if(p==="neck")return{x:-.045*a,y:.035*a};if(p==="jaw")return{x:-.025*a,y:.06*a};if(p==="chest")return{x:-.008*a,y:.01*a};if(/^tail[1-4]$/.test(p))return{x:.008*a,y:-.008*a*Number(p.slice(4))};return{x:0,y:0}},
  "dino-tail-swipe":(p,t)=>{const a=Math.sin(Math.PI*clamp(t));if(/^tail[1-4]$/.test(p)){const n=Number(p.slice(4));return{x:0,y:a*(.025+n*.026)}}if(p==="hip"||p==="spine")return{x:-.015*a,y:0};if(p==="head"||p==="neck")return{x:.012*a,y:-.008*a};return{x:0,y:0}},
  "dino-hit":(p,t)=>{const a=pulse(t);if(p==="head")return{x:.04*a,y:.025*a};if(p==="neck"||p==="chest")return{x:.025*a,y:.02*a};if(p==="hip")return{x:-.015*a,y:.018*a};if(/^tail[1-4]$/.test(p))return{x:-.018*a,y:-.018*a*Number(p.slice(4))};return{x:0,y:0}},
