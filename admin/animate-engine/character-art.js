@@ -306,12 +306,16 @@ function drawDinosaur(ctx,w,h,rig,options={}){
   segment(ctx,{x:head.x-27,y:head.y+11},{x:jawMouth.x+5,y:jawMouth.y+2},2.2,"#31523a","#23402f");
  }
  const blinkAt=((Number(options.time)||0)+.35)%3.45,eyeOpen=blinkAt<.14?Math.max(.1,Math.abs(blinkAt-.07)/.07):1;
- ellipse(ctx,{x:head.x-8,y:head.y-9},10,10*eyeOpen,"#f4d36d","#405239",2.2);
- ellipse(ctx,{x:head.x-10,y:head.y-9},4.6,5.4*eyeOpen,"#243128",null);
- ellipse(ctx,{x:head.x-11.5,y:head.y-11.5},2,2*eyeOpen,"#fff9d9",null);
- // Heavy brow ridge makes the eye read as part of the skull.
- segment(ctx,{x:head.x-22,y:head.y-19},{x:head.x-3,y:head.y-23},4.2,"#315b3f","#243d31");
- segment(ctx,{x:head.x-27,y:head.y-24},{x:head.x-12,y:head.y-27},2,"#d1e79a","#527b4b");
+ const eyeScale=action==="dino-hit"?1.16:action==="dino-bite"?.86:action==="dino-roar"?.92:1;
+ const gazeX=action==="dino-bite"?-2.2:action==="dino-roar"?-.8:action==="dino-tail-swipe"?1.5:0;
+ const gazeY=action==="dino-bite"?2.1:action==="dino-roar"?-1.5:action==="dino-hit"?-1:0;
+ const browDrop=action==="dino-bite"||action==="dino-roar"?2.4:action==="dino-hit"?-1.8:0;
+ ellipse(ctx,{x:head.x-8+gazeX,y:head.y-9+gazeY},10*eyeScale,10*eyeScale*eyeOpen,"#f4d36d","#405239",2.2);
+ ellipse(ctx,{x:head.x-10+gazeX,y:head.y-9+gazeY},4.6*eyeScale,5.4*eyeScale*eyeOpen,"#243128",null);
+ ellipse(ctx,{x:head.x-11.5+gazeX,y:head.y-11.5+gazeY},2*eyeScale,2*eyeScale*eyeOpen,"#fff9d9",null);
+ // Brows and gaze shift with the action: alert at rest, focused for a bite, narrowed for a roar.
+ segment(ctx,{x:head.x-22,y:head.y-19+browDrop},{x:head.x-3,y:head.y-23+browDrop},4.2,"#315b3f","#243d31");
+ segment(ctx,{x:head.x-27,y:head.y-24+browDrop},{x:head.x-12,y:head.y-27+browDrop},2,"#d1e79a","#527b4b");
  ellipse(ctx,{x:head.x-29,y:head.y+1},2.5,2,"#315d43",null);
  segment(ctx,{x:head.x-31,y:head.y-16},{x:head.x-14,y:head.y-20},3,"#d1e79a","#527b4b");
  // Nostril, cheek scales and fine skin markings.
