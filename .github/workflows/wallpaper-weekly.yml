@@ -29,3 +29,5 @@ jobs:
           WALLPAPER_ACCESS_CLIENT_ID: ${{ secrets.WALLPAPER_ACCESS_CLIENT_ID }}
           WALLPAPER_ACCESS_CLIENT_SECRET: ${{ secrets.WALLPAPER_ACCESS_CLIENT_SECRET }}
         run: node .github/scripts/import-wallpapers.mjs
+
+# Manual verification trigger: wallpaper import retry
