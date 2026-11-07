@@ -1091,3 +1091,34 @@ test("GLB parser preserves embedded base-color images and UV coordinates for tex
   assert.equal(parsed.images[0].data.byteLength, png.length);
   assert.equal(parsed.textures[0].source, 0);
 });
+
+test("2D walk cycles preserve bone lengths and articulate legs and dinosaur tail", () => {
+  const { api } = loadEngine();
+  const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  for (const type of ["worker", "dinosaur"]) {
+    const rig = new api.NexoraAnimationTools.CharacterRig();
+    type === "dinosaur" ? rig.createDinosaur() : rig.createHumanoid();
+    const preset = type === "dinosaur" ? "dino-walk" : "worker-walk";
+    const timeline = new api.NexoraMotionSystem.MotionTimeline(rig.points);
+    timeline.usePreset(preset, 2);
+    const pose = timeline.sample(0.37);
+    for (const [root, joint, end] of [
+      ["hip", "kneeL", "footL"],
+      ["hip", "kneeR", "footR"],
+      ["shoulderL", "elbowL", "handL"],
+      ["shoulderR", "elbowR", "handR"]
+    ]) {
+      assert.ok(Math.abs(distance(rig.points[root], rig.points[joint]) - distance(pose[root], pose[joint])) < 1e-6);
+      assert.ok(Math.abs(distance(rig.points[joint], rig.points[end]) - distance(pose[joint], pose[end])) < 1e-6);
+    }
+    assert.notDeepEqual(pose.footL, rig.points.footL);
+    assert.notDeepEqual(pose.footR, rig.points.footR);
+    if (type === "dinosaur") {
+      const before = ["tail1", "tail2", "tail3", "tail4"];
+      const roots = ["hip", "tail1", "tail2", "tail3"];
+      before.forEach((name, index) => {
+        assert.ok(Math.abs(distance(rig.points[roots[index]], rig.points[name]) - distance(pose[roots[index]], pose[name])) < 1e-6);
+      });
+    }
+  }
+});
