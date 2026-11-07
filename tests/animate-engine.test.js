@@ -160,3 +160,21 @@ test("polygon masks constrain bone deformation to a softly feathered body region
   assert.equal(restored.regions.length,1);
   assert.deepEqual(Array.from(restored.regions[0].boneNames),["armL1"]);
 });
+
+
+test("color-assisted mask finds a connected color region and rejects a huge background", () => {
+  const { api } = loadEngine();
+  const width=12,height=12,data=new Uint8ClampedArray(width*height*4);
+  for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+    const i=(y*width+x)*4;
+    const inside=x>=4&&x<=7&&y>=3&&y<=8;
+    data[i]=inside?220:20;data[i+1]=inside?30:20;data[i+2]=inside?40:20;data[i+3]=255;
+  }
+  const hull=api.NexoraMeshDeformer.colorRegionHull(data,width,height,5,5,8);
+  assert.ok(Array.isArray(hull));
+  assert.ok(hull.length>=4);
+  assert.equal(api.NexoraMeshDeformer.pointInPolygon({x:.5,y:.5},hull),true);
+  assert.equal(api.NexoraMeshDeformer.pointInPolygon({x:.05,y:.05},hull),false);
+  const background=api.NexoraMeshDeformer.colorRegionHull(data,width,height,0,0,8);
+  assert.equal(background,null);
+});
