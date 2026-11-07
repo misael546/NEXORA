@@ -132,3 +132,11 @@ El visor WebGL ya rasteriza geometría 3D, pero aún no importa modelos GLB/FBX,
 - El rig 3D es una base de animación; aún falta conectar JOINTS/WEIGHTS y inverse-bind matrices de los GLB al rig, así como editor visual, IK 3D, clips y retargeting.
 - El estudio expone `NEXORA_ANIMATE_ENGINE.rig3d`; versión 2.0.0.
 - Pruebas de regresión para importación GLB, jerarquía 3D y skinning.
+
+
+## Evolución 2.1 — movimiento 3D e IK
+
+- `animate-engine/spatial-motion.js`: clips 3D por canales de huesos, keyframes temporizados, interpolación lineal de traslación/escala y slerp de cuaterniones, reproducción en bucle y aplicación directa al rig.
+- Solver IK 3D de dos huesos basado en longitudes y vector pole; resuelve la articulación intermedia y limita objetivos fuera del alcance.
+- El estudio expone `NEXORA_ANIMATE_ENGINE.motion3d`; versión 2.1.0.
+- Pruebas para interpolación de poses, aplicación al esqueleto y límites del IK.
