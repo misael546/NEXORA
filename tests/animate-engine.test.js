@@ -682,3 +682,25 @@ test("studio validates facial cue controls and drives face animation beside body
   assert.ok(bridge.includes("applyFacialFrame(facialTime)"));
   assert.ok(bridge.includes("spatialRenderer.applyFacialAnimation"));
 });
+
+test("facial visemes coarticulate smoothly across adjacent phoneme cues", () => {
+  const { api } = loadEngine();
+  const face = api.NexoraFacialAnimation;
+  const track = [
+    { start: 0, end: 0.2, phoneme: "M" },
+    { start: 0.2, end: 0.4, phoneme: "A" }
+  ];
+  const before = face.visemeWeightsAt(track, 0.17, 0.06);
+  const middle = face.visemeWeightsAt(track, 0.2, 0.06);
+  const after = face.visemeWeightsAt(track, 0.23, 0.06);
+  assert.ok(before.M > before.A);
+  assert.ok(Math.abs(middle.M - 0.5) < 1e-8);
+  assert.ok(Math.abs(middle.A - 0.5) < 1e-8);
+  assert.ok(after.A > after.M);
+
+  const mesh = { morphTargets: [{ name: "mouthClosed" }, { name: "visemeAA" }], morphWeights: [0, 0] };
+  const animator = new face.FacialAnimator([mesh]);
+  animator.applyAt(0.2, { visemeTrack: track, coarticulation: 0.06 });
+  assert.ok(Math.abs(mesh.morphWeights[0] - 0.5) < 1e-8);
+  assert.ok(Math.abs(mesh.morphWeights[1] - 0.5) < 1e-8);
+});
