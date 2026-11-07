@@ -153,3 +153,27 @@ El visor WebGL ya rasteriza geometría 3D, pero aún no importa modelos GLB/FBX,
 
 ### Límites de esta prueba
 Los dinosaurios son personajes procedurales de piezas 3D, no modelos escaneados ni personajes GLB con rig importado. La actuación es una animación programada para esta escena. La generación de voz requiere el binding Workers AI y autorización de administración en Cloudflare; si no está disponible, se conservan subtítulos y ambiente.
+
+
+## Evolución 2.3 — actuación jerárquica en la escena de dinosaurios
+
+- La escena `animate-dino-dialogue.html` carga `spatial-rig.js` y crea un esqueleto 3D por dinosaurio mediante `createDinosaur()`.
+- Las piezas visibles se vinculan a huesos de referencia: torso, pelvis, pecho, cuello, cabeza, mandíbula, brazos, piernas y tres segmentos de cola.
+- Cada fotograma actualiza las rotaciones locales y recalcula las matrices mundiales del rig. Las piezas heredan el movimiento de sus articulaciones en vez de depender exclusivamente de desplazamientos independientes.
+- La suite verifica que la escena cargue el rig y use sus matrices para transformar las piezas.
+- La ejecución de GitHub Actions del commit de integración terminó correctamente.
+
+### Auditoría técnica: lo que falta para calidad de producción
+
+1. **Modelos 3D reales:** el demo aún usa esferas low-poly separadas. El importador GLB actual aplana las mallas a geometría estática; no importa skins, pesos JOINTS/WEIGHTS ni clips de animación.
+2. **Rig GLB completo:** falta conservar jerarquía, inverse-bind matrices, pesos normalizados, normales transformadas y animaciones del archivo GLB.
+3. **Actuación:** falta retargeting de movimiento, ciclos de caminar/correr, equilibrio, contacto de pies/manos, inercia corporal y corrección de penetraciones.
+4. **Rostro y lipsync:** la mandíbula se mueve por intensidad aproximada del diálogo. Falta alineación fonética real, visemas temporizados, expresiones faciales y control de ojos/parpadeo.
+5. **Render:** faltan materiales PBR, texturas, sombras de contacto, iluminación ambiental, oclusión, profundidad de campo y gestión de recursos de GPU.
+6. **Audio:** la línea de tiempo multipista existe y el compositor puede mezclar pistas, pero faltan waveform visible, automatización editable por fotograma, sincronización de eventos y validación de mezcla.
+7. **Control de calidad:** las pruebas actuales son de lógica y sintaxis. Falta una batería de pruebas visuales en navegador, exportación de clips de referencia y comparación de fotogramas.
+8. **Servicios externos:** las voces dependen de la configuración de Workers AI y de los permisos de administración; no se debe presentar como garantizada si no se valida en el navegador.
+
+### Próxima prioridad
+
+Implementar importación GLB con skins y animaciones conservando los datos del archivo, y después conectar esos modelos al rig y al reproductor de clips 3D. No sustituir modelos reales por más primitivas geométricas ni declarar calidad final sin pruebas visuales y de audio en navegador.
