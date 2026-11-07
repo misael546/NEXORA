@@ -190,3 +190,17 @@ Implementar importación GLB con skins y animaciones conservando los datos del a
 ### Límite de integración
 
 Esta etapa conserva y prepara los datos del personaje, pero el visor WebGL todavía no reproduce los clips GLB ni actualiza automáticamente los vértices skinned durante cada fotograma. La importación visual actual sigue mostrando la geometría estática. El siguiente paso es conectar el rig reconstruido al búfer dinámico de vértices y al reproductor de clips, y validar modelos reales en navegador.
+
+
+## Evolución 2.5 — skinning dinámico y reproducción de clips GLB
+
+- El importador conserva posiciones originales de los vértices skinned y las influencias de articulaciones en el mismo orden que la expansión de triángulos.
+- El rig calcula matrices de skinning en espacio local de la malla usando la inversa de la transformación mundial del nodo de malla.
+- El renderizador puede actualizar dinámicamente el búfer de posiciones de GPU sin recrear toda la malla.
+- Se agregó un reproductor de animaciones GLB con selección de clip, pausa, búsqueda temporal, avance por delta, bucle y muestreo de canales de traslación, rotación y escala. Interpolación LINEAR (con slerp para cuaterniones), STEP y CUBICSPLINE.
+- El visor 3D del estudio incorpora controles para reproducir y pausar clips de modelos importados.
+- La suite valida transformaciones de espacio de malla y muestreo de clips; 26 pruebas automáticas pasan.
+
+### Límite actual
+
+La reproducción está conectada para mallas skinned que tengan datos GLB válidos y un rig compatible. La importación de materiales y texturas PBR, morph targets, animaciones de pesos, varias primitivas con materiales completos y validación visual con archivos GLB reales siguen pendientes. La prueba automática no sustituye una revisión visual en navegador.
