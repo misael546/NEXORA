@@ -730,7 +730,7 @@ test("cinematic 3D action sequences combine walk jump and landing with blended t
   sequence.add("walk", {}, { duration: 0.6, blendDuration: 0.12 });
   sequence.add("jump", {}, { duration: 0.95, blendDuration: 0.16 });
   sequence.add("land", {}, { duration: 0.55, blendDuration: 0.12 });
-  assert.equal(sequence.totalDuration, 2.1);
+  assert.ok(Math.abs(sequence.totalDuration - 2.1) < 1e-8);
   assert.deepEqual(Array.from(sequence.timeline().map(x => x.action)), ["walk", "jump", "land"]);
 
   const player = sequence.createPlayer();
