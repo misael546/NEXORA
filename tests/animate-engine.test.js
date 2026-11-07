@@ -618,3 +618,16 @@ test("3D action transitions blend from the current acting pose instead of snappi
   talk.advance(0.2);
   assert.ok(Math.abs(rig.byName.get("pelvis").rotation[2]) < 1e-8);
 });
+
+test("animation studio loads the 3D action library and parses its bridge script", () => {
+  const root = path.join(__dirname, "..");
+  const bridgePath = path.join(root, "admin/animate-engine/studio-bridge.js");
+  const studioPath = path.join(root, "admin/animate-studio.html");
+  const bridge = fs.readFileSync(bridgePath, "utf8");
+  const studio = fs.readFileSync(studioPath, "utf8");
+  assert.doesNotThrow(() => new vm.Script(bridge, { filename: bridgePath }));
+  assert.ok(studio.includes('<script src="animate-engine/spatial-actions.js"></script>'));
+  assert.ok(bridge.includes('id="n3dAction"'));
+  assert.ok(bridge.includes('id="n3dBlend"'));
+  assert.ok(bridge.includes("updateSkinnedMeshes()"));
+});
