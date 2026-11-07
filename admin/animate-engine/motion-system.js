@@ -68,7 +68,7 @@ const cycles={
 };
 function chainPoint(root,angle,length){return{x:root.x+Math.sin(angle)*length,y:root.y+Math.cos(angle)*length}}
 function applyWalkKinematics(out,base,preset,progress){
- const phase=progress*Math.PI*4,amplitude=preset==="dino-walk"?.25:.11,bend=preset==="dino-walk"?.42:.28;
+ const phase=progress*Math.PI*4,amplitude=preset==="dino-walk"?.16:.075,bend=preset==="dino-walk"?.62:.48;
  const solve=(rootName,jointName,endName,phaseOffset,swing,bendAmount)=>{
   const r=out[rootName],bRoot=base[rootName],bJoint=base[jointName],bEnd=base[endName];
   if(!r||!bRoot||!bJoint||!bEnd)return;
@@ -77,10 +77,11 @@ function applyWalkKinematics(out,base,preset,progress){
   if(len1<.001||len2<.001)return;
   const angle1=Math.atan2(dx1,dy1),angle2=Math.atan2(dx2,dy2),phaseNow=phase+phaseOffset;
   const wave=Math.sin(phaseNow),lift=Math.max(0,Math.cos(phaseNow));
+  // Shorter stride with a clearer knee/ankle fold: feet stay under the hips instead of skating sideways.
   const nextAngle=angle1+swing*wave;
   const joint=chainPoint(r,nextAngle,len1);
   const bendSign=Math.sign(angle1)||1;
-  const lowerAngle=angle2+swing*.45*wave+bendSign*bendAmount*lift;
+  const lowerAngle=angle2+swing*.32*wave+bendSign*bendAmount*lift;
   const end=chainPoint(joint,lowerAngle,len2);
   out[jointName]=joint;out[endName]=end;
  };
