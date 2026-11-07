@@ -243,7 +243,9 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.ok(roarPose.head.y > dino.points.head.y - 0.021);
   assert.ok(roarPose.jaw.y < dino.points.jaw.y + 0.066);
   motion.usePreset("dino-tail-swipe", 2);
-  assert.ok(motion.sample(1).tail4.y > dino.points.tail4.y);
+  const tailWhip = motion.sample(1);
+  assert.ok(tailWhip.tail4.y > dino.points.tail4.y + .18);
+  assert.ok(tailWhip.tail4.x > dino.points.tail4.x + .05);
   motion.usePreset("dino-walk", 2);
   const dinoStep = motion.sample(.74);
   assert.ok(Math.abs(dinoStep.footL.x - dino.points.footL.x) < .06);
