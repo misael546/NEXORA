@@ -42,12 +42,13 @@ const cycles={
  },
  "worker-run":(p,t)=>cycles.run(p,t),
  "worker-work":(p,t)=>{const s=cyc(t*1.5),lift=Math.max(0,s);if(p==="head"||p==="neck")return{x:.005*s,y:.025+Math.abs(s)*.008};if(p==="hip")return{x:0,y:.018};if(/elbowL/.test(p))return{x:-.018*lift,y:-.035*lift};if(/handL/.test(p))return{x:-.025*lift,y:-.075*lift};if(/elbowR/.test(p))return{x:.012*lift,y:-.018*lift};if(/handR/.test(p))return{x:.025*lift,y:-.05*lift};return{x:0,y:0}},
- "worker-lift":(p,t)=>{const lift=t<.28?ease(t/.28):t<.72?1:1-ease((t-.72)/.28);if(p==="head"||p==="neck")return{x:0,y:.035-.025*lift};if(p==="hip")return{x:0,y:.025-.012*lift};if(p==="shoulderL")return{x:.018*lift,y:-.035*lift};if(p==="shoulderR")return{x:-.018*lift,y:-.035*lift};if(p==="elbowL")return{x:.025*lift,y:-.065*lift};if(p==="elbowR")return{x:-.025*lift,y:-.065*lift};if(p==="handL")return{x:.015*lift,y:-.15*lift};if(p==="handR")return{x:-.015*lift,y:-.15*lift};if(/knee/.test(p))return{x:0,y:.025*(1-lift)};return{x:0,y:0}},
- "worker-carry":(p,t)=>{const s=cyc(t);if(p==="head")return{x:.004*s,y:-.004*Math.abs(s)};if(p==="hip")return{x:0,y:-.012*Math.abs(s)};if(p==="shoulderL")return{x:.015,y:-.018};if(p==="shoulderR")return{x:-.015,y:-.018};if(p==="elbowL")return{x:.025,y:-.035};if(p==="elbowR")return{x:-.025,y:-.035};if(p==="handL")return{x:.012,y:-.035};if(p==="handR")return{x:-.012,y:-.035};if(/foot/.test(p))return{x:s*(p.includes("L")?.018:-.018),y:0};return{x:0,y:0}},
+ "worker-lift":(p,t)=>{const lift=t<.28?ease(t/.28):t<.72?1:1-ease((t-.72)/.28);if(p==="jaw")return{x:0,y:.014*lift};if(p==="head"||p==="neck")return{x:0,y:.035-.025*lift};if(p==="hip")return{x:0,y:.025-.012*lift};if(p==="shoulderL")return{x:.018*lift,y:-.035*lift};if(p==="shoulderR")return{x:-.018*lift,y:-.035*lift};if(p==="elbowL")return{x:.025*lift,y:-.065*lift};if(p==="elbowR")return{x:-.025*lift,y:-.065*lift};if(p==="handL")return{x:.015*lift,y:-.15*lift};if(p==="handR")return{x:-.015*lift,y:-.15*lift};if(/knee/.test(p))return{x:0,y:.025*(1-lift)};return{x:0,y:0}},
+ "worker-carry":(p,t)=>{const s=cyc(t);if(p==="jaw")return{x:0,y:.009*Math.max(0,Math.sin(t*Math.PI*2))};if(p==="head")return{x:.004*s,y:-.004*Math.abs(s)};if(p==="hip")return{x:0,y:-.012*Math.abs(s)};if(p==="shoulderL")return{x:.015,y:-.018};if(p==="shoulderR")return{x:-.015,y:-.018};if(p==="elbowL")return{x:.025,y:-.035};if(p==="elbowR")return{x:-.025,y:-.035};if(p==="handL")return{x:.012,y:-.035};if(p==="handR")return{x:-.012,y:-.035};if(/foot/.test(p))return{x:s*(p.includes("L")?.018:-.018),y:0};return{x:0,y:0}},
  "worker-hammer":(p,t)=>{
   const raise=t<.36?ease(t/.36):t<.48?1:t<.56?1-ease((t-.48)/.08):0;
   const strike=t<.48?0:t<.60?ease((t-.48)/.12):t<.70?1:t<.84?1-ease((t-.70)/.14):0;
   if(p==="head"||p==="neck")return{x:.004*raise,y:.014*strike-.01*raise};
+  if(p==="jaw")return{x:0,y:.012*raise+.024*strike};
   if(p==="hip")return{x:-.008*raise,y:.01*strike};
   if(p==="shoulderR")return{x:-.018*raise+.025*strike,y:-.08*raise+.045*strike};
   if(p==="elbowR")return{x:-.03*raise+.04*strike,y:-.18*raise+.12*strike};
