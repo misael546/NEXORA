@@ -122,8 +122,11 @@ function createPlayer(rig,action,options={}){return new SpatialActionPlayer(rig,
 class SpatialActionSequence{
  constructor(rig,{name="Secuencia cinematográfica",segments=[]}={}){if(!rig?.bones)throw Error("La secuencia necesita un rig 3D");this.rig=rig;this.name=name;this.segments=[];for(const segment of segments)this.add(segment.action,segment.options||{},segment)}
  add(action,options={},settings={}){
-  const clip=createClip(this.rig,action,options),duration=Number(settings.duration??options.duration??clip.duration),blendDuration=clamp(Number(settings.blendDuration??options.blendDuration??.22),0,2);
+  if(this.segments.length>=100)throw Error("Una secuencia admite como máximo 100 acciones");
+  if(!options||typeof options!=="object"||Array.isArray(options))throw Error("Las opciones de una acción deben ser un objeto");
+  const clip=createClip(this.rig,action,options),duration=Number(settings.duration??options.duration??clip.duration),blendDuration=Number(settings.blendDuration??options.blendDuration??.22);
   if(!Number.isFinite(duration)||duration<.05||duration>120)throw Error("La duración de cada acción debe estar entre 0.05 y 120 segundos");
+  if(!Number.isFinite(blendDuration)||blendDuration<0||blendDuration>2)throw Error("El fundido debe estar entre 0 y 2 segundos");
   this.segments.push({action,options:{...options},duration,blendDuration,clip});
   return this;
  }
