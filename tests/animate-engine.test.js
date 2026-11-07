@@ -334,3 +334,30 @@ test("3D dinosaur dialogue demo contains syntactically valid inline JavaScript",
   assert.match(html,/no esculpí estos músculos para pelear/);
   assert.match(html,/NEXORA-Coelo-y-el-musculo\.webm/);
 });
+
+test("dinosaur 3D rig has articulated jaw, limbs and a three-segment tail", () => {
+  const { api } = loadEngine();
+  const rig = api.NexoraSpatialRig3D.createDinosaur();
+  const tailBefore = rig.worldPosition("tailTip");
+  const headBefore = rig.worldPosition("head");
+  rig.setPose("tailBase", { rotation: [0, 0, Math.sin(0.35), Math.cos(0.35)] });
+  rig.setPose("neckMid", { rotation: [0, 0, Math.sin(-0.12), Math.cos(-0.12)] });
+  const tailAfter = rig.worldPosition("tailTip");
+  const headAfter = rig.worldPosition("head");
+  assert.ok(Math.abs(tailAfter[1] - tailBefore[1]) > 0.01);
+  assert.ok(Math.abs(headAfter[0] - headBefore[0]) > 0.01);
+  assert.ok(rig.byName.has("jaw"));
+  assert.ok(rig.byName.has("footL") && rig.byName.has("footR"));
+  assert.ok(rig.byName.has("tailBase") && rig.byName.has("tailMid") && rig.byName.has("tailTip"));
+  const restored = api.NexoraSpatialRig3D.SpatialRig3D.fromJSON(rig.exportJSON());
+  assert.deepEqual(Array.from(restored.worldPosition("tailTip")), Array.from(tailAfter));
+});
+
+test("3D linear blend skinning moves weighted vertices with the dinosaur skeleton", () => {
+  const { api } = loadEngine();
+  const rig = api.NexoraSpatialRig3D.createDinosaur();
+  const before = rig.skinVertices([0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]);
+  rig.setPose("pelvis", { translation: [0, 1, 0] });
+  const after = rig.skinVertices([0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]);
+  assert.ok(after[1] > before[1]);
+});
