@@ -108,6 +108,27 @@ test("motion timeline honors a keyframe at zero, supports hold and linearly inte
   assert.throws(() => timeline.addKeyframe(1, { head: { x: .2, y: .2 } }, "unknown"), /Interpolación/);
 });
 
+test("motion transitions blend from the current pose and return to the target clip", () => {
+  const { api } = loadEngine();
+  const rig = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const source = new api.NexoraMotionSystem.MotionTimeline(rig.points);
+  source.usePreset("worker-walk", 2);
+  const fromPose = source.sample(.55);
+  const target = new api.NexoraMotionSystem.MotionTimeline(rig.points);
+  target.usePreset("worker-hammer", 2);
+  const expectedMiddle = target.sample(.2);
+  source.setBase(rig.points);
+  source.transitionTo("worker-hammer", 2, .4, fromPose);
+  assert.deepEqual(source.sample(0), fromPose);
+  const middle = source.sample(.2);
+  assert.notDeepEqual(middle, fromPose);
+  assert.notDeepEqual(middle, expectedMiddle);
+  assert.deepEqual(source.sample(.4), expectedMiddle);
+  source.usePreset("worker-idle", 2);
+  assert.deepEqual(source.sample(0), rig.points);
+  assert.throws(() => source.transitionTo("worker-run", 2, 9, fromPose), /transición/);
+});
+
 test("motion import validates keyframe timing and accepts legacy easing defaults", () => {
   const { api } = loadEngine();
   const timeline = new api.NexoraMotionSystem.MotionTimeline();
