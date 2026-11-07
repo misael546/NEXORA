@@ -230,6 +230,10 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   const worker = new api.NexoraMotionSystem.MotionTimeline(human.points);
   worker.usePreset("worker-hammer", 2);
   assert.ok(worker.sample(.125).handR.y < human.points.handR.y);
+  const hammerRaised = worker.sample(.7);
+  const hammerImpact = worker.sample(1.2);
+  assert.ok(hammerRaised.handR.y < human.points.handR.y - .25, "The hammer must rise above shoulder height before impact.");
+  assert.ok(hammerImpact.handR.y > human.points.handR.y + .10, "The hammer arm must travel down into the strike.");
   assert.ok(api.NexoraMotionSystem.profiles.worker.includes("worker-lift"));
   const dino = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
   const motion = new api.NexoraMotionSystem.MotionTimeline(dino.points);
