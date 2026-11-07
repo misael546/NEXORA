@@ -227,7 +227,7 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  for(let i=0;i<10;i++){const t=i/10,a=mix(ridgeStart,ridgeEnd,t),size=9*(1-t*.32);polygon(ctx,[{x:a.x-size,y:a.y-18},{x:a.x-1,y:a.y-19-size},{x:a.x+size,y:a.y-15}],i%2?"#8fc66b":"#c8e68e","#315f43",1.5)}
  // Head and muzzle, slightly three-quarter profile.
  const headAngle=Math.atan2(neck.y-head.y,neck.x-head.x);
- const jawMouth={x:jaw.x,y:Math.min(jaw.y,head.y+h*.115)};
+ const jawMouth={x:jaw.x,y:Math.min(jaw.y,head.y+h*.17)};
  ellipse(ctx,head,43,28,gradient(ctx,{x:head.x-34,y:head.y-27},{x:head.x+27,y:head.y+25},[[0,"#d9f4a0"],[.48,"#83bd62"],[1,"#3a754b"]]),"#173b35",4,-.12);
  // Broad upper muzzle with a tapered snout, cheek plane and a distinct brow-to-nose silhouette.
  bezierShape(ctx,{x:head.x-34,y:head.y+2},[
@@ -237,8 +237,17 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  ],gradient(ctx,{x:head.x-28,y:head.y-3},{x:head.x+8,y:head.y+17},[[0,"#c7e98b"],[1,"#4a8751"]]),"#173b35",2.5);
  // Keep the lower jaw hinged beneath the muzzle. Its opening is clamped so a roar never stretches the mouth into a spike.
  polygon(ctx,[{x:head.x-27,y:head.y+7},{x:head.x-9,y:head.y+12},{x:jawMouth.x+12,y:jawMouth.y+2},{x:jawMouth.x+8,y:jawMouth.y+10},{x:head.x-13,y:jawMouth.y+9},{x:head.x-30,y:head.y+14}],gradient(ctx,{x:head.x-8,y:head.y+12},jawMouth,[[0,"#8fbd65"],[1,"#386c48"]]),"#173b35",3);
- polygon(ctx,[{x:head.x-25,y:head.y+10},{x:head.x-8,y:head.y+14},{x:jawMouth.x+8,y:jawMouth.y+5},{x:jawMouth.x+4,y:jawMouth.y+7}],"#48282d",null);
- segment(ctx,{x:head.x-25,y:head.y+10},{x:jawMouth.x+7,y:jawMouth.y+4},2.6,"#3a2629","#1c2026");
+ polygon(ctx,[
+  {x:head.x-34,y:head.y+7},{x:head.x-12,y:head.y+12},
+  {x:jawMouth.x+9,y:jawMouth.y+2},{x:jawMouth.x+6,y:jawMouth.y+14},
+  {x:head.x-12,y:jawMouth.y+10},{x:head.x-33,y:head.y+15}
+ ],"#371d27","#1d2025",1.5);
+ // Tongue and gum shading stay inside the moving lower jaw.
+ bezierShape(ctx,{x:head.x-25,y:jawMouth.y+3},[
+  [head.x-17,jawMouth.y+1,head.x-7,jawMouth.y+3,head.x-4,jawMouth.y+8],
+  [head.x-11,jawMouth.y+10,head.x-21,jawMouth.y+9,head.x-25,jawMouth.y+3]
+ ],"#b75f69",null);
+ segment(ctx,{x:head.x-32,y:head.y+10},{x:jawMouth.x+7,y:jawMouth.y+3},2.8,"#3a2629","#1c2026");
  // Upper and lower teeth follow the hinged jaw.
  for(let i=0;i<4;i++){const x=head.x-17+i*8;polygon(ctx,[{x,y:head.y+9+i*.8},{x:x+4,y:head.y+9+i*.8},{x:x+2,y:head.y+16+i}],"#f1edcf","#b1b28e",.8)}
  for(let i=0;i<4;i++){const x=head.x-12+i*8;polygon(ctx,[{x,y:jawMouth.y+8},{x:x+5,y:jawMouth.y+8},{x:x+2.5,y:jawMouth.y+2}],"#f1edcf","#b1b28e",.8)}
