@@ -37,6 +37,7 @@ function loadEngine() {
     "character-skeleton.js",
     "spatial-engine.js",
     "spatial-rig.js",
+    "facial-animation.js",
     "spatial-motion.js",
     "audio-engine.js",
     "continuity.js",
