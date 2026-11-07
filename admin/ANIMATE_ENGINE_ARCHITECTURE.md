@@ -177,3 +177,16 @@ Los dinosaurios son personajes procedurales de piezas 3D, no modelos escaneados 
 ### Próxima prioridad
 
 Implementar importación GLB con skins y animaciones conservando los datos del archivo, y después conectar esos modelos al rig y al reproductor de clips 3D. No sustituir modelos reales por más primitivas geométricas ni declarar calidad final sin pruebas visuales y de audio en navegador.
+
+
+## Evolución 2.4 — importación de datos de skin y rig GLB
+
+- El lector GLB conserva los skins, el orden de articulaciones, las matrices inverse-bind, los nodos y los canales de animación con sus tiempos y valores.
+- Las mallas skinned importan `JOINTS_0/WEIGHTS_0` y el segundo conjunto opcional `JOINTS_1/WEIGHTS_1`; los pesos se normalizan y se expanden respetando los índices de triángulos.
+- `SpatialRig3D.createFromGLB(parsed, skinIndex)` reconstruye la jerarquía de nodos, conserva transformaciones TRS y descompone matrices de nodos en traslación, rotación y escala cuando es posible. Devuelve el rig, el mapeo de articulaciones y las matrices inverse-bind.
+- El skinning CPU admite cuatro u ocho influencias por vértice y un mapeo explícito entre índices del skin e índices del rig.
+- La suite cubre lectura de skins, canales de animación, reconstrucción de jerarquía, ocho influencias y mapeo de articulaciones.
+
+### Límite de integración
+
+Esta etapa conserva y prepara los datos del personaje, pero el visor WebGL todavía no reproduce los clips GLB ni actualiza automáticamente los vértices skinned durante cada fotograma. La importación visual actual sigue mostrando la geometría estática. El siguiente paso es conectar el rig reconstruido al búfer dinámico de vértices y al reproductor de clips, y validar modelos reales en navegador.
