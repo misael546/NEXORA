@@ -108,8 +108,11 @@ function solveTwoBoneIK(root,target,len1,len2,pole=1){
  return{x:root.x+Math.cos(base)*l1,y:root.y+Math.sin(base)*l1};
 }
 function applyWalkKinematics(out,base,preset,progress){
- const phase=progress*Math.PI*4,dinosaur=preset==="dino-walk";
- const stride=dinosaur?.045:.032,liftHeight=dinosaur?.048:.064,armRange=dinosaur?.014:.018;
+ const dinosaur=preset.startsWith("dino-"),running=preset.endsWith("-run");
+ const phase=progress*Math.PI*4*(running?1.35:1);
+ const stride=dinosaur?(running?.07:.045):(running?.054:.032);
+ const liftHeight=dinosaur?(running?.065:.048):(running?.086:.064);
+ const armRange=dinosaur?(running?.022:.014):(running?.03:.018);
  const solveChain=(rootName,jointName,endName,phaseOffset,range,lift,pole)=>{
   const root=out[rootName],baseRoot=base[rootName],baseJoint=base[jointName],baseEnd=base[endName];
   if(!root||!baseRoot||!baseJoint||!baseEnd)return;
@@ -131,15 +134,16 @@ function applyWalkKinematics(out,base,preset,progress){
  solveChain("hip","kneeL","footL",0,stride,liftHeight,1);
  solveChain("hip","kneeR","footR",Math.PI,stride,liftHeight,-1);
  // Arms counter-swing against the legs, with smaller travel than the feet.
- solveChain("shoulderL","elbowL","handL",Math.PI,armRange,dinosaur?.008:.012,1);
- solveChain("shoulderR","elbowR","handR",0,armRange,dinosaur?.008:.012,-1);
+ const armLift=dinosaur?(running?.015:.008):(running?.02:.012);
+ solveChain("shoulderL","elbowL","handL",Math.PI,armRange,armLift,1);
+ solveChain("shoulderR","elbowR","handR",0,armRange,armLift,-1);
  if(dinosaur){
   let root=out.hip;
   const names=["tail1","tail2","tail3","tail4"],parents=["hip","tail1","tail2","tail3"];
   names.forEach((name,i)=>{
    const parent=parents[i],a=base[parent],b=base[name];if(!a||!b)return;
    const length=Math.hypot(b.x-a.x,b.y-a.y),baseAngle=Math.atan2(b.x-a.x,b.y-a.y);
-   const sway=Math.sin(phase-(i+1)*.62)*(.035+(i+1)*.012);
+   const sway=Math.sin(phase-(i+1)*.62)*(running?.055+(i+1)*.016:.035+(i+1)*.012);
    root=chainPoint(root,baseAngle+sway,length);out[name]=root;
   });
  }
@@ -174,7 +178,7 @@ class MotionTimeline{
   }
   const t=current/this.duration,fn=cycles[this.preset]||cycles.idle,single=new Set(["worker-lift","worker-push","worker-pull","worker-kneel","worker-point","worker-hammer","dino-roar","dino-bite","dino-tail-swipe","dino-hit","dino-crouch","dino-sniff","dino-stomp","dino-pounce","dino-threat"]),phase=single.has(this.preset)?t:t*2,out={};
   for(const[name,p]of Object.entries(this.base)){const d=fn(name,phase);out[name]={x:clamp(p.x+d.x),y:clamp(p.y+d.y)}}
-  if(this.preset==="worker-walk"||this.preset==="dino-walk")applyWalkKinematics(out,this.base,this.preset,t);
+  if(["worker-walk","worker-run","dino-walk","dino-run"].includes(this.preset))applyWalkKinematics(out,this.base,this.preset,t);
   return finish(out);
  }
  apply(rig,time){rig.points=this.sample(time);return rig.points}
