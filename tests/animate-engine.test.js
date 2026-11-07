@@ -642,3 +642,43 @@ test("looping 3D actions complete their blend once without restarting it each cy
   assert.ok(player.elapsed >= 1.1);
   assert.ok(rig.byName.get("pelvis").rotation[2] < -0.005);
 });
+
+test("3D renderer applies timed facial expressions and visemes through its shared scene clock", () => {
+  const { api } = loadEngine();
+  const mesh = {
+    id: "face",
+    morphTargets: [
+      { name: "eyeBlinkLeft" },
+      { name: "eyeBlinkRight" },
+      { name: "jawOpen" },
+      { name: "visemeAA" }
+    ],
+    morphWeights: [0, 0, 0, 0]
+  };
+  mesh.facialAnimator = new api.NexoraFacialAnimation.FacialAnimator([mesh]);
+  const renderer = Object.create(api.NexoraSpatialEngine.SpatialRenderer.prototype);
+  renderer.meshes = [mesh];
+  let updates = 0, renders = 0;
+  renderer.updateSkinnedMesh = current => { assert.equal(current, mesh); updates++; };
+  renderer.render = () => { renders++; return renderer; };
+  const track = [{ start: 0.1, end: 0.4, phoneme: "A" }];
+  const count = renderer.applyFacialAnimation(0.25, track, { mouthOpen: 0.7, blinkOffset: 3.42 });
+  assert.equal(count, 1);
+  assert.ok(mesh.morphWeights[0] > 0.99);
+  assert.ok(mesh.morphWeights[1] > 0.99);
+  assert.equal(mesh.morphWeights[2], 0.7);
+  assert.equal(mesh.morphWeights[3], 0.7);
+  assert.equal(updates, 1);
+  assert.equal(renders, 1);
+});
+
+test("studio validates facial cue controls and drives face animation beside body motion", () => {
+  const root = path.join(__dirname, "..");
+  const bridgePath = path.join(root, "admin/animate-engine/studio-bridge.js");
+  const bridge = fs.readFileSync(bridgePath, "utf8");
+  assert.doesNotThrow(() => new vm.Script(bridge, { filename: bridgePath }));
+  assert.ok(bridge.includes('id="n3dVisemeTrack"'));
+  assert.ok(bridge.includes('id="n3dFaceValidate"'));
+  assert.ok(bridge.includes("applyFacialFrame(facialTime)"));
+  assert.ok(bridge.includes("spatialRenderer.applyFacialAnimation"));
+});
