@@ -61,7 +61,7 @@ function worker(t){
  const fatigue=smooth((t-3.2)/5),celebrate=smooth((t-10.2)/1.1),sleep=smooth((t-12)/1.7);
  const typing=Math.sin(t*13),breath=Math.sin(t*2.1)*2;
  const yawn=smooth((t-5.15)/.35)*(1-smooth((t-7.5)/.55)),rub=smooth((t-7.7)/.35)*(1-smooth((t-9.1)/.35)),headDroop=Math.sin(t*2.3)*3*fatigue*(1-sleep)+Math.sin(t*3.1)*1.8*sleep;
- const headX=mix(530,630,sleep),headY=mix(310,420,sleep)+Math.sin(t*2)*2*sleep;
+ const headX=mix(530,540,sleep),headY=mix(310,345,sleep)+Math.sin(t*2)*2*sleep;
  const lean=mix(0,40,sleep),slump=fatigue*12;
  // chair
  rounded(380,350,125,210,28,'#273b53');rounded(400,530,90,16,7,'#1b293a');
@@ -69,7 +69,7 @@ function worker(t){
  line(480,515,465,660,'#202b3b',26);line(465,660,550,665,'#182333',16);
  line(555,515,610,650,'#202b3b',26);line(610,650,680,660,'#182333',16);
  // body
- ctx.save();ctx.translate(0,slump);ctx.fillStyle='#557f91';ctx.beginPath();ctx.moveTo(440,345);ctx.quadraticCurveTo(500,320,560,350);ctx.lineTo(595,510);ctx.quadraticCurveTo(510,540,420,510);ctx.closePath();ctx.fill();ctx.strokeStyle='#2d5367';ctx.lineWidth=4;ctx.stroke();
+ ctx.save();ctx.translate(0,slump);ctx.translate(510,500);ctx.rotate(.34*sleep);ctx.translate(-510,-500);ctx.fillStyle='#557f91';ctx.beginPath();ctx.moveTo(440,345);ctx.quadraticCurveTo(500,320,560,350);ctx.lineTo(595,510);ctx.quadraticCurveTo(510,540,420,510);ctx.closePath();ctx.fill();ctx.strokeStyle='#2d5367';ctx.lineWidth=4;ctx.stroke();
  // shirt seams and fabric folds
  ctx.strokeStyle='rgba(15,42,58,.52)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(455,376);ctx.quadraticCurveTo(470,420,462,474);ctx.moveTo(548,374);ctx.quadraticCurveTo(563,420,570,475);ctx.stroke();
  ctx.strokeStyle='rgba(193,220,226,.32)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(465,405);ctx.quadraticCurveTo(490,420,510,414);ctx.moveTo(540,430);ctx.quadraticCurveTo(520,452,498,463);ctx.stroke();
@@ -78,7 +78,7 @@ function worker(t){
  // neck
  rounded(488,320,42,48,12,'#d59d7b');
  // head
- ctx.save();ctx.translate(headX,headY+headDroop);ctx.rotate(mix(-.04,.68,sleep)+Math.sin(t*1.7)*.025*(1-sleep));
+ ctx.save();ctx.translate(headX,headY+headDroop);ctx.rotate(mix(-.04,.42,sleep)+Math.sin(t*1.7)*.025*(1-sleep));
  ctx.fillStyle='#e2b18e';ctx.beginPath();ctx.ellipse(0,0,65,78,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#9b6d5c';ctx.lineWidth=3;ctx.stroke();
  // ears
  ctx.fillStyle='#d59d7b';ctx.beginPath();ctx.ellipse(-62,8,13,19,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(62,8,13,19,0,0,Math.PI*2);ctx.fill();
@@ -99,7 +99,7 @@ function worker(t){
  ctx.strokeStyle='#34495a';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(-43,-17,36,31,9);ctx.roundRect(7,-17,36,31,9);ctx.moveTo(-7,-4);ctx.lineTo(7,-4);ctx.stroke();
  ctx.restore();
  // arms and hands
- const armY=365+slump*.5,handLx=mix(550,600,sleep),handLy=mix(478+typing*5,510,sleep),handRx=mix(710,670,sleep),handRy=mix(478-typing*5,510,sleep);
+ const armY=365+slump*.5,handLx=mix(550,600,sleep),handLy=mix(478+typing*5,450,sleep),handRx=mix(710,670,sleep),handRy=mix(478-typing*5,450,sleep);
  ctx.strokeStyle='#557f91';ctx.lineWidth=28;ctx.lineCap='round';
  ctx.beginPath();ctx.moveTo(450,armY);ctx.quadraticCurveTo(425,420,handLx,handLy);ctx.stroke();
  ctx.beginPath();ctx.moveTo(550,armY);ctx.quadraticCurveTo(640,415,handRx,handRy);ctx.stroke();
