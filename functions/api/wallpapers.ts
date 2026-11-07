@@ -8,7 +8,7 @@ async function liveSearch(q:string,category:string,device:string){
  const res=await fetch(url.toString(),{headers:{"User-Agent":"NEXORA-Wallpaper/1.0 (public wallpaper discovery; contact: site administrator)"}});if(!res.ok)return{wallpapers:[],total:0,has_more:false};
  const data:any=await res.json();const pages=Object.values(data.query?.pages||{}) as any[];
  const wallpapers=pages.map(p=>{const info=p.imageinfo?.[0],meta=info?.extmetadata||{};if(!info?.thumburl)return null;const width=Number(info.width||0),height=Number(info.height||0);if(device==="desktop"&&height>width)return null;if(device==="mobile"&&width>=height)return null;const title=String(p.title||"Wallpaper").replace(/^File:/,"").replace(/\.[^.]+$/,"").replace(/[_-]+/g," ");return{id:"commons-"+p.pageid,title,category:categoryFor(title+" "+(meta.ImageDescription?.value||"")),thumb_url:info.thumburl,image_url:info.url,source_url:info.descriptionurl,source_name:"Wikimedia Commons",author:String(meta.Artist?.value||"Comunidad").replace(/<[^>]*>/g,"").slice(0,100),license:String(meta.LicenseShortName?.value||"Ver licencia").replace(/<[^>]*>/g,""),width,height};}).filter(Boolean);
- return{wallpapers,total:wallpapers.length,has_more:false,source:"Wikimedia Commons"};
+ const filtered=category?wallpapers.filter((w:any)=>w.category===category):wallpapers;return{wallpapers:filtered,total:filtered.length,has_more:false,source:"Wikimedia Commons"};
 }
 export const onRequest:PagesFunction<Env>=async({request,env})=>{
  if(request.method!=="GET")return json({error:"Método no permitido"},405);
@@ -24,5 +24,5 @@ export const onRequest:PagesFunction<Env>=async({request,env})=>{
   const order=sort==="popular"?"downloads DESC,published_at DESC":"published_at DESC";
   const {results}=await env.DB.prepare("SELECT id,title,category,tags,thumb_url,image_url,source_url,source_name,author,license,width,height,downloads FROM wallpapers WHERE "+where+" ORDER BY "+order+" LIMIT ? OFFSET ?").bind(...values,limit,(page-1)*limit).all();
   const total=Number(countRow?.total||0);return json({wallpapers:results,total,page,limit,has_more:page*limit<total});
- }catch(error){console.error("Wallpaper query failed",error);return json({error:"No se pudo consultar el catálogo."},500);}
+ }catch(error){console.warn("Wallpaper database unavailable; using live Commons discovery.",error);const live=await liveSearch(q,category,device);return json({...live,notice:"Catálogo persistente pendiente de inicialización."});}
 };
