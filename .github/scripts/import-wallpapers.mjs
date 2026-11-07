@@ -17,13 +17,26 @@ const topics=[
  ["space","galaxy nebula planets astronomy","espacio"],
  ["anime","anime manga character illustration drawing","anime"],
  ["gaming","video game digital art pixel art game scenery","gaming"],
+ ["gaming-pixel","pixel art landscape retro game art","gaming"],
+ ["gaming-concept","video game concept art game environment","gaming"],
  ["cars","cars automotive motorcycles racing photography","autos"],
+ ["cars-classic","classic car automobile photography","autos"],
+ ["cars-sports","sports cars supercars motorsport","autos"],
  ["architecture","architecture buildings interior design","arquitectura"],
  ["technology","technology computer circuit cyberpunk","tecnologia"],
+ ["technology-hardware","computer hardware motherboard electronics","tecnologia"],
+ ["technology-circuits","circuit board electronic components","tecnologia"],
  ["abstract","abstract texture geometric digital art","abstracto"],
  ["minimal","minimal minimalist geometric pattern","minimalista"],
+ ["minimal-photo","minimalist photography simple composition","minimalista"],
+ ["minimal-shapes","geometric shapes minimal art","minimalista"],
  ["cities","city skyline street night photography","ciudades"],
- ["illustration","digital illustration fantasy concept art","arte"]
+ ["city-urban","urban city buildings street photography","ciudades"],
+ ["illustration","digital illustration fantasy concept art","arte"],
+ ["illustration-drawing","illustration digital painting fantasy art","arte"],
+ ["anime-art","anime manga art drawing","anime"],
+ ["anime-illustration","manga illustration character drawing","anime"],
+ ["animals-birds","bird wildlife photography","animales"]
 ].map(([key,query,category])=>({key,query,category}));
 
 const statePath=".github/data/wallpaper-import-state.json";
