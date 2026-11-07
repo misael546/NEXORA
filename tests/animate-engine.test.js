@@ -244,6 +244,11 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.ok(roarPose.jaw.y < dino.points.jaw.y + 0.066);
   motion.usePreset("dino-tail-swipe", 2);
   assert.ok(motion.sample(1).tail4.y > dino.points.tail4.y);
+  motion.usePreset("dino-walk", 2);
+  const dinoStep = motion.sample(.74);
+  assert.ok(Math.abs(dinoStep.footL.x - dino.points.footL.x) < .06);
+  assert.ok(Math.abs(dinoStep.footR.x - dino.points.footR.x) < .06);
+  assert.ok(Math.abs(Math.hypot(dinoStep.kneeL.x-dinoStep.hip.x,dinoStep.kneeL.y-dinoStep.hip.y) - Math.hypot(dino.points.kneeL.x-dino.points.hip.x,dino.points.kneeL.y-dino.points.hip.y)) < .004);
   assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-bite"));
 });
 
