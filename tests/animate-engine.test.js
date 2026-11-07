@@ -432,3 +432,21 @@ test("GLB rig skinning applies inverse mesh transform and updates GPU vertex buf
   const m=api.NexoraSpatialRig3D.math.inverse(api.NexoraSpatialRig3D.math.compose([2,3,4],[0,0,0,1],[2,2,2]));
   assert.ok(Math.abs(m[12]+1)<1e-6 && Math.abs(m[13]+1.5)<1e-6 && Math.abs(m[14]+2)<1e-6);
 });
+
+
+test("GLB animation player samples translation and quaternion channels", () => {
+ const {api}=loadEngine();
+ const rig=new api.NexoraSpatialRig3D.SpatialRig3D([{name:"root"}]);
+ const parsed={animations:[{name:"Move",channels:[
+  {node:0,path:"translation",interpolation:"LINEAR",times:[0,2],values:[[0,0,0],[4,0,0]]},
+  {node:0,path:"rotation",interpolation:"LINEAR",times:[0,2],values:[[0,0,0,1],[0,0,1,0]]}
+ ]}]};
+ const imported={rig,nodeBoneIndices:new Map([[0,0]])};
+ const player=api.NexoraSpatialRig3D.createAnimationPlayer(parsed,imported,0);
+ player.seek(1);
+ assert.ok(Math.abs(rig.bones[0].translation[0]-2)<1e-6);
+ assert.ok(Math.abs(Math.hypot(...rig.bones[0].rotation)-1)<1e-6);
+ player.play().advance(.5);
+ assert.ok(Math.abs(player.time-1.5)<1e-6);
+ player.pause();
+});
