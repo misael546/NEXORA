@@ -7,6 +7,24 @@ function affine(ctx,s0,s1,s2,d0,d1,d2){const den=s0.x*(s1.y-s2.y)+s1.x*(s2.y-s0.
 function pointInPolygon(p,poly){let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j],cross=(p.y-a.y)*(b.x-a.x)/(b.y-a.y||1e-12)+a.x;if((a.y>p.y)!==(b.y>p.y)&&p.x<cross)inside=!inside}return inside}
 function distanceToPolygon(p,poly){let best=Infinity;for(let i=0;i<poly.length;i++){const q=closestOnSegment(p,poly[i],poly[(i+1)%poly.length]);best=Math.min(best,Math.hypot(p.x-q.x,p.y-q.y))}return best}
 function polygonInfluence(p,poly,feather=.045){if(!poly||poly.length<3)return 1;const d=distanceToPolygon(p,poly);if(pointInPolygon(p,poly)){const t=clamp(d/feather,0,1);return t*t*(3-2*t)}const t=clamp(1-d/feather,0,1);return t*t*(3-2*t)}
+function colorRegionHull(data,width,height,seedX,seedY,tolerance=42){
+ if(!data||!Number.isInteger(width)||!Number.isInteger(height)||width<2||height<2||data.length<width*height*4)return null;
+ const sx=Math.max(0,Math.min(width-1,Math.round(seedX))),sy=Math.max(0,Math.min(height-1,Math.round(seedY))),start=(sy*width+sx)*4;
+ const base=[data[start],data[start+1],data[start+2]],tol=Math.max(1,Math.min(180,Number(tolerance)||42)),limit=tol*tol;
+ const seen=new Uint8Array(width*height),queue=new Int32Array(width*height);let head=0,tail=0;const seed=sy*width+sx;seen[seed]=1;queue[tail++]=seed;const boundary=[];
+ while(head<tail){const id=queue[head++],x=id%width,y=(id/width)|0;let edge=false;
+  const neighbors=[x>0?id-1:-1,x<width-1?id+1:-1,y>0?id-width:-1,y<height-1?id+width:-1];
+  for(const n of neighbors){if(n<0){edge=true;continue}if(seen[n])continue;const k=n*4,dr=data[k]-base[0],dg=data[k+1]-base[1],db=data[k+2]-base[2];if(dr*dr+dg*dg+db*db<=limit){seen[n]=1;queue[tail++]=n}else edge=true}
+  if(edge)boundary.push({x:x/(width-1),y:y/(height-1)});
+  if(tail>width*height*.72)return null;
+ }
+ if(tail<Math.max(8,width*height*.001)||boundary.length<3)return null;
+ boundary.sort((a,b)=>a.x-b.x||a.y-b.y);
+ const cross=(o,a,b)=>(a.x-o.x)*(b.y-o.y)-(a.y-o.y)*(b.x-o.x),lower=[],upper=[];
+ for(const p of boundary){while(lower.length>=2&&cross(lower[lower.length-2],lower[lower.length-1],p)<=0)lower.pop();lower.push(p)}
+ for(let i=boundary.length-1;i>=0;i--){const p=boundary[i];while(upper.length>=2&&cross(upper[upper.length-2],upper[upper.length-1],p)<=0)upper.pop();upper.push(p)}
+ lower.pop();upper.pop();const hull=lower.concat(upper);return hull.length>=3?hull:null;
+}
 function closestOnSegment(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy,t=l?clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/l,0,1):0;return{x:a.x+t*dx,y:a.y+t*dy,t}}
 function transformByBone(p,b){const sx=b.sourceB.x-b.sourceA.x,sy=b.sourceB.y-b.sourceA.y,tx=b.targetB.x-b.targetA.x,ty=b.targetB.y-b.targetA.y,sl=Math.max(1e-5,Math.hypot(sx,sy)),tl=Math.hypot(tx,ty),scale=clamp(tl/sl,.35,2.5),angle=Math.atan2(ty,tx)-Math.atan2(sy,sx),c=Math.cos(angle)*scale,s=Math.sin(angle)*scale,rx=p.x-b.sourceA.x,ry=p.y-b.sourceA.y;return{x:b.targetA.x+rx*c-ry*s,y:b.targetA.y+rx*s+ry*c}}
 class MeshDeformer{
@@ -27,5 +45,5 @@ class MeshDeformer{
  exportJSON(){return JSON.stringify({version:3,columns:this.columns,rows:this.rows,strength:this.strength,influenceRadius:this.influenceRadius,controls:this.controls,bones:this.bones,regions:this.regions},null,2)}
  importJSON(raw){const d=typeof raw==="string"?JSON.parse(raw):raw;if(![1,2,3].includes(d.version)||!Array.isArray(d.controls))throw new Error("Malla incompatible");this.columns=Math.max(2,Math.min(32,d.columns||8));this.rows=Math.max(2,Math.min(32,d.rows||10));this.strength=clamp(d.strength??1,0,1);this.influenceRadius=clamp(d.influenceRadius??.22,.03,1);this.setControls(d.controls);if(d.version>=2)this.setBones(d.bones||[]);if(d.version>=3)this.setRegions(d.regions||[]);return this}
 }
-window.NexoraMeshDeformer={MeshDeformer,barycentric,affine,closestOnSegment,transformByBone,pointInPolygon,polygonInfluence};
+window.NexoraMeshDeformer={MeshDeformer,barycentric,affine,closestOnSegment,transformByBone,pointInPolygon,polygonInfluence,colorRegionHull};
 })();
