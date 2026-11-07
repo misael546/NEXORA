@@ -36,5 +36,7 @@ jobs:
             echo "No cursor changes to save."
           else
             git commit -m "chore: advance NEXORA wallpaper import cursors"
+            git fetch origin main
+            git rebase origin/main
             git push
           fi
