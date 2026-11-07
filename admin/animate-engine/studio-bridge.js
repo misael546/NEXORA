@@ -140,6 +140,23 @@ $("ncImport").addEventListener("click",()=>$("ncFile").click());
 $("ncFile").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{const raw=JSON.parse(await file.text());if(raw.format==="nexora-character-bible-package"&&Array.isArray(raw.characters)){const characters=[];for(const p of raw.characters){const refs=[];for(const ref of p.referenceAssets||[]){if(ref.dataUrl){const saved=await assetStore.put(dataURLToBlob(ref.dataUrl),{name:ref.name});refs.push({...ref,assetId:saved.id,dataUrl:undefined})}else refs.push(ref)}characters.push({...p,referenceAssets:refs})}continuity.importJSON({format:"nexora-character-bible",version:1,characters})}else continuity.importJSON(raw);refresh();status("Biblia importada correctamente.")}catch(err){status("No se pudo importar: "+err.message)}e.target.value=""});
 refresh();
 const engine=new window.NexoraVisualEngine.VisualEngine($("nvCanvas"));
+const studioBackdrop=engine.addLayer({name:"Fondo de estudio 2D",type:"custom",z:0,draw:(ctx)=>{
+ const w=engine.width,h=engine.height,horizon=h*.76;
+ const sky=ctx.createLinearGradient(0,0,0,horizon);
+ sky.addColorStop(0,"#182838");sky.addColorStop(1,"#0d1824");
+ ctx.fillStyle=sky;ctx.fillRect(0,0,w,horizon);
+ const floor=ctx.createLinearGradient(0,horizon,0,h);
+ floor.addColorStop(0,"#24343d");floor.addColorStop(1,"#0c141c");
+ ctx.fillStyle=floor;ctx.fillRect(0,horizon,w,h-horizon);
+ const glow=ctx.createRadialGradient(w*.5,h*.52,4,w*.5,h*.52,w*.52);
+ glow.addColorStop(0,"rgba(100,184,188,.13)");glow.addColorStop(1,"rgba(100,184,188,0)");
+ ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
+ ctx.save();ctx.strokeStyle="rgba(178,211,220,.09)";ctx.lineWidth=1;
+ ctx.beginPath();ctx.moveTo(0,horizon);ctx.lineTo(w,horizon);ctx.stroke();
+ for(let row=1;row<=4;row++){const y=horizon+(h-horizon)*row/5;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+ for(let col=-4;col<=4;col++){ctx.beginPath();ctx.moveTo(w*.5,horizon);ctx.lineTo(w*.5+col*w*.16,h);ctx.stroke()}
+ ctx.restore();
+}});
 const compositor=new window.NexoraCompositor.SceneCompositor(engine);const scene=new window.NexoraSceneProject.SceneProject();const characterStage=new window.NexoraCharacterStage.CharacterStage(window.NexoraCharacterArt.draw);
 const audioTimeline=window.NexoraAudio?new window.NexoraAudio.AudioTimeline():null;let spatialRenderer=null;
 function drawAudioTracks(){const root=$("naTracks");root.innerHTML="";if(!audioTimeline.tracks.length){root.textContent="No hay pistas añadidas.";return}for(const t of audioTimeline.tracks){const row=document.createElement("div");row.style.cssText="padding:8px;margin:7px 0;border:1px solid var(--line);border-radius:8px";const title=document.createElement("strong");title.textContent=t.kind.toUpperCase()+" · "+t.name;row.append(title);for(const [label,key,min,max,step]of [["Entrada","start",0,3600,.1],["Volumen","volume",0,2,.05],["Paneo","pan",-1,1,.1],["Fundido entrada","fadeIn",0,30,.1],["Fundido salida","fadeOut",0,30,.1]]){const l=document.createElement("label");l.textContent=label+" ";l.style.cssText="font-size:10px;color:var(--muted);margin:5px";const i=document.createElement("input");i.type="number";i.min=min;i.max=max;i.step=step;i.value=t[key];i.style.width="75px";i.addEventListener("change",()=>audioTimeline.update(t.id,{[key]:Number(i.value)}));l.append(i);row.append(l)}const del=document.createElement("button");del.className="btn";del.textContent="Quitar";del.addEventListener("click",()=>{audioTimeline.remove(t.id);drawAudioTracks()});row.append(del);root.append(row)}}
