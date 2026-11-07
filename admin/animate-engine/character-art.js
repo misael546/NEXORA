@@ -140,20 +140,25 @@ function drawWorker(ctx,w,h,rig,options={}){
  ellipse(ctx,head,27.5,32,gradient(ctx,{x:head.x-20,y:head.y-24},{x:head.x+21,y:head.y+27},[[0,"#ffe8c8"],[.48,"#e7ad82"],[1,"#a96354"]]),"#57372f",3,faceAngle);
  // Soft jaw shadow gives the face volume under the hard hat.
  ellipse(ctx,{x:head.x+1,y:head.y+16},17,10,"rgba(102,51,43,.12)",null);
+ const effort=["worker-hammer","worker-lift","worker-carry","worker-dig"].includes(action)?1:0;
+ const gazeX=action==="worker-hammer"?2.1:action==="worker-dig"?-1.2:0,gazeY=action==="worker-hammer"?-1.1:0;
+ const browDrop=effort*(action==="worker-hammer"?.9:1.5);
  const blinkAt=((Number(options.time)||0)+.2)%3.7,eyeOpen=blinkAt<.13?Math.max(.12,Math.abs(blinkAt-.065)/.065):1;
  ellipse(ctx,{x:head.x-11.5,y:head.y-1},4.8,5.8*eyeOpen,"#fffdf5","#8a604c",.9);
  ellipse(ctx,{x:head.x+8.5,y:head.y-1},4.8,5.8*eyeOpen,"#fffdf5","#8a604c",.9);
- ellipse(ctx,{x:head.x-10.5,y:head.y},2.8,3.8*eyeOpen,"#465c7b",null);
- ellipse(ctx,{x:head.x+9.5,y:head.y},2.8,3.8*eyeOpen,"#465c7b",null);
- ellipse(ctx,{x:head.x-10.5,y:head.y-1.2},1.45,1.7*eyeOpen,"#15243a",null);
- ellipse(ctx,{x:head.x+9.5,y:head.y-1.2},1.45,1.7*eyeOpen,"#15243a",null);
- ellipse(ctx,{x:head.x-12,y:head.y-3},1.35,1.4*eyeOpen,"#ffffff",null);
- ellipse(ctx,{x:head.x+8,y:head.y-3},1.35,1.4*eyeOpen,"#ffffff",null);
- segment(ctx,{x:head.x-16,y:head.y-8},{x:head.x-6,y:head.y-11},3.2,"#573a31");
- segment(ctx,{x:head.x+4,y:head.y-11},{x:head.x+15,y:head.y-8},3.2,"#573a31");
+ ellipse(ctx,{x:head.x-10.5+gazeX,y:head.y+gazeY},2.8,3.8*eyeOpen,"#465c7b",null);
+ ellipse(ctx,{x:head.x+9.5+gazeX,y:head.y+gazeY},2.8,3.8*eyeOpen,"#465c7b",null);
+ ellipse(ctx,{x:head.x-10.5+gazeX,y:head.y-1.2+gazeY},1.45,1.7*eyeOpen,"#15243a",null);
+ ellipse(ctx,{x:head.x+9.5+gazeX,y:head.y-1.2+gazeY},1.45,1.7*eyeOpen,"#15243a",null);
+ ellipse(ctx,{x:head.x-12+gazeX,y:head.y-3+gazeY},1.35,1.4*eyeOpen,"#ffffff",null);
+ ellipse(ctx,{x:head.x+8+gazeX,y:head.y-3+gazeY},1.35,1.4*eyeOpen,"#ffffff",null);
+ // Eyebrows lower slightly when the worker strains or concentrates.
+ segment(ctx,{x:head.x-16,y:head.y-8+browDrop},{x:head.x-6,y:head.y-11+browDrop},3.2,"#573a31");
+ segment(ctx,{x:head.x+4,y:head.y-11+browDrop},{x:head.x+15,y:head.y-8+browDrop},3.2,"#573a31");
  segment(ctx,{x:head.x-1,y:head.y+1},{x:head.x+1,y:head.y+7},1.8,"#a96955","#70473d");
  ellipse(ctx,{x:head.x+2,y:head.y+7},2.7,1.6,"#b9775f",null);
  const mouthTop=head.y+9.5,mouthGap=Math.max(1.2,jaw.y-mouthTop);
+ if(action==="worker-talk"||effort&&mouthGap>5)ellipse(ctx,{x:head.x+1,y:mouthTop+Math.min(6,mouthGap*.62)},Math.max(2.5,mouthGap*.28),Math.max(1.3,mouthGap*.16),"#bd6870",null);
  polygon(ctx,[{x:head.x-7,y:mouthTop},{x:head.x+7,y:mouthTop},{x:jaw.x+6,y:jaw.y},{x:jaw.x-6,y:jaw.y}],"#5d3034","#75433e",1.2);
  if(mouthGap>4)polygon(ctx,[{x:head.x-5,y:mouthTop+1},{x:head.x+5,y:mouthTop+1},{x:head.x+3,y:mouthTop+Math.min(4,mouthGap/2)},{x:head.x-3,y:mouthTop+Math.min(4,mouthGap/2)}],"#f1e7d1",null);
  ellipse(ctx,{x:head.x-24,y:head.y+4},4.3,6.5,"#d18d69","#5b3b32",1.5);
