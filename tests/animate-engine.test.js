@@ -461,3 +461,12 @@ test("GLB morph targets apply weighted position deltas without mutating the base
  assert.deepEqual(base,[0,0,0,1,0,0,0,1,0]);
  assert.deepEqual(api.NexoraSpatialRig3D.applyMorphTargets(base,[target],[0]),base);
 });
+
+
+test("deformed GLB geometry receives recomputed triangle normals", () => {
+ const {api}=loadEngine();
+ const normals=api.NexoraSpatialEngine.flatNormals([0,0,0,1,0,0,0,1,0]);
+ assert.deepEqual(normals,[0,0,1,0,0,1,0,0,1]);
+ const degenerate=api.NexoraSpatialEngine.flatNormals([0,0,0,1,0,0,2,0,0]);
+ assert.deepEqual(degenerate,[0,0,0,0,0,0,0,0,0]);
+});
