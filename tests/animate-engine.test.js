@@ -44,6 +44,7 @@ function loadEngine() {
     "continuity.js",
     "animation-tools.js",
     "motion-system.js",
+    "character-art.js",
     "scene-project.js",
     "mesh-deformer.js"
   ]) {
@@ -128,6 +129,59 @@ test("motion timeline interpolates keyframes and exposes reusable presets", () =
   const serialized = timeline.exportJSON();
   const copy = new api.NexoraMotionSystem.MotionTimeline().importJSON(serialized);
   assert.equal(copy.duration, 2);
+});
+
+test("2D dinosaur rig contains a multi-joint tail and persists its character type", () => {
+  const { api } = loadEngine();
+  const rig = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
+  assert.equal(rig.kind, "dinosaur");
+  assert.ok(rig.points.tail1 && rig.points.tail4 && rig.points.jaw);
+  assert.deepEqual(rig.bones.filter(b => /^tail/.test(b.name)).map(b => b.name), ["tail1","tail2","tail3","tail4"]);
+  const copy = new api.NexoraAnimationTools.CharacterRig();
+  copy.load(rig.save());
+  assert.equal(copy.kind, "dinosaur");
+  assert.equal(copy.points.tail4.x, rig.points.tail4.x);
+});
+
+test("worker and dinosaur 2D action libraries animate their dedicated landmarks", () => {
+  const { api } = loadEngine();
+  const human = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const worker = new api.NexoraMotionSystem.MotionTimeline(human.points);
+  worker.usePreset("worker-hammer", 2);
+  assert.ok(worker.sample(.5).handR.y < human.points.handR.y);
+  assert.ok(api.NexoraMotionSystem.profiles.worker.includes("worker-lift"));
+  const dino = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
+  const motion = new api.NexoraMotionSystem.MotionTimeline(dino.points);
+  motion.usePreset("dino-roar", 2);
+  assert.ok(motion.sample(1).jaw.y > dino.points.jaw.y);
+  motion.usePreset("dino-tail-swipe", 2);
+  assert.ok(motion.sample(1).tail4.y > dino.points.tail4.y);
+  assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-bite"));
+});
+
+test("2D character art renders worker and dinosaur figures through the canvas API", () => {
+  const { api } = loadEngine();
+  const calls = [];
+  const gradient = { addColorStop() {} };
+  const ctx = new Proxy({ createLinearGradient: () => gradient }, {
+    get(target,key){if(key in target)return target[key];return (...args)=>{calls.push(String(key))}},
+    set(target,key,value){target[key]=value;return true}
+  });
+  const worker = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const dinosaur = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
+  assert.equal(api.NexoraCharacterArt.draw(ctx,640,360,worker,"worker"),true);
+  assert.equal(api.NexoraCharacterArt.draw(ctx,640,360,dinosaur,"dinosaur"),true);
+  assert.ok(calls.filter(name=>name==="fill"||name==="stroke").length>40);
+});
+
+test("2D studio defaults to the worker and hides the preserved 3D controls", () => {
+  const fs = require("node:fs");
+  const bridge = fs.readFileSync(path.join(__dirname,"../admin/animate-engine/studio-bridge.js"),"utf8");
+  const html = fs.readFileSync(path.join(__dirname,"../admin/animate-studio.html"),"utf8");
+  assert.match(bridge,/id="n3dHiddenTools" hidden/);
+  assert.match(bridge,/id="nvCharacterType"/);
+  assert.match(bridge,/id="nvRigDino"/);
+  assert.match(html,/animate-engine\/character-art\.js/);
 });
 
 test("2D rig inverse kinematics and phoneme-to-viseme mapping return usable results", () => {
