@@ -233,3 +233,15 @@ Al actualizar posiciones de una malla deformada, el renderer vuelve a calcular n
 
 - Los morph targets conservan sus nombres desde `mesh.extras.targetNames` cuando están presentes.
 - El panel del estudio genera un control deslizante por cada target encontrado, agrupado por malla, y permite pesos negativos y positivos.
+
+
+## Evolución 2.7 — actuación facial y cortometraje de Coelo
+
+- Nuevo módulo `facial-animation.js`: resuelve morph targets por alias de expresiones, parpadeos por ojo, cejas, apertura de mandíbula y visemas A/E/I/O/U/M/F/L.
+- El visor 3D conecta el controlador facial con mallas GLB que incluyan morph targets mediante `setFacialState`.
+- La prueba de Coelo incorpora párpados y cejas animados, mirada dirigida al interlocutor, mandíbula articulada y gestos de brazos.
+- El bosque añade vegetación, árboles con balanceo suave y luciérnagas animadas.
+- La escena se amplía a 25 segundos con encuadres de apertura, primeros planos alternados y cierre. Conserva los tres diálogos originales y añade una respuesta final del dinosaurio mayor: «Para proteger a quienes no pueden defenderse solos».
+- La exportación del navegador usa el nombre `NEXORA-Coelo-y-el-musculo-EDICION-MEJORADA.webm`.
+
+La escena sigue usando dinosaurios procedurales de mallas esféricas, no modelos de dinosaurios realistas importados. Las voces dependen de la configuración de Workers AI y de la sesión de administrador. La exportación real solo se produce al reproducir/exportar desde el navegador.
