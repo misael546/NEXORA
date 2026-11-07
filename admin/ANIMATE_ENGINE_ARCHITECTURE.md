@@ -275,7 +275,7 @@ Los clips son animaciones procedurales de articulaciones, y las pistas fonética
 
 ## Evolución 2D — rig humano e interpolación de animación
 
-- El panel 2D puede crear una pose base humana con 13 articulaciones para acelerar el montaje inicial.
+- El panel 2D puede crear una pose base humana con 14 puntos, incluida mandíbula independiente, para acelerar el montaje inicial.
 - El arrastre de manos y pies resuelve codo o rodilla mediante cinemática inversa de dos segmentos; limita el alcance para conservar las longitudes del brazo o la pierna.
 - Las articulaciones laterales pueden espejarse respecto al eje central del personaje.
 - Las poses clave admiten interpolación suave, lineal, entrada, salida y mantenimiento. Las claves en el segundo cero se respetan y los archivos antiguos sin tipo de interpolación siguen cargándose.
@@ -305,4 +305,6 @@ El arte incluido es una ilustración vectorial procedimental original, no una se
 
 - En el modo de trabajo actual, la interfaz 3D permanece oculta y el renderizador WebGL no se inicializa (`ENABLE_3D_STUDIO=false`). Sus módulos y herramientas siguen conservados en el repositorio para reactivarlos cuando vuelva a ser prioridad.
 
-- Las acciones de oficio del trabajador ahora llevan utilería dibujada y sincronizada con el clip: martillo en `worker-hammer`, pala en `worker-dig`, y caja/carga en `worker-carry` y `worker-lift`. La pose de carga aproxima ambas manos al objeto, y el renderizador recibe el nombre de la acción para dibujar el accesorio correspondiente.
+- Las acciones de oficio del trabajador ahora llevan utilería dibujada y sincronizada con el clip: martillo en `worker-hammer`, pala en `worker-dig`, y caja/carga en `worker-carry` y `worker-lift`. La pose de carga aproxima ambas manos al objeto, y el renderizador recibe el nombre de la acción para dibujar el accesorio correspondiente. El clip de levantamiento también cierra los brazos alrededor de la caja.
+
+- El dibujo del dinosaurio incluye una fila de dientes inferiores anclados a la mandíbula móvil, para que sigan la apertura durante rugidos y mordidas.
