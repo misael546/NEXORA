@@ -87,7 +87,7 @@ La deformación actual es un prototipo geométrico 2D basado en anclas y no sepa
 
 El deformador de malla admite ahora *bone skinning* 2D: cada hueso toma los puntos iniciales y finales del rig, calcula una transformación rígida (rotación y escala limitada) y aplica influencia suave según la distancia de cada vértice al segmento. El panel permite ajustar el radio de influencia y la intensidad global.
 
-Flujo: cargar una ilustración → colocar los puntos del rig sobre sus articulaciones → activar la deformación. El estudio captura los huesos disponibles del rig y actualiza sus extremos cuando se mueven los puntos. Las configuraciones nuevas se exportan como versión 2; el importador conserva compatibilidad con mallas versión 1.
+Flujo: cargar una ilustración → colocar los puntos del rig sobre sus articulaciones → activar la deformación. El estudio captura los huesos disponibles del rig y actualiza sus extremos cuando se mueven los puntos. Las configuraciones de esta etapa se exportaban como versión 2; el formato actual es versión 3 e incluye regiones poligonales.
 
 Limitaciones: es deformación geométrica de píxeles existentes. No separa automáticamente partes del cuerpo, no crea píxeles ocultos y no sustituye un sistema de segmentación, máscaras por capa o reconstrucción generativa. Los resultados dependen de la colocación manual del rig y del radio elegido.
 
