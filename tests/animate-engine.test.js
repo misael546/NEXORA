@@ -91,6 +91,32 @@ test("scene projects bind shots to a character and validate voice continuity", (
   assert.equal(restored.data.shots.length, 1);
 });
 
+test("motion timeline honors a keyframe at zero, supports hold and linearly interpolates poses", () => {
+  const { api } = loadEngine();
+  const timeline = new api.NexoraMotionSystem.MotionTimeline({ head: { x: .5, y: .3 } });
+  timeline.duration = 2;
+  timeline.addKeyframe(0, { head: { x: .2, y: .4 } });
+  timeline.addKeyframe(2, { head: { x: .8, y: .6 } }, "linear");
+  assert.deepEqual({ ...timeline.sample(0).head }, { x: .2, y: .4 });
+  assert.ok(Math.abs(timeline.sample(1).head.x - .5) < 1e-8);
+  timeline.addKeyframe(1, { head: { x: .9, y: .7 } }, "hold");
+  assert.ok(timeline.sample(.5).head.x < .3);
+  assert.equal(timeline.sample(1).head.x, .9);
+  assert.throws(() => timeline.addKeyframe(1, { head: { x: NaN, y: .2 } }), /Pose inválida/);
+  assert.throws(() => timeline.addKeyframe(1, { head: { x: .2, y: .2 } }, "unknown"), /Interpolación/);
+});
+
+test("motion import validates keyframe timing and accepts legacy easing defaults", () => {
+  const { api } = loadEngine();
+  const timeline = new api.NexoraMotionSystem.MotionTimeline();
+  const legacy = { format: "nexora-motion", version: 1, preset: "walk", duration: 2,
+    base: { handL: { x: .3, y: .4 } }, keyframes: [{ time: 1, points: { handL: { x: .5, y: .4 } } }] };
+  timeline.importJSON(legacy);
+  assert.equal(timeline.keyframes[0].ease, "smooth");
+  assert.ok(Number.isFinite(timeline.sample(.5).handL.x));
+  assert.throws(() => timeline.importJSON({ ...legacy, keyframes: [{ time: "bad", points: {} }] }), /Tiempo/);
+});
+
 test("motion timeline interpolates keyframes and exposes reusable presets", () => {
   const { api } = loadEngine();
   const timeline = new api.NexoraMotionSystem.MotionTimeline({ head: { x: 0.5, y: 0.3 } });
