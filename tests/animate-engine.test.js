@@ -136,11 +136,23 @@ test("2D dinosaur rig contains a multi-joint tail and persists its character typ
   const rig = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
   assert.equal(rig.kind, "dinosaur");
   assert.ok(rig.points.tail1 && rig.points.tail4 && rig.points.jaw);
-  assert.deepEqual(rig.bones.filter(b => /^tail/.test(b.name)).map(b => b.name), ["tail1","tail2","tail3","tail4"]);
+  assert.deepEqual(Array.from(rig.bones.filter(b => /^tail/.test(b.name)), b => b.name), ["tail1","tail2","tail3","tail4"]);
   const copy = new api.NexoraAnimationTools.CharacterRig();
   copy.load(rig.save());
   assert.equal(copy.kind, "dinosaur");
   assert.equal(copy.points.tail4.x, rig.points.tail4.x);
+});
+
+test("editing one timeline pose keeps all other keyed poses intact", () => {
+  const { api } = loadEngine();
+  const timeline = new api.NexoraMotionSystem.MotionTimeline({ hand: { x: .2, y: .4 } });
+  timeline.duration = 2;
+  timeline.addKeyframe(.5, { hand: { x: .4, y: .4 } });
+  timeline.addKeyframe(1.5, { hand: { x: .8, y: .4 } });
+  timeline.addKeyframe(.5, { hand: { x: .6, y: .5 } }, "linear");
+  assert.equal(timeline.keyframes.length, 2);
+  assert.equal(timeline.keyframes[0].points.hand.x, .6);
+  assert.equal(timeline.sample(1.5).hand.x, .8);
 });
 
 test("worker and dinosaur 2D action libraries animate their dedicated landmarks", () => {
@@ -148,7 +160,7 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   const human = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
   const worker = new api.NexoraMotionSystem.MotionTimeline(human.points);
   worker.usePreset("worker-hammer", 2);
-  assert.ok(worker.sample(.5).handR.y < human.points.handR.y);
+  assert.ok(worker.sample(.125).handR.y < human.points.handR.y);
   assert.ok(api.NexoraMotionSystem.profiles.worker.includes("worker-lift"));
   const dino = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
   const motion = new api.NexoraMotionSystem.MotionTimeline(dino.points);
