@@ -95,7 +95,7 @@ function drawWorker(ctx,w,h,rig,options={}){
  // Tools and carried props stay attached to the worker's animated hands.
  const action=options.action||"",time=Number(options.time)||0;
  if(action==="worker-hammer"){
-  const swing=Math.sin(time*Math.PI*2),angle=-1.9+swing*.28,dir={x:Math.cos(angle),y:Math.sin(angle)},normal={x:-Math.sin(angle),y:Math.cos(angle)},headCenter={x:hr.x+dir.x*34,y:hr.y+dir.y*34};
+  const swing=Math.sin(time*Math.PI*2),angle=-1.55+swing*.68,dir={x:Math.cos(angle),y:Math.sin(angle)},normal={x:-Math.sin(angle),y:Math.cos(angle)},headCenter={x:hr.x+dir.x*39,y:hr.y+dir.y*39};
   segment(ctx,hr,headCenter,5.5,"#87532e","#422d23","#e0b17c");
   const hammerHead=[
    {x:headCenter.x+normal.x*15+dir.x*5,y:headCenter.y+normal.y*15+dir.y*5},
@@ -175,13 +175,18 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  // Ground shadow.
  ellipse(ctx,{x:(head.x+tail4.x+hip.x)/3,y:Math.max(fl.y,fr.y)+7},130,10,"rgba(0,0,0,.3)",null);
  // A single tapered tail silhouette keeps the moving sections joined instead of looking like pipes.
- taperedRibbon(ctx,[hip,tail1,tail2,tail3,tail4],[38,34,26,17,5],green,"#173b35",4);
+ taperedRibbon(ctx,[hip,tail1,tail2,tail3,tail4],[42,36,27,17,5],green,"#173b35",4);
+ // A soft dorsal highlight and patterned bands make the tail read as a flexible, muscular form.
+ segment(ctx,{x:hip.x+8,y:hip.y-18},{x:tail1.x+8,y:tail1.y-15},3.2,"#a8d77b","#3e754d");
+ segment(ctx,{x:tail1.x+7,y:tail1.y-15},{x:tail2.x+7,y:tail2.y-12},2.5,"#95c86e","#3e754d");
+ segment(ctx,{x:tail2.x+6,y:tail2.y-12},{x:tail3.x+5,y:tail3.y-9},2,"#83b95f","#315f43");
  for(let i=1;i<4;i++){const q=mix([hip,tail1,tail2,tail3,tail4][i],[hip,tail1,tail2,tail3,tail4][i+1],.18);ellipse(ctx,q,3.2,5.5,"#b6d77b","#386d49",1.2)}
+ for(let i=0;i<5;i++){const a=mix(tail1,tail4,.22+i*.14);segment(ctx,{x:a.x-3,y:a.y-6},{x:a.x+3,y:a.y+5},2.1,"#2f6847","#214b3b")}
  // Far hind leg, then near hind leg.
- organicLimb(ctx,{x:hip.x+9,y:hip.y+4},kr,34,25,green,"#c2e28d");organicLimb(ctx,kr,fr,25,19,green,"#b5d57e");
+ organicLimb(ctx,{x:hip.x+9,y:hip.y+4},kr,40,30,green,"#c2e28d");organicLimb(ctx,kr,fr,28,21,green,"#b5d57e");
  polygon(ctx,[{x:fr.x-14,y:fr.y-6},{x:fr.x+12,y:fr.y-4},{x:fr.x+25,y:fr.y+5},{x:fr.x+24,y:fr.y+11},{x:fr.x-17,y:fr.y+10}],"#538c55","#1e4b3b",3);
  for(let i=0;i<3;i++)polygon(ctx,[{x:fr.x+9+i*5,y:fr.y+5},{x:fr.x+17+i*5,y:fr.y+7},{x:fr.x+22+i*5,y:fr.y+12}],"#d4d8a0","#5c6848",1);
- organicLimb(ctx,{x:hip.x-9,y:hip.y+4},kl,36,26,green,"#c2e28d");organicLimb(ctx,kl,fl,26,20,green,"#b5d57e");
+ organicLimb(ctx,{x:hip.x-9,y:hip.y+4},kl,43,32,green,"#c2e28d");organicLimb(ctx,kl,fl,29,22,green,"#b5d57e");
  polygon(ctx,[{x:fl.x-15,y:fl.y-6},{x:fl.x+12,y:fl.y-5},{x:fl.x+27,y:fl.y+5},{x:fl.x+25,y:fl.y+12},{x:fl.x-19,y:fl.y+11}],"#659b5c","#1e4b3b",3);
  for(let i=0;i<3;i++)polygon(ctx,[{x:fl.x+9+i*5,y:fl.y+5},{x:fl.x+17+i*5,y:fl.y+7},{x:fl.x+21+i*5,y:fl.y+12}],"#e4dcad","#5c6848",1);
  // Body mass and belly.
@@ -195,15 +200,11 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  ],green,"#173b35",5);
  ellipse(ctx,mix(chest,hip,.27),45,38,green,"#315d43",2,-.28);
  ellipse(ctx,{x:center.x-8,y:center.y+24},61,24,belly,"#536e4c",2,-.08);
- // Subtle flank muscles are shaded without separate circular outlines.
- bezierShape(ctx,{x:center.x-61,y:center.y-5},[
-  [center.x-45,center.y-31,center.x-22,center.y-33,center.x-4,center.y-19],
-  [center.x-18,center.y+2,center.x-42,center.y+10,center.x-61,center.y-5]
- ],gradient(ctx,{x:center.x-42,y:center.y-26},{x:center.x-22,y:center.y+6},[[0,"#91c56c"],[1,"#397650"]]),null);
- bezierShape(ctx,{x:center.x+19,y:center.y-19},[
-  [center.x+42,center.y-34,center.x+67,center.y-18,center.x+67,center.y+3],
-  [center.x+48,center.y+23,center.x+27,center.y+12,center.x+19,center.y-19]
- ],gradient(ctx,{x:center.x+33,y:center.y-27},{x:center.x+51,y:center.y+18},[[0,"#85bc61"],[1,"#2e6848"]]),null);
+ // Continuous anatomical contour lines follow the flank without creating detached muscle blobs.
+ segment(ctx,{x:center.x-55,y:center.y-7},{x:center.x-36,y:center.y-22},2.2,"#b4d982","#47764a");
+ segment(ctx,{x:center.x-36,y:center.y-22},{x:center.x-12,y:center.y-20},1.8,"#b4d982","#47764a");
+ segment(ctx,{x:center.x+18,y:center.y-22},{x:center.x+42,y:center.y-27},2,"#9cc975","#356b48");
+ segment(ctx,{x:center.x+42,y:center.y-27},{x:center.x+60,y:center.y-13},1.8,"#9cc975","#356b48");
  segment(ctx,{x:center.x-46,y:center.y+32},{x:center.x-13,y:center.y+43},2.1,"#a6b978","#4a6a48");
  segment(ctx,{x:center.x+8,y:center.y+43},{x:center.x+43,y:center.y+32},2.1,"#a6b978","#4a6a48");
  // Rib lines and flank markings give the torso a readable organic volume.
