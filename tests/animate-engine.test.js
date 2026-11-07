@@ -131,6 +131,39 @@ test("motion timeline interpolates keyframes and exposes reusable presets", () =
   assert.equal(copy.duration, 2);
 });
 
+test("scene shots store actor type and the exact 2D action clip", () => {
+  const { api } = loadEngine();
+  const scene = new api.NexoraSceneProject.SceneProject({getItem:()=>null,setItem(){}});
+  const worker = scene.addShot({name:"Trabajo",characterId:"worker-id",duration:2});
+  const dino = scene.addShot({name:"Rugido",characterId:"dino-id",actorType:"dinosaur",motionPreset:"dino-roar",duration:3});
+  assert.equal(worker.actorType,"worker");
+  assert.equal(worker.motionPreset,"worker-idle");
+  assert.equal(dino.actorType,"dinosaur");
+  assert.equal(dino.motionPreset,"dino-roar");
+  const restored = new api.NexoraSceneProject.SceneProject({getItem:()=>null,setItem(){}});
+  restored.importJSON(scene.exportJSON());
+  assert.equal(restored.data.shots[1].motionPreset,"dino-roar");
+});
+
+test("saved pre-2D scenes migrate to worker idle without losing shot data", () => {
+  const { api } = loadEngine();
+  const old = {format:"nexora-scene",version:1,title:"Legacy",fps:24,
+    shots:[{id:"old",name:"Plano antiguo",characterId:"c1",duration:2,start:0}]};
+  const storage = {getItem:()=>JSON.stringify(old),setItem(){}};
+  const scene = new api.NexoraSceneProject.SceneProject(storage);
+  assert.equal(scene.data.shots[0].actorType,"worker");
+  assert.equal(scene.data.shots[0].motionPreset,"worker-idle");
+  assert.equal(scene.data.shots[0].name,"Plano antiguo");
+});
+
+test("2D scene compositor binds the selected per-shot actor action", () => {
+  const bridge = require("node:fs").readFileSync(path.join(__dirname,"../admin/animate-engine/studio-bridge.js"),"utf8");
+  assert.match(bridge,/shotMotion\.sample\(local\)/);
+  assert.match(bridge,/motionPreset:\$\("ns2DAction"\)\.value/);
+  assert.match(bridge,/actorType:\$\("ns2DCharacterType"\)\.value/);
+  assert.match(bridge,/NexoraCharacterArt\.draw/);
+});
+
 test("2D dinosaur rig contains a multi-joint tail and persists its character type", () => {
   const { api } = loadEngine();
   const rig = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
