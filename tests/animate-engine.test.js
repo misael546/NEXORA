@@ -117,6 +117,22 @@ test("2D rig inverse kinematics and phoneme-to-viseme mapping return usable resu
 });
 
 
+test("2D humanoid rig creates symmetric landmarks and solves arm and leg IK without stretching", () => {
+  const { api } = loadEngine();
+  const rig = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  assert.equal(Object.keys(rig.points).length, 13);
+  const upper = Math.hypot(rig.points.elbowL.x-rig.points.shoulderL.x, rig.points.elbowL.y-rig.points.shoulderL.y);
+  const lower = Math.hypot(rig.points.handL.x-rig.points.elbowL.x, rig.points.handL.y-rig.points.elbowL.y);
+  const result = rig.applyIK("handL", 0.08, 0.34);
+  assert.ok(result && rig.points.handL.x < 0.2);
+  assert.ok(Math.abs(Math.hypot(rig.points.elbowL.x-rig.points.shoulderL.x, rig.points.elbowL.y-rig.points.shoulderL.y)-upper)<1e-8);
+  assert.ok(Math.abs(Math.hypot(rig.points.handL.x-rig.points.elbowL.x, rig.points.handL.y-rig.points.elbowL.y)-lower)<1e-8);
+  assert.equal(rig.mirrorPoint("handL"), "handR");
+  assert.ok(Math.abs(rig.points.handR.x-(1-rig.points.handL.x))<1e-8);
+  assert.ok(rig.applyIK("footR", 0.95, 0.95));
+  assert.throws(() => rig.setPoint("head", NaN, .2), /numérica/);
+});
+
 test("mesh deformer preserves original shape and follows rig landmarks", () => {
   const { api } = loadEngine();
   const mesh = new api.NexoraMeshDeformer.MeshDeformer({ columns: 4, rows: 4 });
