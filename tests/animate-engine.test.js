@@ -375,11 +375,12 @@ test("dinosaur dialogue scene drives its visible parts from the hierarchical 3D 
 });
 
 
+
 test("GLB importer preserves skin joints, normalized weights and animation channels", () => {
   const { api } = loadEngine();
   const json = {
-    asset:{version:"2.0"},buffers:[{byteLength:72}],
-    bufferViews:[{buffer:0,byteOffset:0,byteLength:36},{buffer:0,byteOffset:36,byteLength:12},{buffer:0,byteOffset:48,byteLength:48},{buffer:0,byteOffset:60,byteLength:4},{buffer:0,byteOffset:64,byteLength:8}],
+    asset:{version:"2.0"},buffers:[{byteLength:108}],
+    bufferViews:[{buffer:0,byteOffset:0,byteLength:36},{buffer:0,byteOffset:36,byteLength:12},{buffer:0,byteOffset:48,byteLength:48},{buffer:0,byteOffset:96,byteLength:4},{buffer:0,byteOffset:100,byteLength:8}],
     accessors:[{bufferView:0,componentType:5126,count:3,type:"VEC3"},{bufferView:1,componentType:5121,count:3,type:"VEC4"},{bufferView:2,componentType:5126,count:3,type:"VEC4"},{bufferView:3,componentType:5126,count:1,type:"SCALAR"},{bufferView:4,componentType:5126,count:1,type:"VEC2"}],
     meshes:[{name:"Skinned",primitives:[{attributes:{POSITION:0,JOINTS_0:1,WEIGHTS_0:2}}]}],
     nodes:[{name:"Mesh",mesh:0,skin:0},{name:"Root"},{name:"Arm"}],
@@ -387,13 +388,13 @@ test("GLB importer preserves skin joints, normalized weights and animation chann
     animations:[{name:"Wave",samplers:[{input:3,output:4}],channels:[{sampler:0,target:{node:2,path:"translation"}}]}],
     scenes:[{nodes:[0,1]}],scene:0
   };
-  const bytes=new ArrayBuffer(72),dv=new DataView(bytes);
+  const bytes=new ArrayBuffer(108),dv=new DataView(bytes);
   [0,0,0,1,0,0,0,1,0].forEach((v,i)=>dv.setFloat32(i*4,v,true));
   for(let i=0;i<12;i++)dv.setUint8(36+i,0);
   for(let i=0;i<12;i++)dv.setFloat32(48+i*4,i%4===0?2:0,true);
-  dv.setFloat32(60,0,true);dv.setFloat32(64,0,true);dv.setFloat32(68,1,true);
-  const jsonBytes=new TextEncoder().encode(JSON.stringify(json)),jl=Math.ceil(jsonBytes.length/4)*4,total=12+8+jl+8+72;
-  const glb=new ArrayBuffer(total),v=new DataView(glb);v.setUint32(0,0x46546c67,true);v.setUint32(4,2,true);v.setUint32(8,total,true);v.setUint32(12,jl,true);v.setUint32(16,0x4e4f534a,true);new Uint8Array(glb,20,jsonBytes.length).set(jsonBytes);for(let i=jsonBytes.length;i<jl;i++)new Uint8Array(glb)[20+i]=32;const off=20+jl;v.setUint32(off,72,true);v.setUint32(off+4,0x004e4942,true);new Uint8Array(glb,off+8,72).set(new Uint8Array(bytes));
+  dv.setFloat32(96,0,true);dv.setFloat32(100,0,true);dv.setFloat32(104,1,true);
+  const jsonBytes=new TextEncoder().encode(JSON.stringify(json)),jl=Math.ceil(jsonBytes.length/4)*4,total=12+8+jl+8+108;
+  const glb=new ArrayBuffer(total),v=new DataView(glb);v.setUint32(0,0x46546c67,true);v.setUint32(4,2,true);v.setUint32(8,total,true);v.setUint32(12,jl,true);v.setUint32(16,0x4e4f534a,true);new Uint8Array(glb,20,jsonBytes.length).set(jsonBytes);for(let i=jsonBytes.length;i<jl;i++)new Uint8Array(glb)[20+i]=32;const off=20+jl;v.setUint32(off,108,true);v.setUint32(off+4,0x004e4942,true);new Uint8Array(glb,off+8,108).set(new Uint8Array(bytes));
   const parsed=api.NexoraSpatialEngine.parseGLB(glb);
   assert.equal(parsed.skins.length,1);
   assert.deepEqual(parsed.meshes[0].skin.jointNames,["Root","Arm"]);
