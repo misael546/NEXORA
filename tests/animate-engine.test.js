@@ -263,6 +263,9 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   const hammerImpact = worker.sample(1.2);
   assert.ok(hammerRaised.handR.y < human.points.handR.y - .25, "The hammer must rise above shoulder height before impact.");
   assert.ok(hammerImpact.handR.y > human.points.handR.y + .10, "The hammer arm must travel down into the strike.");
+  assert.ok(hammerImpact.hip.x > human.points.hip.x, "El cuerpo debe transferir el peso hacia el golpe.");
+  assert.ok(hammerImpact.kneeR.y > human.points.kneeR.y, "La rodilla debe absorber el impacto.");
+  assert.ok(hammerImpact.handL.y < human.points.handL.y, "El brazo libre debe estabilizar el movimiento.");
   assert.ok(api.NexoraMotionSystem.profiles.worker.includes("worker-lift"));
   const dino = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
   const motion = new api.NexoraMotionSystem.MotionTimeline(dino.points);
