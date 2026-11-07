@@ -125,9 +125,11 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  const headAngle=Math.atan2(neck.y-head.y,neck.x-head.x);
  ellipse(ctx,head,33,27,gradient(ctx,{x:head.x-24,y:head.y-24},{x:head.x+18,y:head.y+25},[[0,"#c2df80"],[.55,"#78b65c"],[1,"#417b4d"]]),"#173b35",4,-.2);
  polygon(ctx,[{x:head.x-28,y:head.y+5},{x:head.x-6,y:head.y+9},{x:jaw.x+10,y:jaw.y+6},{x:jaw.x+3,y:jaw.y+16},{x:head.x-16,y:head.y+19}],gradient(ctx,head,jaw,[[0,"#8fbd65"],[1,"#386c48"]]),"#173b35",3);
+ polygon(ctx,[{x:head.x-22,y:head.y+12},{x:head.x-7,y:head.y+14},{x:jaw.x+7,y:jaw.y+8},{x:jaw.x+1,y:jaw.y+7}],"#48282d",null);
  segment(ctx,{x:head.x-24,y:head.y+11},{x:jaw.x+5,y:jaw.y+9},3,"#3a2629","#1c2026");
- // Teeth along open jaw.
+ // Upper and lower teeth follow the moving jaw instead of floating in place.
  for(let i=0;i<4;i++){const x=head.x-17+i*8;polygon(ctx,[{x,y:head.y+9+i*.8},{x:x+4,y:head.y+9+i*.8},{x:x+2,y:head.y+16+i}], "#f1edcf","#b1b28e",.8)}
+ for(let i=0;i<4;i++){const x=head.x-12+i*8;polygon(ctx,[{x,y:jaw.y+8},{x:x+5,y:jaw.y+8},{x:x+2.5,y:jaw.y+2}], "#f1edcf","#b1b28e",.8)}
  const blinkAt=((Number(options.time)||0)+.35)%3.45,eyeOpen=blinkAt<.14?Math.max(.1,Math.abs(blinkAt-.07)/.07):1;
  ellipse(ctx,{x:head.x-8,y:head.y-9},8,8*eyeOpen,"#f3c95c","#4b5035",2);
  ellipse(ctx,{x:head.x-10,y:head.y-9},3.5,4.5*eyeOpen,"#202c25",null);
