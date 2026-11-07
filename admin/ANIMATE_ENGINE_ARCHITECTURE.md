@@ -211,3 +211,16 @@ La reproducción está conectada para mallas skinned que tengan datos GLB válid
 - El lector de accessors ahora convierte atributos enteros marcados como `normalized` a sus rangos flotantes definidos por glTF.
 - Esto es esencial para pesos de skinning almacenados como bytes o enteros de 16 bits, en lugar de valores float.
 - Se añadió cobertura con pesos `WEIGHTS_0` normalizados de tipo unsigned byte; se verifica que el peso máximo se convierta a 1.0.
+
+
+## Evolución 2.6 — morph targets GLB
+
+- El importador lee targets de posición de primitivas glTF/GLB y expande sus deltas al mismo orden de vértices que la malla renderizada.
+- Conserva pesos iniciales definidos en el nodo o en la malla.
+- El renderizador combina los deltas ponderados antes del skinning, por lo que las expresiones pueden coexistir con el movimiento de huesos.
+- Se añadió un control de intensidad para el primer morph target detectado en el estudio 3D.
+- Se añadieron pruebas de deltas ponderados, preservación de la malla base e importación de targets con pesos iniciales.
+
+### Alcance pendiente
+
+El control actual permite probar el primer target de una malla. Aún falta exponer todos los targets por nombre, animar los pesos mediante canales GLB `weights`, procesar morph targets de normales/tangentes y validar modelos faciales reales en navegador.
