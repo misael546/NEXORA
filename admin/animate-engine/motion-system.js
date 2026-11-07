@@ -97,8 +97,13 @@ function applyWalkKinematics(out,base,preset,progress){
   const lower=Math.hypot(baseEnd.x-baseJoint.x,baseEnd.y-baseJoint.y);
   if(upper<.001||lower<.001)return;
   const p=phase+phaseOffset,step=Math.sin(p),air=Math.max(0,Math.cos(p));
-  const target={x:clamp(baseEnd.x+step*range),y:clamp(baseEnd.y-air*lift)};
-  const joint=solveTwoBoneIK(root,target,upper,lower,pole);
+  let target={x:clamp(baseEnd.x+step*range),y:clamp(baseEnd.y-air*lift)};
+  // Keep the foot target inside the real reach of both segments.
+  const dx=target.x-root.x,dy=target.y-root.y,rawDistance=Math.hypot(dx,dy)||.001;
+  const minReach=Math.abs(upper-lower)+.002,maxReach=upper+lower-.002;
+  const reachable=clamp(rawDistance,minReach,maxReach);
+  if(Math.abs(reachable-rawDistance)>.000001)target={x:clamp(root.x+dx/rawDistance*reachable),y:clamp(root.y+dy/rawDistance*reachable)};
+  const joint=solveTwoBoneIK(root,target,upper,lower);
   out[jointName]=joint;
   out[endName]=target;
  };
