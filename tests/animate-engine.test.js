@@ -219,6 +219,8 @@ test("2D scene compositor binds the selected per-shot actor action", () => {
   assert.match(bridge,/motionPreset:\$\("ns2DAction"\)\.value/);
   assert.match(bridge,/const actorType=\$\("ns2DCharacterType"\)\.value/);
   assert.match(bridge,/NexoraCharacterArt\.draw/);
+  assert.ok(bridge.includes('name:"Fondo de estudio 2D"'));
+  assert.ok(bridge.includes("createRadialGradient"));
 });
 
 test("2D dinosaur rig contains a multi-joint tail and persists its character type", () => {
