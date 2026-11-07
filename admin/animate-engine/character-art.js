@@ -231,15 +231,15 @@ function drawDinosaur(ctx,w,h,rig,options={}){
   [center.x+96,center.y+39,center.x+55,center.y+56,center.x+8,center.y+47],
   [center.x-40,center.y+42,center.x-82,center.y+24,center.x-91,center.y-9]
  ],green,"#173b35",5);
- // Belly is a single inset plane that follows the underside of the rib cage.
+ // Near-side thigh roots overlap the rib cage so the legs feel attached to the pelvis.
+ organicLimb(ctx,{x:hip.x+8,y:hip.y+1},kr,46,34,green,"#c2e28d");
+ organicLimb(ctx,{x:hip.x-8,y:hip.y+1},kl,48,36,green,"#c2e28d");
+ // Foreground belly panel overlays the thigh roots, keeping the pale underside readable.
  bezierShape(ctx,{x:center.x-61,y:center.y+7},[
   [center.x-56,center.y+28,center.x-24,center.y+45,center.x+7,center.y+46],
   [center.x+45,center.y+48,center.x+76,center.y+31,center.x+78,center.y+12],
   [center.x+49,center.y+26,center.x-16,center.y+23,center.x-61,center.y+7]
  ],belly,"#65794f",1.6);
- // Near-side thigh roots overlap the rib cage so the legs feel attached to the pelvis.
- organicLimb(ctx,{x:hip.x+8,y:hip.y+1},kr,46,34,green,"#c2e28d");
- organicLimb(ctx,{x:hip.x-8,y:hip.y+1},kl,48,36,green,"#c2e28d");
  // Continuous anatomical contour lines follow the flank without creating detached muscle blobs.
  segment(ctx,{x:center.x-55,y:center.y-7},{x:center.x-36,y:center.y-22},2.2,"#b4d982","#47764a");
  segment(ctx,{x:center.x-36,y:center.y-22},{x:center.x-12,y:center.y-20},1.8,"#b4d982","#47764a");
@@ -263,15 +263,15 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  segment(ctx,{x:sl.x-6,y:sl.y+5},{x:sl.x+7,y:sl.y+7},2.2,"#c6e58e","#386748");
  segment(ctx,{x:sr.x-6,y:sr.y+5},{x:sr.x+7,y:sr.y+7},2.2,"#c6e58e","#386748");
  for(const hand of [hl,hr])for(let i=0;i<2;i++)segment(ctx,{x:hand.x+i*3,y:hand.y},{x:hand.x+i*3+2,y:hand.y+8},2,"#e2d79f","#526b4a");
- // A short dorsal crest sits along the back instead of running down the throat.
- const ridgeStart=mix(chest,hip,.04),ridgeEnd=mix(chest,hip,.62);
+ // Raised dorsal plates follow the top contour of the back, beginning behind the neck.
+ const ridgeStart={x:center.x-47,y:center.y-49},ridgeEnd={x:center.x+72,y:center.y-37};
  for(let i=0;i<7;i++){
-  const t=i/6,a=mix(ridgeStart,ridgeEnd,t),size=10*(1-t*.36);
+  const t=i/6,a=mix(ridgeStart,ridgeEnd,t),size=11*(1-t*.4);
   polygon(ctx,[
-   {x:a.x-size,y:a.y-9},
-   {x:a.x-1,y:a.y-12-size},
-   {x:a.x+size,y:a.y-7}
-  ],i%2?"#8fc66b":"#c8e68e","#315f43",1.7);
+   {x:a.x-size,y:a.y+2},
+   {x:a.x-1,y:a.y-10-size},
+   {x:a.x+size,y:a.y+3}
+  ],i%2?"#8fc66b":"#c8e68e","#315f43",1.8);
  }
  // Head and muzzle, slightly three-quarter profile.
  const headAngle=Math.atan2(neck.y-head.y,neck.x-head.x);
