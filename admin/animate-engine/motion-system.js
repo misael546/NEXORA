@@ -66,13 +66,47 @@ const cycles={
  "dino-pounce":(p,t)=>{const crouch=t<.22?ease(t/.22):t<.38?1-ease((t-.22)/.16):0,flight=t<.38?0:t<.72?Math.sin(Math.PI*(t-.38)/.34):0,land=t>.72?Math.sin(Math.PI*Math.min(1,(t-.72)/.28)):0;if(p==="hip"||p==="chest")return{x:.035*flight,y:.055*crouch-.14*flight+.025*land};if(p==="head"||p==="neck")return{x:.025*flight,y:.035*crouch-.105*flight+.02*land};if(/knee/.test(p))return{x:0,y:.055*crouch-.065*flight};if(/foot/.test(p))return{x:0,y:.025*crouch-.085*flight+.018*land};if(/hand/.test(p))return{x:.012*flight,y:-.045*flight};if(/^tail[1-4]$/.test(p)){const n=Number(p.slice(4));return{x:-.012*flight*n,y:.025*crouch+.018*flight*n};}return{x:0,y:0}},
  "dino-threat":(p,t)=>{const a=t<.22?ease(t/.22):t<.78?1:1-ease((t-.78)/.22);if(p==="head")return{x:-.025*a,y:-.075*a};if(p==="neck")return{x:-.018*a,y:-.055*a};if(p==="jaw")return{x:-.008*a,y:.075*a};if(p==="chest")return{x:0,y:-.028*a};if(p==="hip")return{x:-.012*a,y:0};if(/hand/.test(p))return{x:0,y:-.035*a};if(/^tail[1-4]$/.test(p)){const n=Number(p.slice(4));return{x:0,y:Math.sin(t*Math.PI*4-n*.35)*.025*a*n};}return{x:0,y:0}}
 };
+function chainPoint(root,angle,length){return{x:root.x+Math.sin(angle)*length,y:root.y+Math.cos(angle)*length}}
+function applyWalkKinematics(out,base,preset,progress){
+ const phase=progress*Math.PI*4,amplitude=preset==="dino-walk"?.42:.34,bend=preset==="dino-walk"?.68:.52;
+ const solve=(rootName,jointName,endName,phaseOffset,swing,bendAmount)=>{
+  const r=out[rootName],bRoot=base[rootName],bJoint=base[jointName],bEnd=base[endName];
+  if(!r||!bRoot||!bJoint||!bEnd)return;
+  const dx1=bJoint.x-bRoot.x,dy1=bJoint.y-bRoot.y,dx2=bEnd.x-bJoint.x,dy2=bEnd.y-bJoint.y;
+  const len1=Math.hypot(dx1,dy1),len2=Math.hypot(dx2,dy2);
+  if(len1<.001||len2<.001)return;
+  const angle1=Math.atan2(dx1,dy1),angle2=Math.atan2(dx2,dy2),phaseNow=phase+phaseOffset;
+  const wave=Math.sin(phaseNow),lift=Math.max(0,Math.cos(phaseNow));
+  const nextAngle=angle1+swing*wave;
+  const joint=chainPoint(r,nextAngle,len1);
+  const bendSign=Math.sign(angle1)||1;
+  const lowerAngle=angle2+swing*.45*wave+bendSign*bendAmount*lift;
+  const end=chainPoint(joint,lowerAngle,len2);
+  out[jointName]=joint;out[endName]=end;
+ };
+ // Feet alternate; arms counter-swing against the same stride phase.
+ solve("hip","kneeL","footL",0,amplitude,bend);
+ solve("hip","kneeR","footR",Math.PI,amplitude,bend);
+ solve("shoulderL","elbowL","handL",Math.PI,amplitude*.58,bend*.28);
+ solve("shoulderR","elbowR","handR",0,amplitude*.58,bend*.28);
+ if(preset==="dino-walk"){
+  let root=out.hip;
+  const names=["tail1","tail2","tail3","tail4"],parents=["hip","tail1","tail2","tail3"];
+  names.forEach((name,i)=>{
+   const parent=parents[i],a=base[parent],b=base[name];if(!a||!b)return;
+   const length=Math.hypot(b.x-a.x,b.y-a.y),baseAngle=Math.atan2(b.x-a.x,b.y-a.y);
+   const sway=Math.sin(phase-(i+1)*.62)*(.045+(i+1)*.016);
+   root=chainPoint(root,baseAngle+sway,length);out[name]=root;
+  });
+ }
+}
 class MotionTimeline{
  constructor(points={}){this.base=copyPoints(points);this.duration=2;this.preset="idle";this.keyframes=[]}
  setBase(points){this.base=copyPoints(points);return this.base}
  usePreset(name,duration=this.duration){if(!cycles[name])throw new Error("Movimiento desconocido");const d=Number(duration);if(!Number.isFinite(d)||d<.1||d>3600)throw new Error("Duración de movimiento inválida");this.preset=name;this.duration=d;this.keyframes=[];return this.sample(0)}
  addKeyframe(time,points,mode="smooth"){const n=Number(time);if(!Number.isFinite(n))throw new Error("Tiempo de pose clave inválido");const t=clamp(n,0,this.duration),easeMode=typeof mode==="string"?mode:mode?.ease||"smooth";if(!easing.includes(easeMode))throw new Error("Interpolación desconocida");const frame={time:t,points:copyPoints(points),ease:easeMode};const i=this.keyframes.findIndex(x=>Math.abs(x.time-t)<.001);if(i>=0)this.keyframes[i]=frame;else this.keyframes.push(frame);this.keyframes.sort((a,b)=>a.time-b.time);return frame}
  sample(time){const n=Number(time),current=clamp(Number.isFinite(n)?n:0,0,this.duration);if(this.keyframes.length){const byTime=new Map();byTime.set(0,{time:0,points:this.base,ease:"smooth"});for(const frame of this.keyframes)byTime.set(frame.time,{time:frame.time,points:frame.points,ease:frame.ease||"smooth"});const sorted=[...byTime.values()].sort((a,b)=>a.time-b.time);if(!byTime.has(this.duration)){const last=sorted[sorted.length-1];sorted.push({time:this.duration,points:last.points,ease:last.ease})}if(current<=sorted[0].time)return copyPoints(sorted[0].points);for(let i=0;i<sorted.length-1;i++){const a=sorted[i],b=sorted[i+1];if(current<=b.time){if(current>=b.time)return copyPoints(b.points);const progress=(current-a.time)/Math.max(.0001,b.time-a.time),p=b.ease==="hold"?0:ease(progress,b.ease),out={};for(const name of new Set([...Object.keys(a.points),...Object.keys(b.points)])){const x=a.points[name]||b.points[name],y=b.points[name]||x;out[name]={x:clamp(lerp(x.x,y.x,p)),y:clamp(lerp(x.y,y.y,p))}}return out}}return copyPoints(sorted[sorted.length-1].points)}
- const t=current/this.duration,fn=cycles[this.preset]||cycles.idle,single=new Set(["worker-lift","worker-push","worker-pull","worker-kneel","worker-point","dino-roar","dino-bite","dino-tail-swipe","dino-hit","dino-crouch","dino-sniff","dino-stomp","dino-pounce","dino-threat"]),phase=single.has(this.preset)?t:t*2,out={};for(const[name,p]of Object.entries(this.base)){const d=fn(name,phase);out[name]={x:clamp(p.x+d.x),y:clamp(p.y+d.y)}}return out}
+ const t=current/this.duration,fn=cycles[this.preset]||cycles.idle,single=new Set(["worker-lift","worker-push","worker-pull","worker-kneel","worker-point","dino-roar","dino-bite","dino-tail-swipe","dino-hit","dino-crouch","dino-sniff","dino-stomp","dino-pounce","dino-threat"]),phase=single.has(this.preset)?t:t*2,out={};for(const[name,p]of Object.entries(this.base)){const d=fn(name,phase);out[name]={x:clamp(p.x+d.x),y:clamp(p.y+d.y)}}if(this.preset==="worker-walk"||this.preset==="dino-walk")applyWalkKinematics(out,this.base,this.preset,t);return out}
  apply(rig,time){rig.points=this.sample(time);return rig.points}
  exportJSON(){return JSON.stringify({format:"nexora-motion",version:1,preset:this.preset,duration:this.duration,base:this.base,keyframes:this.keyframes},null,2)}
  importJSON(raw){const d=typeof raw==="string"?JSON.parse(raw):raw;if(d?.format!=="nexora-motion"||d.version!==1||!d.base||!Array.isArray(d.keyframes||[]))throw new Error("Archivo de movimiento no válido");const duration=Number(d.duration);if(!Number.isFinite(duration)||duration<.1||duration>3600)throw new Error("Duración de movimiento inválida");if((d.keyframes||[]).length>1000)throw new Error("El movimiento supera 1000 poses clave");const base=copyPoints(d.base),validPreset=cycles[d.preset]?d.preset:"idle",frames=[];for(const f of d.keyframes||[]){if(!Number.isFinite(Number(f.time)))throw new Error("Tiempo de pose clave inválido");const mode=f.ease||"smooth";if(!easing.includes(mode))throw new Error("Interpolación de pose inválida");frames.push({time:clamp(Number(f.time),0,duration),points:copyPoints(f.points),ease:mode})}this.base=base;this.duration=duration;this.preset=validPreset;this.keyframes=[];for(const f of frames)this.addKeyframe(f.time,f.points,f.ease);return this}
