@@ -361,3 +361,15 @@ test("3D linear blend skinning moves weighted vertices with the dinosaur skeleto
   const after = rig.skinVertices([0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]);
   assert.ok(after[1] > before[1]);
 });
+
+
+test("dinosaur dialogue scene drives its visible parts from the hierarchical 3D skeleton", () => {
+  const html=fs.readFileSync(path.join(__dirname,"../admin/animate-dino-dialogue.html"),"utf8");
+  assert.ok(html.includes('<script src="animate-engine/spatial-rig.js"></script>'));
+  assert.ok(html.includes("NexoraSpatialRig3D.createDinosaur()"));
+  assert.ok(html.includes("animateDinoRig(d,t,gesture,jaw)"));
+  assert.ok(html.includes("NexoraSpatialRig3D.math.transform"));
+  const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+  assert.equal(scripts.length,1);
+  assert.doesNotThrow(()=>new vm.Script(scripts[0][1],{filename:"animate-dino-dialogue.html"}));
+});
