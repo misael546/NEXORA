@@ -25,7 +25,12 @@ function loadEngine() {
     Object,
     String,
     Number,
-    Error
+    Error,
+    TextDecoder,
+    TextEncoder,
+    Uint8Array,
+    DataView,
+    ArrayBuffer
   };
   vm.createContext(context);
   for (const file of [
@@ -229,4 +234,35 @@ test("WebGL spatial engine supplies real triangle geometry for 3D objects", () =
   assert.equal(geometry.positions.length, 108);
   assert.equal(geometry.colors.length, 144);
   assert.ok(geometry.positions.every(Number.isFinite));
+});
+
+
+test("GLB 2.0 importer reads triangle positions and node transforms", () => {
+  const { api } = loadEngine();
+  const json = {
+    asset:{version:"2.0"},
+    buffers:[{byteLength:36}],
+    bufferViews:[{buffer:0,byteOffset:0,byteLength:36}],
+    accessors:[{bufferView:0,componentType:5126,count:3,type:"VEC3"}],
+    meshes:[{name:"Triangle",primitives:[{attributes:{POSITION:0}}]}],
+    nodes:[{mesh:0,translation:[2,1,0]}],
+    scenes:[{nodes:[0]}],
+    scene:0
+  };
+  const jsonBytes = new TextEncoder().encode(JSON.stringify(json));
+  const jsonLength = Math.ceil(jsonBytes.length/4)*4;
+  const binLength = 36;
+  const total = 12+8+jsonLength+8+binLength;
+  const buffer = new ArrayBuffer(total), view = new DataView(buffer);
+  view.setUint32(0,0x46546c67,true);view.setUint32(4,2,true);view.setUint32(8,total,true);
+  view.setUint32(12,jsonLength,true);view.setUint32(16,0x4e4f534a,true);
+  new Uint8Array(buffer,20,jsonBytes.length).set(jsonBytes);
+  for(let i=jsonBytes.length;i<jsonLength;i++)new Uint8Array(buffer)[20+i]=0x20;
+  const binStart=20+jsonLength;view.setUint32(binStart,binLength,true);view.setUint32(binStart+4,0x004e4942,true);
+  const coords=[0,0,0,1,0,0,0,1,0];coords.forEach((v,i)=>view.setFloat32(binStart+8+i*4,v,true));
+  const result=api.NexoraSpatialEngine.parseGLB(buffer);
+  assert.equal(result.meshCount,1);
+  assert.equal(result.vertexCount,3);
+  assert.equal(result.meshes[0].name,"Triangle");
+  assert.deepEqual(Array.from(result.meshes[0].positions),[2,1,0,3,1,0,2,2,0]);
 });
