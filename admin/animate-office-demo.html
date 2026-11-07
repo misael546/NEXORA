@@ -9,10 +9,10 @@
 </style></head>
 <body><main>
 <header class="top"><div class="brand"><b>N.</b> NEXORA ANIMATE</div><a class="back" href="animate-studio.html">← Volver al estudio</a></header>
-<section class="intro"><div class="tag">PRUEBA DE ANIMACIÓN · ESCENA 01</div><h1>La última entrega</h1><p>Un oficinista lleva horas trabajando. La noche avanza, el cansancio lo vence, pero por fin termina su tarea… y se queda dormido frente al escritorio.</p></section>
+<section class="intro"><div class="tag">PRUEBA DE ANIMACIÓN · ESCENA 02</div><h1>La última entrega</h1><p>Un oficinista lleva horas trabajando. La noche avanza, el cansancio lo vence, pero por fin termina su tarea… y se queda dormido frente al escritorio.</p></section>
 <section class="stage"><canvas id="scene" width="1280" height="720" aria-label="Animación de un oficinista trabajando hasta quedarse dormido"></canvas><div class="controls"><button class="btn primary" id="play">▶ Reproducir</button><button class="btn" id="restart">↺ Reiniciar</button><button class="btn" id="export">↓ Exportar vídeo WebM</button><span class="time" id="time">00:00 / 00:20</span></div></section>
 <div class="status" id="status" role="status">Escena lista. Pulsa Reproducir o exporta el vídeo.</div>
-<p class="notes">Animación 2D procedural de prueba: actuación corporal, parpadeo, bostezo, manos escribiendo, reloj, lluvia, pantalla de tarea completada, caída sobre el escritorio y globo de pensamiento. La exportación WebM se realiza en este navegador.</p>
+<p class="notes">Versión 2: más detalle facial y de vestuario, gesto de frotarse los ojos, iluminación ambiental y lluvia sobre el cristal. Sigue siendo animación procedural 2D, no un modelo generativo de anime. La exportación WebM se realiza en este navegador.</p>
 </main>
 <script>
 (()=>{
@@ -29,8 +29,9 @@ function background(t){
  for(let i=0;i<18;i++){let x=75+i*64,h=70+(Math.sin(i*9.7)*.5+.5)*125;ctx.fillStyle=i%3?'#1b3047':'#203952';ctx.fillRect(x,354-h,48,h);for(let j=0;j<4;j++)for(let k=0;k<3;k++){ctx.fillStyle='rgba(244,204,132,'+(.15+Math.abs(Math.sin(i*3+j*4+k))* .35)+')';ctx.fillRect(x+8+j*10,365-h+k*22,4,7)}}
  // moon
  ctx.fillStyle='#d9dfdc';ctx.beginPath();ctx.arc(1080,125,29,0,Math.PI*2);ctx.fill();ctx.fillStyle='#243c54';ctx.beginPath();ctx.arc(1093,115,27,0,Math.PI*2);ctx.fill();
- // rain
- for(let i=0;i<55;i++){const x=(i*83+t*(32+i%4*7))%1180+50,y=(i*47+t*(170+i%5*18))%300+60;line(x,y,x-5,y+15,'rgba(180,213,236,.23)',2)}
+ // rain on the window glass
+ for(let i=0;i<75;i++){const x=(i*83+t*(32+i%4*7))%1180+50,y=(i*47+t*(170+i%5*18))%300+60;line(x,y,x-5,y+15,'rgba(180,213,236,.23)',2)}
+ ctx.save();ctx.beginPath();ctx.roundRect(66,62,1148,292,9);ctx.clip();for(let i=0;i<22;i++){const x=(i*59+Math.sin(t*.7+i)*5)%1140+70,y=(i*37+t*(22+i%3*7))%290+65;ctx.strokeStyle='rgba(204,230,242,.16)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x-5,y+14,x-2,y+27);ctx.stroke()}ctx.restore();
  // wall shelves
  rounded(70,388,1140,14,7,'#35475c');rounded(90,402,1100,5,2,'#627187');
  // framed photo plant
@@ -52,12 +53,14 @@ function desk(t){
  rounded(480,492,270,19,5,'#202c3a','#718096');for(let i=0;i<13;i++)line(493+i*19,498,493+i*19,505,'#66778a',1);
  // mug
  rounded(1120,453,48,52,9,'#d7e0df');ctx.strokeStyle='#d7e0df';ctx.lineWidth=7;ctx.beginPath();ctx.arc(1170,477,14,-Math.PI/2,Math.PI/2);ctx.stroke();text('COFFEE',1144,484,8,'#43576b','800','center');
- // papers
+ // papers and pen
  ctx.save();ctx.translate(300,484);ctx.rotate(-.06);rounded(-65,-28,110,58,3,'#e2e0d6');for(let i=0;i<3;i++)line(-48,-12+i*13,24,-12+i*13,'#a5adb0',2);ctx.restore();
+ ctx.save();ctx.translate(210,496);ctx.rotate(-.28);rounded(-42,-5,86,13,5,'#263a50');ctx.fillStyle='#d2dce1';ctx.fillRect(35,-3,15,9);ctx.restore();
 }
 function worker(t){
- const fatigue=smooth((t-4)/4),celebrate=smooth((t-10.2)/1.1),sleep=smooth((t-12)/1.7);
+ const fatigue=smooth((t-3.2)/5),celebrate=smooth((t-10.2)/1.1),sleep=smooth((t-12)/1.7);
  const typing=Math.sin(t*13),breath=Math.sin(t*2.1)*2;
+ const yawn=smooth((t-5.15)/.35)*(1-smooth((t-7.5)/.55)),rub=smooth((t-7.7)/.35)*(1-smooth((t-9.1)/.35)),headDroop=Math.sin(t*2.3)*3*fatigue*(1-sleep)+Math.sin(t*3.1)*1.8*sleep;
  const headX=mix(530,630,sleep),headY=mix(310,420,sleep)+Math.sin(t*2)*2*sleep;
  const lean=mix(0,40,sleep),slump=fatigue*12;
  // chair
@@ -67,12 +70,15 @@ function worker(t){
  line(555,515,610,650,'#202b3b',26);line(610,650,680,660,'#182333',16);
  // body
  ctx.save();ctx.translate(0,slump);ctx.fillStyle='#557f91';ctx.beginPath();ctx.moveTo(440,345);ctx.quadraticCurveTo(500,320,560,350);ctx.lineTo(595,510);ctx.quadraticCurveTo(510,540,420,510);ctx.closePath();ctx.fill();ctx.strokeStyle='#2d5367';ctx.lineWidth=4;ctx.stroke();
+ // shirt seams and fabric folds
+ ctx.strokeStyle='rgba(15,42,58,.52)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(455,376);ctx.quadraticCurveTo(470,420,462,474);ctx.moveTo(548,374);ctx.quadraticCurveTo(563,420,570,475);ctx.stroke();
+ ctx.strokeStyle='rgba(193,220,226,.32)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(465,405);ctx.quadraticCurveTo(490,420,510,414);ctx.moveTo(540,430);ctx.quadraticCurveTo(520,452,498,463);ctx.stroke();
  // collar
  ctx.fillStyle='#dce3df';ctx.beginPath();ctx.moveTo(478,350);ctx.lineTo(505,375);ctx.lineTo(530,350);ctx.lineTo(516,397);ctx.closePath();ctx.fill();
  // neck
  rounded(488,320,42,48,12,'#d59d7b');
  // head
- ctx.save();ctx.translate(headX,headY);ctx.rotate(mix(-.04,.68,sleep)+Math.sin(t*1.7)*.025*(1-sleep));
+ ctx.save();ctx.translate(headX,headY+headDroop);ctx.rotate(mix(-.04,.68,sleep)+Math.sin(t*1.7)*.025*(1-sleep));
  ctx.fillStyle='#e2b18e';ctx.beginPath();ctx.ellipse(0,0,65,78,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#9b6d5c';ctx.lineWidth=3;ctx.stroke();
  // ears
  ctx.fillStyle='#d59d7b';ctx.beginPath();ctx.ellipse(-62,8,13,19,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(62,8,13,19,0,0,Math.PI*2);ctx.fill();
@@ -85,8 +91,10 @@ function worker(t){
  ctx.fillStyle='#fff';if(!blink){ctx.beginPath();ctx.ellipse(-25,eyeY,10,Math.max(1,eyeOpen),0,0,Math.PI*2);ctx.ellipse(25,eyeY,10,Math.max(1,eyeOpen),0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#354d5a';ctx.beginPath();ctx.arc(-23,eyeY,4,0,Math.PI*2);ctx.arc(27,eyeY,4,0,Math.PI*2);ctx.fill()}else{line(-35,eyeY,-15,eyeY,'#493a36',3);line(15,eyeY,35,eyeY,'#493a36',3)}
  // nose
  line(0,5,3,17,'#b9826b',2);
- // mouth: yawn / smile / sleep
- ctx.strokeStyle='#714b47';ctx.lineWidth=3;ctx.beginPath();if(t>5&&t<8.2){ctx.ellipse(0,34,13,19,0,0,Math.PI*2)}else if(t>10.5&&t<12.3){ctx.arc(0,24,17,.15,Math.PI-.15)}else if(sleep>.6){ctx.arc(0,28,9,0,Math.PI)}else{ctx.moveTo(-12,31);ctx.quadraticCurveTo(0,37,12,31)}ctx.stroke();
+ // expressive yawn, relieved smile and relaxed sleeping mouth
+ ctx.strokeStyle='#714b47';ctx.lineWidth=3;ctx.beginPath();if(yawn>.08){ctx.ellipse(0,34,10+5*yawn,5+17*yawn,0,0,Math.PI*2);ctx.fillStyle='#653d43';ctx.fill();ctx.stroke()}else if(t>10.5&&t<12.3){ctx.arc(0,24,17,.15,Math.PI-.15);ctx.stroke()}else if(sleep>.6){ctx.arc(0,28,9,0,Math.PI);ctx.stroke()}else{ctx.moveTo(-12,31);ctx.quadraticCurveTo(0,37,12,31);ctx.stroke()}
+ ctx.strokeStyle='rgba(120,75,69,.34)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(-25,10,11,.2,2.7);ctx.arc(25,10,11,.4,2.9);ctx.stroke();
+ ctx.fillStyle='rgba(221,126,115,.22)';ctx.beginPath();ctx.ellipse(-43,23,12,6,0,0,Math.PI*2);ctx.ellipse(43,23,12,6,0,0,Math.PI*2);ctx.fill();
  // glasses
  ctx.strokeStyle='#34495a';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(-43,-17,36,31,9);ctx.roundRect(7,-17,36,31,9);ctx.moveTo(-7,-4);ctx.lineTo(7,-4);ctx.stroke();
  ctx.restore();
@@ -111,6 +119,8 @@ function thought(t){
  ctx.restore();
 }
 function draw(t){current=clamp(t,0,duration);ctx.clearRect(0,0,W,H);background(current);desk(current);worker(current);thought(current);
+ // cinematic vignette
+ const vignette=ctx.createRadialGradient(640,350,240,640,350,790);vignette.addColorStop(0,'rgba(4,8,15,0)');vignette.addColorStop(1,'rgba(4,8,15,.42)');ctx.fillStyle=vignette;ctx.fillRect(0,0,W,H);
  // narrative captions
  let caption=current<4?'UNA NOCHE MÁS EN LA OFICINA':current<8?'EL CANSANCIO EMPIEZA A GANAR':current<12?'POR FIN… TRABAJO COMPLETADO':current<16?'SOLO CINCO MINUTOS…':'OJALÁ ESTO YA TERMINE…';
  ctx.fillStyle='rgba(5,12,22,.62)';rounded(420,28,440,38,18,'rgba(5,12,22,.62)');text(caption,640,53,14,'#dce8f1','700','center');
