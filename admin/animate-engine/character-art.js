@@ -224,15 +224,22 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  for(let i=0;i<3;i++)polygon(ctx,[{x:fl.x+9+i*5,y:fl.y+5},{x:fl.x+17+i*5,y:fl.y+7},{x:fl.x+21+i*5,y:fl.y+12}],"#e4dcad","#5c6848",1);
  // Body mass and belly.
  const center=mix(chest,hip,.5);
- // A broad barrel-shaped torso with a deep chest, tapered waist and layered belly.
- bezierShape(ctx,{x:center.x-69,y:center.y-6},[
-  [center.x-66,center.y-50,center.x-23,center.y-65,center.x+17,center.y-51],
-  [center.x+65,center.y-39,center.x+91,center.y-10,center.x+78,center.y+24],
-  [center.x+68,center.y+58,center.x+6,center.y+66,center.x-38,center.y+43],
-  [center.x-72,center.y+31,center.x-84,center.y+7,center.x-69,center.y-6]
+ // Continuous theropod torso: long back, deep rib cage and a taper into the pelvis.
+ bezierShape(ctx,{x:center.x-91,y:center.y-9},[
+  [center.x-91,center.y-48,center.x-45,center.y-67,center.x+10,center.y-55],
+  [center.x+70,center.y-48,center.x+108,center.y-20,center.x+101,center.y+8],
+  [center.x+96,center.y+39,center.x+55,center.y+56,center.x+8,center.y+47],
+  [center.x-40,center.y+42,center.x-82,center.y+24,center.x-91,center.y-9]
  ],green,"#173b35",5);
- ellipse(ctx,mix(chest,hip,.27),45,38,green,"#315d43",2,-.28);
- ellipse(ctx,{x:center.x-8,y:center.y+24},61,24,belly,"#536e4c",2,-.08);
+ // Belly is a single inset plane that follows the underside of the rib cage.
+ bezierShape(ctx,{x:center.x-61,y:center.y+7},[
+  [center.x-56,center.y+28,center.x-24,center.y+45,center.x+7,center.y+46],
+  [center.x+45,center.y+48,center.x+76,center.y+31,center.x+78,center.y+12],
+  [center.x+49,center.y+26,center.x-16,center.y+23,center.x-61,center.y+7]
+ ],belly,"#65794f",1.6);
+ // Near-side thigh roots overlap the rib cage so the legs feel attached to the pelvis.
+ organicLimb(ctx,{x:hip.x+8,y:hip.y+1},kr,46,34,green,"#c2e28d");
+ organicLimb(ctx,{x:hip.x-8,y:hip.y+1},kl,48,36,green,"#c2e28d");
  // Continuous anatomical contour lines follow the flank without creating detached muscle blobs.
  segment(ctx,{x:center.x-55,y:center.y-7},{x:center.x-36,y:center.y-22},2.2,"#b4d982","#47764a");
  segment(ctx,{x:center.x-36,y:center.y-22},{x:center.x-12,y:center.y-20},1.8,"#b4d982","#47764a");
@@ -269,20 +276,26 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  ],gradient(ctx,{x:head.x-28,y:head.y-3},{x:head.x+8,y:head.y+17},[[0,"#c7e98b"],[1,"#4a8751"]]),"#173b35",2.5);
  // Keep the lower jaw hinged beneath the muzzle. Its opening is clamped so a roar never stretches the mouth into a spike.
  polygon(ctx,[{x:head.x-27,y:head.y+7},{x:head.x-9,y:head.y+12},{x:jawMouth.x+12,y:jawMouth.y+2},{x:jawMouth.x+8,y:jawMouth.y+10},{x:head.x-13,y:jawMouth.y+9},{x:head.x-30,y:head.y+14}],gradient(ctx,{x:head.x-8,y:head.y+12},jawMouth,[[0,"#8fbd65"],[1,"#386c48"]]),"#173b35",3);
- polygon(ctx,[
-  {x:head.x-34,y:head.y+7},{x:head.x-12,y:head.y+12},
-  {x:jawMouth.x+9,y:jawMouth.y+2},{x:jawMouth.x+6,y:jawMouth.y+14},
-  {x:head.x-12,y:jawMouth.y+10},{x:head.x-33,y:head.y+15}
- ],"#371d27","#1d2025",1.5);
- // Tongue and gum shading stay inside the moving lower jaw.
- bezierShape(ctx,{x:head.x-25,y:jawMouth.y+3},[
-  [head.x-17,jawMouth.y+1,head.x-7,jawMouth.y+3,head.x-4,jawMouth.y+8],
-  [head.x-11,jawMouth.y+10,head.x-21,jawMouth.y+9,head.x-25,jawMouth.y+3]
- ],"#b75f69",null);
- segment(ctx,{x:head.x-32,y:head.y+10},{x:jawMouth.x+7,y:jawMouth.y+3},2.8,"#3a2629","#1c2026");
- // Upper and lower teeth follow the hinged jaw.
- for(let i=0;i<4;i++){const x=head.x-17+i*8;polygon(ctx,[{x,y:head.y+9+i*.8},{x:x+4,y:head.y+9+i*.8},{x:x+2,y:head.y+16+i}],"#f1edcf","#b1b28e",.8)}
- for(let i=0;i<4;i++){const x=head.x-12+i*8;polygon(ctx,[{x,y:jawMouth.y+8},{x:x+5,y:jawMouth.y+8},{x:x+2.5,y:jawMouth.y+2}],"#f1edcf","#b1b28e",.8)}
+ const jawOpening=jawMouth.y-(head.y+7);
+ if(jawOpening>6){
+  polygon(ctx,[
+   {x:head.x-34,y:head.y+7},{x:head.x-12,y:head.y+12},
+   {x:jawMouth.x+9,y:jawMouth.y+2},{x:jawMouth.x+6,y:jawMouth.y+14},
+   {x:head.x-12,y:jawMouth.y+10},{x:head.x-33,y:head.y+15}
+  ],"#371d27","#1d2025",1.5);
+  // Tongue and gum shading stay inside the moving lower jaw.
+  bezierShape(ctx,{x:head.x-25,y:jawMouth.y+3},[
+   [head.x-17,jawMouth.y+1,head.x-7,jawMouth.y+3,head.x-4,jawMouth.y+8],
+   [head.x-11,jawMouth.y+10,head.x-21,jawMouth.y+9,head.x-25,jawMouth.y+3]
+  ],"#b75f69",null);
+  segment(ctx,{x:head.x-32,y:head.y+10},{x:jawMouth.x+7,y:jawMouth.y+3},2.8,"#3a2629","#1c2026");
+  // Teeth appear only while the jaw is open.
+  for(let i=0;i<4;i++){const x=head.x-17+i*8;polygon(ctx,[{x,y:head.y+9+i*.8},{x:x+4,y:head.y+9+i*.8},{x:x+2,y:head.y+16+i}],"#f1edcf","#b1b28e",.8)}
+  for(let i=0;i<4;i++){const x=head.x-12+i*8;polygon(ctx,[{x,y:jawMouth.y+8},{x:x+5,y:jawMouth.y+8},{x:x+2.5,y:jawMouth.y+2}],"#f1edcf","#b1b28e",.8)}
+ }else{
+  // Closed resting mouth: one compact curved seam under the snout.
+  segment(ctx,{x:head.x-27,y:head.y+11},{x:jawMouth.x+5,y:jawMouth.y+2},2.2,"#31523a","#23402f");
+ }
  const blinkAt=((Number(options.time)||0)+.35)%3.45,eyeOpen=blinkAt<.14?Math.max(.1,Math.abs(blinkAt-.07)/.07):1;
  ellipse(ctx,{x:head.x-8,y:head.y-9},10,10*eyeOpen,"#f4d36d","#405239",2.2);
  ellipse(ctx,{x:head.x-10,y:head.y-9},4.6,5.4*eyeOpen,"#243128",null);
