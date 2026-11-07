@@ -3,6 +3,10 @@ on:
   schedule:
     - cron: "0 15 * * 1"
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/wallpaper-weekly.yml"
+      - ".github/scripts/import-wallpapers.mjs"
 permissions:
   contents: write
 concurrency:
@@ -24,7 +28,7 @@ jobs:
           WALLPAPER_INGEST_TOKEN: ${{ secrets.WALLPAPER_INGEST_TOKEN }}
           WALLPAPER_ACCESS_CLIENT_ID: ${{ secrets.WALLPAPER_ACCESS_CLIENT_ID }}
           WALLPAPER_ACCESS_CLIENT_SECRET: ${{ secrets.WALLPAPER_ACCESS_CLIENT_SECRET }}
-          WALLPAPER_PAGES_PER_TOPIC: "8"
+          WALLPAPER_PAGES_PER_TOPIC: "4"
         run: node .github/scripts/import-wallpapers.mjs
       - name: Save Wikimedia search progress
         if: always()
