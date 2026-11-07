@@ -45,6 +45,25 @@ function drawWorker(ctx,w,h,rig,options={}){
  limb(ctx,sr,er,20,gradient(ctx,sr,er,[[0,"#ee8c3d"],[1,"#b94d25"]]),"#ffc16d");
  limb(ctx,er,hr,15,gradient(ctx,er,hr,[[0,"#f3a04e"],[1,"#b94f25"]]),"#ffd08b");
  ellipse(ctx,hl,8,7,"#4c5662","#1c2734",2);ellipse(ctx,hr,8,7,"#4c5662","#1c2734",2);
+ // Tools and carried props stay attached to the worker's animated hands.
+ const action=options.action||"",time=Number(options.time)||0;
+ if(action==="worker-hammer"){
+  const swing=Math.sin(time*Math.PI*2),angle=-1.9+swing*.28,tip={x:hr.x+Math.cos(angle)*35,y:hr.y+Math.sin(angle)*35};
+  segment(ctx,hr,tip,5,"#87532e","#422d23","#d7a16a");
+  const headTip={x:tip.x+Math.cos(angle)*4,y:tip.y+Math.sin(angle)*4};
+  segment(ctx,{x:headTip.x+Math.sin(angle)*9,y:headTip.y-Math.cos(angle)*9},{x:headTip.x-Math.sin(angle)*9,y:headTip.y+Math.cos(angle)*9},11,"#8796a5","#354252","#e2e9ee");
+ }
+ if(action==="worker-dig"){
+  const grip=mix(hl,hr,.48),shaft={x:hr.x+22,y:hr.y+33},blade={x:shaft.x+10,y:shaft.y+11};
+  segment(ctx,grip,shaft,5,"#87532e","#422d23","#d7a16a");
+  polygon(ctx,[{x:blade.x-10,y:blade.y-2},{x:blade.x+11,y:blade.y-3},{x:blade.x+5,y:blade.y+13},{x:blade.x-5,y:blade.y+13}],"#9aa8b4","#354252",2);
+ }
+ if(action==="worker-carry"||action==="worker-lift"){
+  const center=mix(hl,hr,.5),boxY=(hl.y+hr.y)/2+7,boxW=action==="worker-lift"?62:56,boxH=action==="worker-lift"?40:36;
+  polygon(ctx,[{x:center.x-boxW/2,y:boxY-boxH/2},{x:center.x+boxW/2,y:boxY-boxH/2-4},{x:center.x+boxW/2,y:boxY+boxH/2-4},{x:center.x-boxW/2,y:boxY+boxH/2}],"#9a693c","#4e3527",3);
+  polygon(ctx,[{x:center.x-boxW/2,y:boxY-boxH/2},{x:center.x,y:boxY-boxH/2-4},{x:center.x,y:boxY+boxH/2-4},{x:center.x-boxW/2,y:boxY+boxH/2}],"#ba874f","#69462d",1.5);
+  segment(ctx,{x:center.x-boxW/2+8,y:boxY-4},{x:center.x+boxW/2-8,y:boxY-8},3,"#d4a36d","#69462d");
+ }
  // Neck and face.
  segment(ctx,neck,head,18,"#d99b70","#5c3e33","#f6c59d");
  ellipse(ctx,head,22,28,gradient(ctx,{x:head.x-17,y:head.y-18},{x:head.x+18,y:head.y+23},[[0,"#f5c99e"],[.62,"#d99a70"],[1,"#a96552"]]),"#5b3b32",3,faceAngle);
