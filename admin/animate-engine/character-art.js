@@ -180,11 +180,28 @@ function drawDinosaur(ctx,w,h,rig,options={}){
  const get=(k,x=.5,y=.5)=>p[k]||{x:x*w,y:y*h};
  const head=get("head"),jaw=get("jaw"),neck=get("neck"),chest=get("chest"),hip=get("hip"),tail1=get("tail1"),tail2=get("tail2"),tail3=get("tail3"),tail4=get("tail4");
  const sl=get("shoulderL"),el=get("elbowL"),hl=get("handL"),sr=get("shoulderR"),er=get("elbowR"),hr=get("handR"),kl=get("kneeL"),fl=get("footL"),kr=get("kneeR"),fr=get("footR");
+ const action=options.action||"",time=Number(options.time)||0,duration=Math.max(.1,Number(options.duration)||2);
+ const actionPhase=Math.max(0,Math.min(1,time/duration));
  const green=gradient(ctx,{x:head.x,y:head.y-35},{x:hip.x,y:hip.y+50},[[0,"#b6d77b"],[.38,"#6eaa55"],[.76,"#397b50"],[1,"#245443"]]);
  const belly=gradient(ctx,chest,hip,[[0,"#e3d39a"],[1,"#a1aa70"]]);
  ctx.save();
  // Ground shadow.
  ellipse(ctx,{x:(head.x+tail4.x+hip.x)/3,y:Math.max(fl.y,fr.y)+7},130,10,"rgba(0,0,0,.3)",null);
+ // Faint delayed silhouettes leave a short smear behind a fast tail strike.
+ if(action==="dino-tail-swipe"){
+  const strength=Math.sin(Math.PI*actionPhase);
+  for(let trail=3;trail>=1;trail--){
+   const offset=trail*8*strength;
+   const ghost=[hip,{x:tail1.x,y:tail1.y-offset},{x:tail2.x,y:tail2.y-offset*1.18},{x:tail3.x,y:tail3.y-offset*1.42},{x:tail4.x,y:tail4.y-offset*1.7}];
+   taperedRibbon(ctx,ghost,[36,31,23,14,4],"rgba(164,211,112,"+(strength*.11)+")",null,0);
+  }
+  if(strength>.55){
+   ctx.save();ctx.globalAlpha=(strength-.55)*.75;ctx.strokeStyle="#d7efa1";ctx.lineWidth=2.6;ctx.lineCap="round";
+   ctx.beginPath();ctx.moveTo(tail1.x,tail1.y-22);
+   ctx.bezierCurveTo(tail2.x,tail2.y-42,tail3.x,tail3.y-38,tail4.x+10,tail4.y-24);
+   ctx.stroke();ctx.restore();
+  }
+ }
  // A single tapered tail silhouette keeps the moving sections joined instead of looking like pipes.
  taperedRibbon(ctx,[hip,tail1,tail2,tail3,tail4],[42,36,27,17,5],green,"#173b35",4);
  // A soft dorsal highlight and patterned bands make the tail read as a flexible, muscular form.
