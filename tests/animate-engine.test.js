@@ -39,6 +39,7 @@ function loadEngine() {
     "spatial-rig.js",
     "facial-animation.js",
     "spatial-motion.js",
+    "spatial-actions.js",
     "audio-engine.js",
     "continuity.js",
     "animation-tools.js",
@@ -533,4 +534,40 @@ test("3D facial acting generates timed blinks and reads phoneme viseme tracks", 
   assert.ok(mesh.morphWeights[0] > 0.99);
   assert.ok(mesh.morphWeights[1] > 0.99);
   assert.equal(mesh.morphWeights[2], 0.75);
+});
+
+test("3D cinematic action library animates dinosaur gait and full-body reactions", () => {
+  const { api } = loadEngine();
+  const rig = api.NexoraSpatialRig3D.createDinosaur();
+  const beforeLeg = rig.worldPosition("shinL");
+  const beforeTail = rig.worldPosition("tailTip");
+  const walk = api.NexoraSpatialActions.createPlayer(rig, "walk");
+  assert.equal(walk.loop, true);
+  walk.play().advance(0.3);
+  assert.notDeepEqual(rig.worldPosition("shinL"), beforeLeg);
+  assert.notDeepEqual(rig.worldPosition("tailTip"), beforeTail);
+
+  const jump = api.NexoraSpatialActions.createPlayer(rig, "jump");
+  jump.play().advance(0.5);
+  assert.ok(rig.worldPosition("root")[1] > 0.3);
+  jump.advance(1);
+  assert.equal(jump.playing, false);
+  assert.equal(jump.time, jump.clip.duration);
+
+  const talk = api.NexoraSpatialActions.createClip(rig, "talk");
+  assert.ok(talk.tracks.some(track => track.bone === "jaw"));
+  assert.equal(api.NexoraSpatialActions.actions.length, 9);
+});
+
+test("3D action library adapts to a humanoid rig and serializes reusable clips", () => {
+  const { api } = loadEngine();
+  const rig = api.NexoraSpatialRig3D.createHumanoid();
+  const before = rig.worldPosition("head");
+  const player = api.NexoraSpatialActions.createPlayer(rig, "hit");
+  player.play().advance(0.25);
+  assert.notDeepEqual(rig.worldPosition("head"), before);
+  const copy = api.NexoraSpatialMotion.SpatialAnimationClip.fromJSON(player.clip.exportJSON());
+  assert.equal(copy.name, "hit");
+  assert.ok(copy.tracks.length > 0);
+  assert.throws(() => api.NexoraSpatialActions.createClip(rig, "fly"), /desconocida/);
 });
