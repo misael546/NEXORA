@@ -119,5 +119,30 @@ class SpatialActionPlayer{
 }
 const actions=[{id:"idle",label:"Respirar / reposo"},{id:"walk",label:"Caminar"},{id:"run",label:"Correr"},{id:"jump",label:"Saltar"},{id:"land",label:"Aterrizar"},{id:"turn",label:"Girar"},{id:"talk",label:"Hablar / gesticular"},{id:"hit",label:"Reaccionar a impacto"},{id:"crouch",label:"Agacharse"}];
 function createPlayer(rig,action,options={}){return new SpatialActionPlayer(rig,createClip(rig,action,options),options)}
-window.NexoraSpatialActions={actions,roleMap,createClip,createPlayer,SpatialActionPlayer};
+class SpatialActionSequence{
+ constructor(rig,{name="Secuencia cinematográfica",segments=[]}={}){if(!rig?.bones)throw Error("La secuencia necesita un rig 3D");this.rig=rig;this.name=name;this.segments=[];for(const segment of segments)this.add(segment.action,segment.options||{},segment)}
+ add(action,options={},settings={}){
+  const clip=createClip(this.rig,action,options),duration=Number(settings.duration??options.duration??clip.duration),blendDuration=clamp(Number(settings.blendDuration??options.blendDuration??.22),0,2);
+  if(!Number.isFinite(duration)||duration<.05||duration>120)throw Error("La duración de cada acción debe estar entre 0.05 y 120 segundos");
+  this.segments.push({action,options:{...options},duration,blendDuration,clip});
+  return this;
+ }
+ remove(index){if(!Number.isInteger(index)||index<0||index>=this.segments.length)return false;this.segments.splice(index,1);return true}
+ clear(){this.segments=[];return this}
+ get totalDuration(){return this.segments.reduce((sum,segment)=>sum+segment.duration,0)}
+ timeline(){let start=0;return this.segments.map((segment,index)=>{const entry={index,action:segment.action,start,end:start+segment.duration,duration:segment.duration,blendDuration:segment.blendDuration};start=entry.end;return entry})}
+ exportJSON(){return{format:"nexora-spatial-action-sequence",version:1,name:this.name,segments:this.segments.map(({action,options,duration,blendDuration})=>({action,options,duration,blendDuration}))}}
+ static fromJSON(rig,data){if(data?.format!=="nexora-spatial-action-sequence"||data.version!==1||!Array.isArray(data.segments))throw Error("Secuencia cinematográfica inválida");return new SpatialActionSequence(rig,{name:data.name,segments:data.segments})}
+ createPlayer(options={}){return new SpatialSequencePlayer(this,options)}
+}
+class SpatialSequencePlayer{
+ constructor(sequence,{blendDuration}={}){this.sequence=sequence;this.rig=sequence.rig;this.time=0;this.playing=false;this.currentIndex=-1;this.currentPlayer=null;this.defaultBlendDuration=blendDuration}
+ locate(time){const timeline=this.sequence.timeline();if(!timeline.length)return null;const t=clamp(Number(time)||0,0,this.sequence.totalDuration);return timeline.find((item,index)=>t<item.end||index===timeline.length-1)||null}
+ enter(item,localTime=0){if(this.currentPlayer)this.currentPlayer.pause();const segment=this.sequence.segments[item.index],blend=this.defaultBlendDuration??segment.blendDuration;this.currentPlayer=new SpatialActionPlayer(this.rig,segment.clip,{blendDuration:blend});this.currentIndex=item.index;this.currentPlayer.play();if(localTime>0)this.currentPlayer.advance(localTime);return this.currentPlayer}
+ play(){if(!this.sequence.segments.length)throw Error("Añade al menos una acción a la secuencia");if(this.time>=this.sequence.totalDuration)this.time=0;const item=this.locate(this.time);if(!this.currentPlayer||item.index!==this.currentIndex)this.enter(item,this.time-item.start);else this.currentPlayer.play();this.playing=true;return this}
+ pause(){this.playing=false;this.currentPlayer?.pause();return this}
+ seek(seconds){if(!this.sequence.segments.length)return this;this.time=clamp(Number(seconds)||0,0,this.sequence.totalDuration);const item=this.locate(this.time),local=this.time-item.start;if(!this.currentPlayer||item.index!==this.currentIndex)this.enter(item,local);else this.currentPlayer.seek(local);this.playing=false;this.currentPlayer.pause();return this}
+ advance(delta){if(!this.playing)return this;const step=Math.max(0,Number(delta)||0),next=Math.min(this.sequence.totalDuration,this.time+step),item=this.locate(next),local=next-item.start;if(item.index!==this.currentIndex)this.enter(item,local);else if(this.currentPlayer)this.currentPlayer.advance(step);this.time=next;if(next>=this.sequence.totalDuration){this.playing=false;this.currentPlayer?.pause()}return this}
+}
+window.NexoraSpatialActions={actions,roleMap,createClip,createPlayer,SpatialActionPlayer,SpatialActionSequence,SpatialSequencePlayer};
 })();
