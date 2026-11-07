@@ -571,3 +571,30 @@ test("3D action library adapts to a humanoid rig and serializes reusable clips",
   assert.ok(copy.tracks.length > 0);
   assert.throws(() => api.NexoraSpatialActions.createClip(rig, "fly"), /desconocida/);
 });
+
+test("procedural 3D actions preserve the imported bind pose and do not stack old motion", () => {
+  const { api } = loadEngine();
+  const angle = 0.22;
+  const baseRotation = [0, 0, Math.sin(angle / 2), Math.cos(angle / 2)];
+  const rig = new api.NexoraSpatialRig3D.SpatialRig3D([
+    { name: "root", translation: [2, 3, 4], rotation: baseRotation },
+    { name: "pelvis", parent: "root", translation: [0, 1, 0] },
+    { name: "spine", parent: "pelvis", translation: [0, 1, 0] },
+    { name: "head", parent: "spine", translation: [0, 1, 0] },
+    { name: "jaw", parent: "head", translation: [0, -0.1, 0] },
+    { name: "tailBase", parent: "pelvis", translation: [-1, 0, 0] },
+    { name: "thighL", parent: "pelvis", translation: [0, -0.2, -0.2] },
+    { name: "thighR", parent: "pelvis", translation: [0, -0.2, 0.2] }
+  ]);
+  const walk = api.NexoraSpatialActions.createPlayer(rig, "walk");
+  walk.play();
+  assert.deepEqual(Array.from(rig.byName.get("root").translation), [2, 3, 4]);
+  assert.ok(Math.abs(rig.byName.get("root").rotation[2] - baseRotation[2]) < 1e-8);
+  walk.advance(0.3);
+  const talk = api.NexoraSpatialActions.createPlayer(rig, "talk");
+  talk.play();
+  assert.deepEqual(Array.from(rig.byName.get("root").translation), [2, 3, 4]);
+  assert.ok(Math.abs(rig.byName.get("root").rotation[2] - baseRotation[2]) < 1e-8);
+  rig.resetPose();
+  assert.deepEqual(Array.from(rig.byName.get("root").translation), [2, 3, 4]);
+});
