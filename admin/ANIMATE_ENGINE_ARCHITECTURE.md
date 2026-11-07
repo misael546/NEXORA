@@ -271,3 +271,12 @@ Las actuaciones son clips procedurales de esqueleto, no un sistema de captura de
 ## Límites de las secuencias
 
 Los clips son animaciones procedurales de articulaciones, y las pistas fonéticas mueven morph targets nombrados. Para una actuación de calidad profesional se necesita que cada modelo tenga rigging bien orientado, morph targets faciales compatibles y pistas fonéticas reales o alineación de voz. Las pruebas automatizadas verifican la lógica y no sustituyen la revisión visual de cada personaje.
+
+
+## Evolución 2D — rig humano e interpolación de animación
+
+- El panel 2D puede crear una pose base humana con 13 articulaciones para acelerar el montaje inicial.
+- El arrastre de manos y pies resuelve codo o rodilla mediante cinemática inversa de dos segmentos; limita el alcance para conservar las longitudes del brazo o la pierna.
+- Las articulaciones laterales pueden espejarse respecto al eje central del personaje.
+- Las poses clave admiten interpolación suave, lineal, entrada, salida y mantenimiento. Las claves en el segundo cero se respetan y los archivos antiguos sin tipo de interpolación siguen cargándose.
+- Las pruebas verifican IK, simetría, interpolación en el inicio, compatibilidad de movimientos anteriores y rechazo de datos numéricos inválidos.
