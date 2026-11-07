@@ -771,3 +771,52 @@ test("cinematic sequence player can seek to an action and resume from that pose"
   player.pause();
   assert.equal(player.playing, false);
 });
+
+test("GLB parser preserves embedded base-color images and UV coordinates for textured models", () => {
+  const { api } = loadEngine();
+  const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j+2QAAAAASUVORK5CYII=", "base64");
+  const imageOffset = 60;
+  const binLength = Math.ceil((imageOffset + png.length) / 4) * 4;
+  const json = {
+    asset: { version: "2.0" },
+    buffers: [{ byteLength: binLength }],
+    bufferViews: [
+      { buffer: 0, byteOffset: 0, byteLength: 36 },
+      { buffer: 0, byteOffset: 36, byteLength: 24 },
+      { buffer: 0, byteOffset: imageOffset, byteLength: png.length }
+    ],
+    accessors: [
+      { bufferView: 0, componentType: 5126, count: 3, type: "VEC3" },
+      { bufferView: 1, componentType: 5126, count: 3, type: "VEC2" }
+    ],
+    images: [{ name: "skin", bufferView: 2, mimeType: "image/png" }],
+    textures: [{ source: 0 }],
+    materials: [{ pbrMetallicRoughness: { baseColorFactor: [0.8, 0.6, 0.4, 1], baseColorTexture: { index: 0 } } }],
+    meshes: [{ name: "TexturedTriangle", primitives: [{ attributes: { POSITION: 0, TEXCOORD_0: 1 }, material: 0 }] }],
+    nodes: [{ mesh: 0 }],
+    scenes: [{ nodes: [0] }],
+    scene: 0
+  };
+  const jsonBytes = new TextEncoder().encode(JSON.stringify(json));
+  const jsonLength = Math.ceil(jsonBytes.length / 4) * 4;
+  const total = 12 + 8 + jsonLength + 8 + binLength;
+  const buffer = new ArrayBuffer(total), view = new DataView(buffer);
+  view.setUint32(0, 0x46546c67, true); view.setUint32(4, 2, true); view.setUint32(8, total, true);
+  view.setUint32(12, jsonLength, true); view.setUint32(16, 0x4e4f534a, true);
+  new Uint8Array(buffer, 20, jsonBytes.length).set(jsonBytes);
+  for (let i = jsonBytes.length; i < jsonLength; i++) new Uint8Array(buffer)[20 + i] = 0x20;
+  const binStart = 20 + jsonLength;
+  view.setUint32(binStart, binLength, true); view.setUint32(binStart + 4, 0x004e4942, true);
+  const coordinates = [0,0,0, 1,0,0, 0,1,0];
+  coordinates.forEach((value, i) => view.setFloat32(binStart + 8 + i * 4, value, true));
+  const uv = [0,0, 1,0, 0,1];
+  uv.forEach((value, i) => view.setFloat32(binStart + 8 + 36 + i * 4, value, true));
+  new Uint8Array(buffer, binStart + 8 + imageOffset, png.length).set(png);
+  const parsed = api.NexoraSpatialEngine.parseGLB(buffer);
+  assert.equal(parsed.meshes[0].textureIndex, 0);
+  assert.deepEqual(Array.from(parsed.meshes[0].uvs), uv);
+  assert.equal(parsed.images.length, 1);
+  assert.equal(parsed.images[0].mimeType, "image/png");
+  assert.equal(parsed.images[0].data.byteLength, png.length);
+  assert.equal(parsed.textures[0].source, 0);
+});
