@@ -29,6 +29,8 @@ function loadEngine() {
   };
   vm.createContext(context);
   for (const file of [
+    "character-skeleton.js",
+    "spatial-engine.js",
     "continuity.js",
     "animation-tools.js",
     "motion-system.js",
@@ -177,4 +179,36 @@ test("color-assisted mask finds a connected color region and rejects a huge back
   assert.equal(api.NexoraMeshDeformer.pointInPolygon({x:.05,y:.05},hull),false);
   const background=api.NexoraMeshDeformer.colorRegionHull(data,width,height,0,0,8);
   assert.equal(background,null);
+});
+
+
+test("hierarchical character skeleton propagates a lean through spine neck head and shoulders", () => {
+  const { api } = loadEngine();
+  const skeleton = api.NexoraCharacterSkeleton.createHumanUpperBodySkeleton();
+  const before = skeleton.worldPose();
+  skeleton.setPose(api.NexoraCharacterSkeleton.buildLeanPose(1));
+  const after = skeleton.worldPose();
+  assert.ok(after.head.x > before.head.x);
+  assert.ok(after.head.y > before.head.y);
+  assert.ok(after.chest.x > before.chest.x);
+  assert.ok(after.shoulderL.x > before.shoulderL.x);
+  assert.ok(after.shoulderR.y > before.shoulderR.y);
+  const copy = api.NexoraCharacterSkeleton.CharacterSkeleton.fromJSON(skeleton.exportJSON());
+  assert.equal(copy.worldPose().head.x, after.head.x);
+});
+
+test("spatial camera supports front back side top and three-quarter projections", () => {
+  const { api } = loadEngine();
+  const camera = new api.NexoraSpatialEngine.SpatialCamera({distance:5});
+  const point = {x:0,y:0,z:0};
+  for (const view of ["front","back","left","right","top","bottom","three-quarter"]) {
+    camera.setView(view);
+    const projected = camera.project(point,1280,720);
+    assert.equal(projected.visible,true);
+    assert.ok(Number.isFinite(projected.x) && Number.isFinite(projected.y));
+  }
+  camera.projection = "orthographic";
+  assert.equal(camera.project(point,1280,720).visible,true);
+  camera.orbit(.2,.1).dolly(-.1);
+  assert.ok(camera.distance>0);
 });
