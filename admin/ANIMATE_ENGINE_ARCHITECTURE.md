@@ -224,3 +224,8 @@ La reproducción está conectada para mallas skinned que tengan datos GLB válid
 ### Alcance pendiente
 
 El control actual permite probar el primer target de una malla. Aún falta exponer todos los targets por nombre, animar los pesos mediante canales GLB `weights`, procesar morph targets de normales/tangentes y validar modelos faciales reales en navegador.
+
+
+### Corrección visual — normales tras deformar
+
+Al actualizar posiciones de una malla deformada, el renderer vuelve a calcular normales por triángulo y actualiza también el búfer de normales de GPU. Esto evita conservar la iluminación radial aproximada de la geometría original después del skinning o de un morph target. El cálculo actual es plano por triángulo; el suavizado de normales y tangentes queda como mejora posterior.
