@@ -7,7 +7,7 @@ export const onRequest:PagesFunction<Env>=async({request,env})=>{
  if(!env.DB)return json({error:"La base D1 no está conectada."},503);
  let body:any;try{body=await request.json()}catch{return json({error:"JSON inválido"},400)}
  if(!Array.isArray(body.wallpapers)||body.wallpapers.length>250)return json({error:"Lote no válido (máximo 250)."},400);
- const allowed=new Set(["naturaleza","paisajes","espacio","anime","gaming","minimalista","abstracto","arquitectura"]);
+ const allowed=new Set(["naturaleza","paisajes","animales","espacio","anime","gaming","autos","arquitectura","tecnologia","ciudades","arte","minimalista","abstracto"]);
  const statements=[];
  for(const w of body.wallpapers){
   const id=String(w.id||"").slice(0,100),title=String(w.title||"").trim().slice(0,180),image=String(w.image_url||""),thumb=String(w.thumb_url||""),source=String(w.source_url||"");
