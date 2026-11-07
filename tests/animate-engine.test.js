@@ -226,6 +226,7 @@ test("editing one timeline pose keeps all other keyed poses intact", () => {
 test("worker and dinosaur 2D action libraries animate their dedicated landmarks", () => {
   const { api } = loadEngine();
   const human = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  assert.ok(human.points.footR.x - human.points.footL.x <= 0.13, "La postura de reposo debe mantener los pies bajo las caderas.");
   const worker = new api.NexoraMotionSystem.MotionTimeline(human.points);
   worker.usePreset("worker-hammer", 2);
   assert.ok(worker.sample(.125).handR.y < human.points.handR.y);
