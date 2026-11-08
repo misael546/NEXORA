@@ -50,6 +50,8 @@
 <path d="M183 449 Q202 461 221 447 L216 469 Q198 485 181 468Z" fill="#2d394b" stroke="#172333" stroke-width="4"/>
 <path d="M181 466 Q202 480 218 466 L215 494 Q206 512 188 507 Q174 500 181 466Z" fill="#303d51" stroke="#182537" stroke-width="4"/>
 <path d="M187 483 L202 489 M184 491 L199 497" stroke="#92a0ae" stroke-width="2" opacity=".7"/>
+<!-- head scale corrected to restore adult anime proportions -->
+<g transform="translate(310 185) scale(.84 .88) translate(-310 -185)">
 <!-- neck and face -->
 <path d="M275 233 L328 231 L333 291 Q307 315 276 288Z" fill="url(#skinShadow)" stroke="#75473e" stroke-width="5"/>
 <path d="M264 160 Q275 127 308 129 Q346 131 354 166 L346 221 Q337 255 308 265 Q276 257 263 225Z" fill="url(#skin)" stroke="#593c39" stroke-width="6" stroke-linejoin="round"/>
@@ -78,6 +80,7 @@
 <path d="M253 157 Q307 145 369 158 L376 174 Q307 164 246 177Z" fill="#ed9c25" stroke="#8a511b" stroke-width="5" stroke-linejoin="round"/>
 <path d="M251 160 Q308 149 369 162" fill="none" stroke="#fff0a0" stroke-width="3"/>
 <rect x="296" y="111" width="22" height="17" rx="5" fill="#f8e48e" stroke="#a66a20" stroke-width="2"/>
+</g>
 <!-- torso / high visibility jacket -->
 <path d="M238 298 Q253 279 279 273 L321 273 Q353 280 373 300 L388 449 Q390 478 369 489 Q308 506 244 485 Q224 479 229 450Z" fill="url(#orange)" stroke="#843d2a" stroke-width="7" stroke-linejoin="round"/>
 <path d="M246 308 Q262 291 280 288 L294 299 L284 466 L244 475 Q231 466 238 431Z" fill="#ffbd72" opacity=".35"/>
