@@ -239,7 +239,7 @@ try {
   })));
   assert.equal(designAssets.length, 2, "La hoja debe contener ambos personajes.");
   assert.ok(designAssets.every(item => item.loaded), "Uno o más dibujos SVG no pudieron cargarse.");
-  const detailAssets = await page.locator(".detail-card img").evaluateAll(images => images.map(image => {
+  const detailAssets = await page.locator(".detail-crop img").evaluateAll(images => images.map(image => {
     const canvas = document.createElement("canvas");
     canvas.width = 96;
     canvas.height = 96;
