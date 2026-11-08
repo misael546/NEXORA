@@ -318,6 +318,7 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.notDeepEqual(dinoRun.tail4,dino.points.tail4);
   assert.ok(Math.abs(dinoRun.handR.x-dino.points.handR.x)>.02, "Los brazos cortos del dinosaurio deben acompañar la carrera.");
   assert.ok(Math.abs(dinoRun.chest.y-dino.points.chest.y)>.01, "El torso del dinosaurio debe tener una suspensión visible.");
+  assert.ok(dinoRun.jaw.y-dinoRun.head.y < .04, "La mandíbula debe acompañar la cabeza durante la carrera.");
   assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-bite"));
 });
 
