@@ -239,6 +239,14 @@ try {
   })));
   assert.equal(designAssets.length, 2, "La hoja debe contener ambos personajes.");
   assert.ok(designAssets.every(item => item.loaded), "Uno o más dibujos SVG no pudieron cargarse.");
+  const detailAssets = await page.locator(".detail-card img").evaluateAll(images => images.map(image => ({
+    src: image.getAttribute("src"),
+    loaded: image.complete && image.naturalWidth > 0,
+    width: image.naturalWidth,
+    height: image.naturalHeight
+  })));
+  assert.equal(detailAssets.length, 4, "La hoja debe contener cuatro acercamientos de detalle.");
+  assert.ok(detailAssets.every(item => item.loaded), "Uno o más acercamientos de diseño no pudieron cargarse.");
   const designReviewPath = path.join(outputDir, "character-design-review.png");
   await page.screenshot({ path: designReviewPath, fullPage: true, animations: "disabled" });
   results.push({ name: "character-design-review", file: path.relative(repoRoot, designReviewPath), assets: designAssets });
