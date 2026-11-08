@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" role="img" aria-labelledby="title desc">
+<svg style="shape-rendering:geometricPrecision" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" role="img" aria-labelledby="title desc">
 <title id="title">NEXORA — Coelo, diseño 2D</title>
 <desc id="desc">Diseño original de Coelo: pequeño terópodo bípedo, rápido y atlético, con piel verde, vientre claro, marcas oscuras, ojos ámbar y cola larga.</desc>
 <defs>
@@ -21,63 +21,63 @@
 </defs>
 <ellipse cx="535" cy="555" rx="370" ry="24" fill="#192b28" opacity=".22" filter="url(#shadow)"/>
 <!-- far hind leg: strong thigh, hock and three-toed foot -->
-<path d="M593 356 Q650 354 676 393 Q693 428 678 463 L719 515 Q728 530 713 537 L685 536 Q662 506 637 481 Q608 464 611 432 L562 410Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="9" stroke-linejoin="round"/>
+<path d="M593 356 Q650 354 676 393 Q693 428 678 463 L719 515 Q728 530 713 537 L685 536 Q662 506 637 481 Q608 464 611 432 L562 410Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
 <path d="M646 389 Q675 405 666 441 L645 465 Q630 447 628 424Z" fill="#8abd68" opacity=".48"/>
 <path d="M678 458 Q695 474 708 501 L694 518 L661 490Z" fill="#2e6648" opacity=".9"/>
-<path d="M685 522 Q702 516 724 522 L754 537 Q763 547 747 553 L683 557 Q666 552 674 539Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="7"/>
+<path d="M685 522 Q702 516 724 522 L754 537 Q763 547 747 553 L683 557 Q666 552 674 539Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5"/>
 <path d="M712 534 L746 542 M700 544 L737 550" stroke="#b2d384" stroke-width="3" opacity=".6"/>
 <path d="M738 540 Q750 537 759 542 L768 550 Q759 558 744 555Z" fill="url(#claw)" stroke="#756f55" stroke-width="3"/>
 <!-- tail, deliberately tapered and muscular -->
-<path d="M614 321 Q702 295 773 279 Q849 257 958 246 Q930 276 885 298 Q800 343 714 362 Q654 371 611 363Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="10" stroke-linejoin="round"/>
+<path d="M614 321 Q702 295 773 279 Q849 257 958 246 Q930 276 885 298 Q800 343 714 362 Q654 371 611 363Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="7.7" stroke-linejoin="round"/>
 <path d="M645 329 Q755 299 845 283 Q904 269 948 253 Q907 291 849 312 Q741 355 657 356Z" fill="url(#hide)" opacity=".82"/>
-<path d="M699 330 Q796 305 887 282" fill="none" stroke="#c1e28b" stroke-width="7" stroke-linecap="round" opacity=".65"/>
-<path d="M731 344 Q812 319 887 295" fill="none" stroke="#24533c" stroke-width="4" stroke-linecap="round" opacity=".65"/>
-<path d="M771 293 Q790 322 795 340 M816 279 Q835 302 841 322 M862 265 Q881 285 885 301 M902 256 Q917 270 921 283" fill="none" stroke="#2c6847" stroke-width="6" stroke-linecap="round" opacity=".8"/>
+<path d="M699 330 Q796 305 887 282" fill="none" stroke="#c1e28b" stroke-width="5.5" stroke-linecap="round" opacity=".65"/>
+<path d="M731 344 Q812 319 887 295" fill="none" stroke="#24533c" stroke-width="3.5" stroke-linecap="round" opacity=".65"/>
+<path d="M771 293 Q790 322 795 340 M816 279 Q835 302 841 322 M862 265 Q881 285 885 301 M902 256 Q917 270 921 283" fill="none" stroke="#2c6847" stroke-width="4.8" stroke-linecap="round" opacity=".8"/>
 <g fill="#d4e99b" stroke="#386b46" stroke-width="2">
  <ellipse cx="746" cy="303" rx="5" ry="8" transform="rotate(22 746 303)"/><ellipse cx="785" cy="292" rx="4" ry="7" transform="rotate(20 785 292)"/><ellipse cx="827" cy="280" rx="3.5" ry="6" transform="rotate(18 827 280)"/><ellipse cx="872" cy="267" rx="3" ry="5" transform="rotate(14 872 267)"/>
 </g>
 <!-- near hind leg: thigh and shin stay broad and athletic -->
-<path d="M514 354 Q566 339 592 375 Q608 406 579 439 L543 481 Q533 508 538 527 Q540 543 523 548 L490 544 Q476 533 487 513 L499 463 Q491 428 472 408Z" fill="url(#hide)" stroke="#1d4938" stroke-width="10" stroke-linejoin="round"/>
+<path d="M514 354 Q566 339 592 375 Q608 406 579 439 L543 481 Q533 508 538 527 Q540 543 523 548 L490 544 Q476 533 487 513 L499 463 Q491 428 472 408Z" fill="url(#hide)" stroke="#1d4938" stroke-width="7.7" stroke-linejoin="round"/>
 <path d="M512 376 Q551 362 576 390 Q575 421 545 441 Q512 438 500 412Z" fill="#c0df8b" opacity=".47"/>
 <path d="M501 458 Q525 467 550 455 L532 501 Q514 511 491 496Z" fill="#38794d" opacity=".7"/>
-<path d="M489 526 Q516 532 539 523 L568 544 Q574 558 553 565 L480 567 Q461 561 470 546Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="7"/>
-<path d="M476 552 Q518 560 565 548" fill="none" stroke="#a8ce78" stroke-width="4" opacity=".6"/>
+<path d="M489 526 Q516 532 539 523 L568 544 Q574 558 553 565 L480 567 Q461 561 470 546Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5"/>
+<path d="M476 552 Q518 560 565 548" fill="none" stroke="#a8ce78" stroke-width="3.5" opacity=".6"/>
 <g fill="url(#claw)" stroke="#746e53" stroke-width="3"><path d="M481 552 Q464 542 453 551 Q465 565 486 562Z"/><path d="M505 559 Q491 551 480 562 Q491 575 510 568Z"/><path d="M535 558 Q526 550 516 563 Q528 575 544 567Z"/></g>
 <!-- body mass -->
-<path d="M335 285 Q374 234 448 226 Q537 207 626 258 Q671 286 681 336 Q676 386 628 408 Q554 439 460 410 Q389 391 346 352Z" fill="url(#hide)" stroke="#1d4938" stroke-width="11" stroke-linejoin="round"/>
-<path d="M382 342 Q420 355 479 359 Q547 365 631 340 Q661 335 669 354 Q650 403 587 417 Q486 433 411 392Z" fill="url(#belly)" stroke="#597451" stroke-width="4"/>
+<path d="M335 285 Q374 234 448 226 Q537 207 626 258 Q671 286 681 336 Q676 386 628 408 Q554 439 460 410 Q389 391 346 352Z" fill="url(#hide)" stroke="#1d4938" stroke-width="8.5" stroke-linejoin="round"/>
+<path d="M382 342 Q420 355 479 359 Q547 365 631 340 Q661 335 669 354 Q650 403 587 417 Q486 433 411 392Z" fill="url(#belly)" stroke="#597451" stroke-width="3.5"/>
 <path d="M411 375 Q476 398 538 397 M428 389 Q483 412 533 411 M552 391 Q597 390 624 371" fill="none" stroke="#8f996d" stroke-width="3" opacity=".7"/>
 <!-- torso musculature and shoulder planes -->
 <path d="M386 288 Q427 244 494 251 Q532 259 548 291 Q518 325 467 334 Q416 330 382 310Z" fill="#a9d77b" opacity=".45"/>
-<path d="M444 257 Q472 269 488 297 M489 257 Q525 270 541 299 M397 318 Q429 341 462 344" fill="none" stroke="#d1e99c" stroke-width="5" stroke-linecap="round" opacity=".58"/>
-<path d="M543 302 Q584 294 615 320 M554 319 Q593 311 622 336" fill="none" stroke="#326d48" stroke-width="5" stroke-linecap="round" opacity=".65"/>
+<path d="M444 257 Q472 269 488 297 M489 257 Q525 270 541 299 M397 318 Q429 341 462 344" fill="none" stroke="#d1e99c" stroke-width="4.2" stroke-linecap="round" opacity=".58"/>
+<path d="M543 302 Q584 294 615 320 M554 319 Q593 311 622 336" fill="none" stroke="#326d48" stroke-width="4.2" stroke-linecap="round" opacity=".65"/>
 <!-- cream underside flows into the throat -->
 <path d="M376 292 Q391 322 424 350 Q465 381 526 377 Q551 373 568 354 Q539 399 482 397 Q415 386 377 342Z" fill="#e4dba9" opacity=".8"/>
 <!-- neck joins chest and skull with clear muscle transitions -->
-<path d="M394 304 Q356 270 320 245 Q292 223 285 200 Q309 193 339 210 Q390 232 433 271 Q445 292 428 314Z" fill="url(#hide)" stroke="#1d4938" stroke-width="9" stroke-linejoin="round"/>
+<path d="M394 304 Q356 270 320 245 Q292 223 285 200 Q309 193 339 210 Q390 232 433 271 Q445 292 428 314Z" fill="url(#hide)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
 <path d="M365 280 Q338 252 315 240 Q299 232 294 211 Q323 226 349 238 Q387 261 414 291Z" fill="#d0e99a" opacity=".48"/>
-<path d="M330 249 Q347 256 359 269 M347 265 Q366 278 378 290" stroke="#2e6947" stroke-width="4" fill="none" opacity=".7"/>
-<path d="M374 299 Q389 320 416 326" stroke="#e2e9b5" stroke-width="4" fill="none" opacity=".55"/>
+<path d="M330 249 Q347 256 359 269 M347 265 Q366 278 378 290" stroke="#2e6947" stroke-width="3.5" fill="none" opacity=".7"/>
+<path d="M374 299 Q389 320 416 326" stroke="#e2e9b5" stroke-width="3.5" fill="none" opacity=".55"/>
 <g transform="translate(238 180) scale(1.08 1) translate(-238 -180)">
 <!-- head silhouette and muzzle, turned slightly toward the viewer -->
-<path d="M163 160 Q178 116 225 116 Q264 112 292 139 Q317 158 326 187 L304 221 Q286 244 247 239 L206 230 Q176 217 163 190Z" fill="url(#face)" stroke="#1d4938" stroke-width="9" stroke-linejoin="round"/>
+<path d="M163 160 Q178 116 225 116 Q264 112 292 139 Q317 158 326 187 L304 221 Q286 244 247 239 L206 230 Q176 217 163 190Z" fill="url(#face)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
 <path d="M180 171 Q195 149 229 150 Q266 148 292 172 Q303 187 289 202 Q261 218 219 212 L184 198Z" fill="#a9d77b" opacity=".75"/>
-<path d="M173 184 Q201 197 238 197 Q269 197 296 185" fill="none" stroke="#3e764b" stroke-width="4" opacity=".6"/>
+<path d="M173 184 Q201 197 238 197 Q269 197 296 185" fill="none" stroke="#3e764b" stroke-width="3.5" opacity=".6"/>
 <!-- closed neutral jaw: alert expression, with the teeth reserved for dedicated action drawings -->
-<path d="M176 190 Q218 205 298 186 Q301 198 294 212 Q282 231 253 238 Q216 239 192 220 Q181 208 176 190Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="7" stroke-linejoin="round"/>
+<path d="M176 190 Q218 205 298 186 Q301 198 294 212 Q282 231 253 238 Q216 239 192 220 Q181 208 176 190Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
 <path d="M176 190 Q220 204 298 186" fill="none" stroke="#1d4938" stroke-width="4.4" stroke-linecap="round"/>
 <path d="M183 198 Q221 211 288 196" fill="none" stroke="#c5e38d" stroke-width="3.2" stroke-linecap="round" opacity=".78"/>
 <path d="M193 220 Q225 237 260 231 Q281 226 293 211" fill="none" stroke="#275b40" stroke-width="3" stroke-linecap="round" opacity=".74"/>
 <path d="M204 226 Q230 236 250 232" fill="none" stroke="#9ac66f" stroke-width="2.2" stroke-linecap="round" opacity=".6"/>
 <path d="M180 194 Q177 203 183 211" fill="none" stroke="#e1efa9" stroke-width="2.2" opacity=".6"/>
 <!-- cheek and brow -->
-<path d="M199 151 Q221 128 252 138 Q267 144 277 157" fill="none" stroke="#d8eda2" stroke-width="7" stroke-linecap="round" opacity=".75"/>
-<path d="M185 142 Q214 120 247 127" fill="none" stroke="#316747" stroke-width="8" stroke-linecap="round"/>
+<path d="M199 151 Q221 128 252 138 Q267 144 277 157" fill="none" stroke="#d8eda2" stroke-width="5.5" stroke-linecap="round" opacity=".75"/>
+<path d="M185 142 Q214 120 247 127" fill="none" stroke="#316747" stroke-width="6.2" stroke-linecap="round"/>
 <!-- amber eye with slit pupil -->
-<ellipse cx="246" cy="159" rx="15.5" ry="16.5" fill="url(#amber)" stroke="#2a523d" stroke-width="5"/>
+<ellipse cx="246" cy="159" rx="15.5" ry="16.5" fill="url(#amber)" stroke="#2a523d" stroke-width="4.2"/>
 <ellipse cx="250" cy="159" rx="4.2" ry="11.5" fill="#202d25"/>
 <ellipse cx="241" cy="151" rx="4.3" ry="4.3" fill="#fffbd8"/>
-<path d="M224 148 Q245 128 268 144" fill="none" stroke="#294d39" stroke-width="8" stroke-linecap="round"/>
+<path d="M224 148 Q245 128 268 144" fill="none" stroke="#294d39" stroke-width="6.2" stroke-linecap="round"/>
 <path d="M224 143 Q246 127 265 139" fill="none" stroke="#d7ed9c" stroke-width="3" stroke-linecap="round"/>
 <!-- nostril and muzzle texture -->
 <ellipse cx="178" cy="179" rx="5.5" ry="3.8" fill="#244c39" transform="rotate(-14 178 179)"/>
@@ -87,11 +87,11 @@
 </g>
 <!-- short forearms, integrated close to the chest -->
 <!-- Far arm tucked behind the rib cage; only the shoulder and elbow contour remain visible. -->
-<path d="M389 288 Q406 276 420 293 Q428 306 418 321 L406 328 Q391 318 385 302Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="7" stroke-linejoin="round"/>
-<path d="M397 292 Q407 287 414 300" fill="none" stroke="#c7e69a" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+<path d="M389 288 Q406 276 420 293 Q428 306 418 321 L406 328 Q391 318 385 302Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
+<path d="M397 292 Q407 287 414 300" fill="none" stroke="#c7e69a" stroke-width="3.5" stroke-linecap="round" opacity=".7"/>
 <!-- Near arm is one continuous, muscular silhouette from shoulder to wrist. -->
-<path d="M405 291 Q423 282 437 298 Q444 311 431 326 Q422 337 430 349 L440 359 Q444 367 436 372 Q426 372 419 360 L405 340 Q393 332 394 316 Q393 300 405 291Z" fill="url(#hide)" stroke="#1d4938" stroke-width="7" stroke-linejoin="round"/>
-<path d="M408 297 Q422 291 432 305 Q436 314 426 327" fill="none" stroke="#d4eda0" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+<path d="M405 291 Q423 282 437 298 Q444 311 431 326 Q422 337 430 349 L440 359 Q444 367 436 372 Q426 372 419 360 L405 340 Q393 332 394 316 Q393 300 405 291Z" fill="url(#hide)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
+<path d="M408 297 Q422 291 432 305 Q436 314 426 327" fill="none" stroke="#d4eda0" stroke-width="3.5" stroke-linecap="round" opacity=".7"/>
 <path d="M403 320 Q411 333 422 340 M421 332 Q430 345 433 355" fill="none" stroke="#2d6947" stroke-width="3.5" stroke-linecap="round" opacity=".78"/>
 <ellipse cx="426" cy="331" rx="8" ry="7" transform="rotate(30 426 331)" fill="#78b568" stroke="#24563e" stroke-width="2.5"/>
 <!-- compact two-digit theropod hand; claws sit close to the chest -->
@@ -105,7 +105,7 @@
 </g>
 <!-- patterned bands along the flank -->
 <g fill="none" stroke-linecap="round">
- <path d="M397 293 Q412 309 425 319" stroke="#2b6545" stroke-width="9"/><path d="M428 280 Q444 298 451 316" stroke="#2a6545" stroke-width="10"/><path d="M462 272 Q477 289 480 313" stroke="#2a6545" stroke-width="9"/><path d="M497 268 Q510 285 510 307" stroke="#2a6545" stroke-width="8"/><path d="M532 273 Q546 288 542 306" stroke="#2a6545" stroke-width="7"/>
+ <path d="M397 293 Q412 309 425 319" stroke="#2b6545" stroke-width="5.5"/><path d="M428 280 Q444 298 451 316" stroke="#2a6545" stroke-width="7.7"/><path d="M462 272 Q477 289 480 313" stroke="#2a6545" stroke-width="5.5"/><path d="M497 268 Q510 285 510 307" stroke="#2a6545" stroke-width="6.2"/><path d="M532 273 Q546 288 542 306" stroke="#2a6545" stroke-width="5.5"/>
  <path d="M401 292 Q412 305 423 314" stroke="#a8d37b" stroke-width="3"/><path d="M433 282 Q444 297 449 309" stroke="#a8d37b" stroke-width="3"/><path d="M466 275 Q477 292 478 306" stroke="#a8d37b" stroke-width="3"/>
 </g>
 <!-- tiny scale clusters -->
@@ -114,8 +114,8 @@
 </g>
 <!-- raptor hind-leg anatomy: tendon paths, joint folds and foot scales -->
 <g fill="none" stroke-linecap="round" stroke-linejoin="round">
- <path d="M526 382 Q549 388 563 410 Q568 423 558 437" stroke="#e1efae" stroke-width="4" opacity=".55"/>
- <path d="M517 401 Q531 417 530 439 M536 409 Q546 419 542 433" stroke="#275f42" stroke-width="4" opacity=".65"/>
+ <path d="M526 382 Q549 388 563 410 Q568 423 558 437" stroke="#e1efae" stroke-width="3.5" opacity=".55"/>
+ <path d="M517 401 Q531 417 530 439 M536 409 Q546 419 542 433" stroke="#275f42" stroke-width="3.5" opacity=".65"/>
  <path d="M507 463 Q521 472 539 466 M500 477 Q515 486 533 480 M494 494 Q509 501 526 496" stroke="#c6e08d" stroke-width="3" opacity=".54"/>
  <path d="M493 514 Q510 521 535 512 M489 520 Q510 529 537 519" stroke="#24593f" stroke-width="3.5" opacity=".68"/>
  <path d="M603 388 Q624 403 632 424 M620 405 Q630 422 626 440 M639 431 Q652 444 668 440" stroke="#c7e28e" stroke-width="3" opacity=".48"/>
@@ -163,9 +163,9 @@
 <g clip-path="url(#bodyClip)">
  <path d="M345 286 Q405 224 490 237 Q563 243 624 287 Q570 272 515 286 Q447 311 397 341Z" fill="#204a39" opacity=".17"/>
  <path d="M361 339 Q406 372 479 381 Q560 396 647 350 Q620 401 564 411 Q455 431 387 378Z" fill="#6a8e5c" opacity=".22"/>
- <path d="M387 276 Q438 236 498 244 Q542 247 575 274" fill="none" stroke="#e0f2ae" stroke-width="5" stroke-linecap="round" opacity=".42"/>
+ <path d="M387 276 Q438 236 498 244 Q542 247 575 274" fill="none" stroke="#e0f2ae" stroke-width="4.2" stroke-linecap="round" opacity=".42"/>
  <path d="M389 349 Q426 364 454 365 M449 369 Q485 380 515 375 M535 375 Q570 376 598 360" fill="none" stroke="#77885a" stroke-width="3" opacity=".65"/>
- <path d="M420 288 Q428 301 426 314 M448 274 Q458 291 457 310 M477 268 Q487 284 486 303 M507 269 Q520 286 517 301 M538 277 Q548 291 545 308" fill="none" stroke="#244f39" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+ <path d="M420 288 Q428 301 426 314 M448 274 Q458 291 457 310 M477 268 Q487 284 486 303 M507 269 Q520 286 517 301 M538 277 Q548 291 545 308" fill="none" stroke="#244f39" stroke-width="3.5" stroke-linecap="round" opacity=".55"/>
  <g fill="#d8eaa2" opacity=".72">
   <ellipse cx="438" cy="352" rx="2.4" ry="3.4"/><ellipse cx="451" cy="344" rx="2" ry="3"/><ellipse cx="465" cy="354" rx="2.2" ry="3.2"/><ellipse cx="481" cy="345" rx="2.2" ry="3.1"/><ellipse cx="495" cy="357" rx="2.1" ry="3"/><ellipse cx="510" cy="347" rx="2.4" ry="3.3"/><ellipse cx="526" cy="356" rx="2" ry="3"/><ellipse cx="543" cy="344" rx="2.1" ry="3"/><ellipse cx="559" cy="354" rx="2.2" ry="3"/><ellipse cx="575" cy="342" rx="2" ry="2.8"/><ellipse cx="590" cy="350" rx="2.2" ry="3"/>
  </g>
@@ -174,17 +174,17 @@
  </g>
 </g>
 <!-- deeper throat and neck folds emphasize a connected muscular silhouette -->
-<path d="M305 218 Q330 234 353 254 Q371 272 390 291" fill="none" stroke="#2b6446" stroke-width="8" stroke-linecap="round" opacity=".58"/>
+<path d="M305 218 Q330 234 353 254 Q371 272 390 291" fill="none" stroke="#2b6446" stroke-width="6.2" stroke-linecap="round" opacity=".58"/>
 <path d="M302 226 Q326 239 347 260 M316 237 Q340 251 359 274 M333 249 Q351 265 370 286" fill="none" stroke="#d3e99a" stroke-width="3.2" stroke-linecap="round" opacity=".55"/>
 <!-- tail banding and skin highlights -->
-<path d="M727 315 Q792 295 854 279 M785 335 Q842 315 905 288" fill="none" stroke="#1e4e39" stroke-width="4" opacity=".55" stroke-linecap="round"/>
+<path d="M727 315 Q792 295 854 279 M785 335 Q842 315 905 288" fill="none" stroke="#1e4e39" stroke-width="3.5" opacity=".55" stroke-linecap="round"/>
 <path d="M752 304 Q813 286 866 272 M834 305 Q890 285 931 265" fill="none" stroke="#c3e58c" stroke-width="2.5" opacity=".65" stroke-linecap="round"/>
 <!-- subtle face markings below the eye -->
 <path d="M195 174 Q209 181 220 178 M204 184 Q217 190 230 186 M217 194 Q228 199 239 195" fill="none" stroke="#4f8951" stroke-width="3" stroke-linecap="round" opacity=".55"/>
 <path d="M265 167 Q277 174 282 185" fill="none" stroke="#eff6c0" stroke-width="3" opacity=".65"/>
 <!-- contour highlights on neck, shoulder and haunch -->
-<path d="M298 209 Q330 221 357 251 M347 290 Q372 312 397 319 M472 244 Q524 225 573 260" fill="none" stroke="#e2f4ae" stroke-width="4" stroke-linecap="round" opacity=".55"/>
-<path d="M503 407 Q553 422 605 397" fill="none" stroke="#345f43" stroke-width="4" opacity=".55"/>
+<path d="M298 209 Q330 221 357 251 M347 290 Q372 312 397 319 M472 244 Q524 225 573 260" fill="none" stroke="#e2f4ae" stroke-width="3.5" stroke-linecap="round" opacity=".55"/>
+<path d="M503 407 Q553 422 605 397" fill="none" stroke="#345f43" stroke-width="3.5" opacity=".55"/>
 <!-- claws on rear foot -->
 <path d="M483 547 L479 555 M507 553 L505 562 M537 551 L535 560" stroke="#fff4d8" stroke-width="2.4" opacity=".8"/>
 </svg>
