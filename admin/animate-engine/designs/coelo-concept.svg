@@ -82,10 +82,11 @@
 <path d="M259 144 Q276 149 285 164 Q291 179 275 192 Q280 174 266 160Z" fill="#285d40" opacity=".5"/>
 <path d="M163 170 Q183 159 204 157" fill="none" stroke="#e0f4b0" stroke-width="2.6" stroke-linecap="round" opacity=".7"/>
 <!-- amber eye with slit pupil -->
-<ellipse cx="246" cy="159" rx="15.5" ry="16.5" fill="url(#amber)" stroke="#2a523d" stroke-width="4.2"/>
-<ellipse cx="250" cy="159" rx="4.2" ry="11.5" fill="#202d25"/>
-<ellipse cx="241" cy="151" rx="4.3" ry="4.3" fill="#fffbd8"/>
+<ellipse cx="246" cy="159" rx="12.5" ry="13.6" fill="url(#amber)" stroke="#2a523d" stroke-width="3.8"/>
+<ellipse cx="249" cy="159" rx="3.5" ry="9.4" fill="#202d25"/>
+<ellipse cx="242" cy="152" rx="3.5" ry="3.5" fill="#fffbd8"/>
 <path d="M224 148 Q245 128 268 144" fill="none" stroke="#294d39" stroke-width="6.2" stroke-linecap="round"/>
+<path d="M229 149 Q246 137 261 146" fill="none" stroke="#1e4937" stroke-width="2.4" stroke-linecap="round" opacity=".75"/>
 <path d="M224 143 Q246 127 265 139" fill="none" stroke="#d7ed9c" stroke-width="3" stroke-linecap="round"/>
 <!-- nostril and muzzle texture -->
 <ellipse cx="157" cy="177" rx="5.8" ry="3.9" fill="#244c39" transform="rotate(-14 157 177)"/>
