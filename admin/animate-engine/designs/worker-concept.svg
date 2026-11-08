@@ -73,6 +73,27 @@
 <path d="M291 237 Q306 231 324 237 Q312 248 296 243Z" fill="#914f50" opacity=".85"/>
 <path d="M296 236 Q309 234 320 237" fill="none" stroke="#fff0db" stroke-width="2"/>
 <path d="M282 223 Q288 230 295 229 M322 228 Q332 229 338 221" fill="none" stroke="#c57c6b" stroke-width="2" opacity=".65"/>
+<!-- refined anime face, iris depth and subtle skin rendering -->
+<g>
+ <ellipse cx="290" cy="198" rx="5.8" ry="8.3" fill="none" stroke="#244565" stroke-width="1.6"/>
+ <ellipse cx="330" cy="197" rx="5.4" ry="7.8" fill="none" stroke="#244565" stroke-width="1.6"/>
+ <path d="M275 193 Q286 185 300 194 M315 193 Q329 184 342 191" fill="none" stroke="#352c31" stroke-width="2.6" stroke-linecap="round"/>
+ <path d="M277 207 Q288 212 298 207 M319 208 Q330 211 340 204" fill="none" stroke="#a66b61" stroke-width="1.7" opacity=".72"/>
+ <path d="M304 204 Q300 213 305 216 Q309 218 313 215" fill="none" stroke="#b97868" stroke-width="2.5" stroke-linecap="round"/>
+ <path d="M296 226 Q306 229 319 225" fill="none" stroke="#f7d6bd" stroke-width="2.2" stroke-linecap="round" opacity=".75"/>
+ <path d="M267 215 Q271 231 288 238 M337 216 Q335 229 324 236" fill="none" stroke="#9c6057" stroke-width="2" opacity=".38"/>
+ <path d="M270 238 Q278 244 290 246 M326 241 Q334 236 340 226" fill="none" stroke="#ffd6ba" stroke-width="2" opacity=".55"/>
+ <path d="M257 169 Q251 184 260 197 M351 169 Q359 185 354 199" fill="none" stroke="#27303a" stroke-width="5" stroke-linecap="round"/>
+ <path d="M258 178 Q251 189 255 202 M352 178 Q358 191 353 204" fill="none" stroke="#626d7c" stroke-width="2.4" stroke-linecap="round"/>
+</g>
+<!-- hardhat engineering details: molded ridge, anchor points, vent cuts and wear -->
+<path d="M270 120 Q306 104 344 120" fill="none" stroke="#d68a20" stroke-width="2.8" opacity=".8"/>
+<path d="M270 125 Q307 110 344 125" fill="none" stroke="#fff1b2" stroke-width="2" opacity=".78"/>
+<path d="M270 142 L278 139 M336 139 L345 143" stroke="#a65d1c" stroke-width="2.2" stroke-linecap="round"/>
+<path d="M278 151 L282 157 M335 151 L331 157" stroke="#fff2ba" stroke-width="2"/>
+<circle cx="259" cy="164" r="3.4" fill="#d78b28" stroke="#874d1c" stroke-width="1.5"/>
+<circle cx="362" cy="164" r="3.4" fill="#d78b28" stroke="#874d1c" stroke-width="1.5"/>
+<path d="M286 116 L293 114 M322 113 L328 115" stroke="#fff8cc" stroke-width="2.4" stroke-linecap="round"/>
 <!-- helmet shell -->
 <path d="M250 158 Q251 104 306 99 Q362 103 369 158 L357 171 Q307 151 260 171Z" fill="url(#helmet)" stroke="#8a511b" stroke-width="7" stroke-linejoin="round"/>
 <path d="M265 135 Q277 109 306 109 Q338 108 354 135" fill="none" stroke="#fff2b2" stroke-width="7" stroke-linecap="round"/>
@@ -138,6 +159,20 @@
 <path d="M188 484 L194 500 M197 482 L202 497" stroke="#9eacb9" stroke-width="2" stroke-linecap="round"/>
 <path d="M410 488 Q423 480 434 489 L443 506 Q440 521 425 519 L411 510Z" fill="#344455" stroke="#172536" stroke-width="4"/>
 <path d="M419 490 L425 505 M429 488 L434 502" stroke="#9eacb9" stroke-width="2" stroke-linecap="round"/>
+<!-- fine tailoring, fabric tension folds and realistic trouser paneling -->
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M236 315 Q246 324 252 342 M237 347 Q247 354 252 367 M367 315 Q376 335 377 354" stroke="#ffe0a6" stroke-width="2.6" opacity=".62"/>
+ <path d="M232 393 Q242 401 255 400 M237 407 Q249 414 260 411 M367 397 Q378 405 380 416" stroke="#9d422e" stroke-width="2.3" opacity=".66"/>
+ <path d="M266 482 Q284 488 296 487 M321 490 Q343 487 359 480" stroke="#ffd18b" stroke-width="2" opacity=".6"/>
+ <path d="M229 538 Q245 550 259 547 M228 565 Q246 574 260 568 M280 560 Q291 552 298 540" stroke="#7e91a6" stroke-width="2.5" opacity=".55"/>
+ <path d="M227 603 Q246 613 265 605 M225 622 Q244 634 266 626 M230 690 Q244 699 259 692" stroke="#101d31" stroke-width="3" opacity=".7"/>
+ <path d="M352 535 Q364 545 376 543 M354 561 Q371 569 381 562 M355 610 Q372 618 384 610 M351 674 Q369 685 381 674" stroke="#8798aa" stroke-width="2.5" opacity=".48"/>
+ <path d="M204 773 L217 760 L246 763 M204 786 Q231 795 259 787 M354 774 L372 774 L393 786" stroke="#b6c2cc" stroke-width="2.5" opacity=".7"/>
+</g>
+<g fill="none" stroke="#aebbc6" stroke-width="1.3" opacity=".8">
+ <path d="M251 504 l11 2 M250 510 l11 2 M355 504 l11 -3 M356 510 l11 -3"/>
+ <path d="M249 421 l8 2 M349 420 l8 -2 M267 411 l13 3 M334 413 l12 -3"/>
+</g>
 <!-- silhouette highlights -->
 <path d="M239 301 Q255 286 278 281 M370 305 Q384 330 392 359" fill="none" stroke="#ffd18b" stroke-width="3" opacity=".55"/>
 <path d="M252 548 Q244 586 241 609 M349 549 Q361 584 367 609" fill="none" stroke="#9baabc" stroke-width="3" opacity=".45"/>
