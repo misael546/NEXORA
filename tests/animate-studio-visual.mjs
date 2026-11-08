@@ -178,6 +178,9 @@ try {
   const hammerRaise = await capture("worker-hammer-raise");
   await setAction("worker", "worker-hammer", 0.60);
   const hammerStrike = await capture("worker-hammer-strike");
+  await setAction("worker", "worker-hammer", 0.76);
+  const hammerSettle = await capture("worker-hammer-settle");
+  assert.notEqual(hammerSettle.hash, hammerStrike.hash, "The worker should visibly settle after the hammer impact.");
   await setAction("worker", "worker-hammer", 0.90);
   const hammerRecover = await capture("worker-hammer-recover");
   assert.notEqual(hammerRaise.hash, hammerStrike.hash, "The hammer must visibly move from the raised pose into the strike.");
@@ -212,9 +215,14 @@ try {
   await setAction("dinosaur", "dino-tail-swipe", 0.52);
   const dinoTailSwipe = await capture("dinosaur-tail-swipe-motion");
   assert.notEqual(dinoTailSwipe.hash, dinoIdle.hash, "The dinosaur tail swipe did not visibly change the rendered pose.");
+  await setAction("dinosaur", "dino-tail-swipe", 0.74);
+  const dinoTailFollowThrough = await capture("dinosaur-tail-follow-through");
+  assert.notEqual(dinoTailFollowThrough.hash, dinoTailSwipe.hash, "The tail should keep settling after the main swipe.");
   await setAction("dinosaur", "dino-bite", 0.5);
   const dinoBite = await capture("dinosaur-bite-motion");
   assert.notEqual(dinoBite.hash, dinoIdle.hash, "The dinosaur bite did not visibly change the rendered pose.");
+  await setAction("dinosaur", "dino-bite", 0.76);
+  await capture("dinosaur-bite-recovery");
   await setAction("dinosaur", "dino-crouch", 0.45);
   await capture("dinosaur-crouch-motion");
 
