@@ -103,6 +103,29 @@
 <g fill="#d7e99f" opacity=".92">
  <circle cx="474" cy="337" r="3"/><circle cx="487" cy="345" r="2.8"/><circle cx="501" cy="336" r="2.8"/><circle cx="516" cy="346" r="3"/><circle cx="531" cy="333" r="2.5"/><circle cx="548" cy="345" r="2.7"/><circle cx="564" cy="333" r="2.6"/><circle cx="580" cy="344" r="2.8"/><circle cx="594" cy="329" r="2.4"/>
 </g>
+<!-- layered hide texture and deep cel-shaded body planes -->
+<g clip-path="url(#bodyClip)">
+ <path d="M345 286 Q405 224 490 237 Q563 243 624 287 Q570 272 515 286 Q447 311 397 341Z" fill="#204a39" opacity=".17"/>
+ <path d="M361 339 Q406 372 479 381 Q560 396 647 350 Q620 401 564 411 Q455 431 387 378Z" fill="#6a8e5c" opacity=".22"/>
+ <path d="M387 276 Q438 236 498 244 Q542 247 575 274" fill="none" stroke="#e0f2ae" stroke-width="5" stroke-linecap="round" opacity=".42"/>
+ <path d="M389 349 Q426 364 454 365 M449 369 Q485 380 515 375 M535 375 Q570 376 598 360" fill="none" stroke="#77885a" stroke-width="3" opacity=".65"/>
+ <path d="M420 288 Q428 301 426 314 M448 274 Q458 291 457 310 M477 268 Q487 284 486 303 M507 269 Q520 286 517 301 M538 277 Q548 291 545 308" fill="none" stroke="#244f39" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+ <g fill="#d8eaa2" opacity=".72">
+  <ellipse cx="438" cy="352" rx="2.4" ry="3.4"/><ellipse cx="451" cy="344" rx="2" ry="3"/><ellipse cx="465" cy="354" rx="2.2" ry="3.2"/><ellipse cx="481" cy="345" rx="2.2" ry="3.1"/><ellipse cx="495" cy="357" rx="2.1" ry="3"/><ellipse cx="510" cy="347" rx="2.4" ry="3.3"/><ellipse cx="526" cy="356" rx="2" ry="3"/><ellipse cx="543" cy="344" rx="2.1" ry="3"/><ellipse cx="559" cy="354" rx="2.2" ry="3"/><ellipse cx="575" cy="342" rx="2" ry="2.8"/><ellipse cx="590" cy="350" rx="2.2" ry="3"/>
+ </g>
+ <g fill="#275c40" opacity=".45">
+  <ellipse cx="414" cy="299" rx="4" ry="6" transform="rotate(-25 414 299)"/><ellipse cx="446" cy="291" rx="3.6" ry="5.5" transform="rotate(-22 446 291)"/><ellipse cx="476" cy="285" rx="3.5" ry="5" transform="rotate(-16 476 285)"/><ellipse cx="509" cy="286" rx="3.4" ry="5" transform="rotate(-14 509 286)"/><ellipse cx="543" cy="297" rx="3.5" ry="5" transform="rotate(-10 543 297)"/><ellipse cx="578" cy="310" rx="3.8" ry="5.5" transform="rotate(9 578 310)"/>
+ </g>
+</g>
+<!-- deeper throat and neck folds emphasize a connected muscular silhouette -->
+<path d="M305 218 Q330 234 353 254 Q371 272 390 291" fill="none" stroke="#2b6446" stroke-width="8" stroke-linecap="round" opacity=".58"/>
+<path d="M302 226 Q326 239 347 260 M316 237 Q340 251 359 274 M333 249 Q351 265 370 286" fill="none" stroke="#d3e99a" stroke-width="3.2" stroke-linecap="round" opacity=".55"/>
+<!-- tail banding and skin highlights -->
+<path d="M727 315 Q792 295 854 279 M785 335 Q842 315 905 288" fill="none" stroke="#1e4e39" stroke-width="4" opacity=".55" stroke-linecap="round"/>
+<path d="M752 304 Q813 286 866 272 M834 305 Q890 285 931 265" fill="none" stroke="#c3e58c" stroke-width="2.5" opacity=".65" stroke-linecap="round"/>
+<!-- subtle face markings below the eye -->
+<path d="M195 174 Q209 181 220 178 M204 184 Q217 190 230 186 M217 194 Q228 199 239 195" fill="none" stroke="#4f8951" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+<path d="M265 167 Q277 174 282 185" fill="none" stroke="#eff6c0" stroke-width="3" opacity=".65"/>
 <!-- contour highlights on neck, shoulder and haunch -->
 <path d="M298 209 Q330 221 357 251 M347 290 Q372 312 397 319 M472 244 Q524 225 573 260" fill="none" stroke="#e2f4ae" stroke-width="4" stroke-linecap="round" opacity=".55"/>
 <path d="M503 407 Q553 422 605 397" fill="none" stroke="#345f43" stroke-width="4" opacity=".55"/>
