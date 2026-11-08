@@ -47,7 +47,7 @@
 <g fill="url(#claw)" stroke="#746e53" stroke-width="3"><path d="M481 552 Q464 542 453 551 Q465 565 486 562Z"/><path d="M505 559 Q491 551 480 562 Q491 575 510 568Z"/><path d="M535 558 Q526 550 516 563 Q528 575 544 567Z"/></g>
 <!-- body mass -->
 <path d="M335 285 Q374 234 448 226 Q537 207 626 258 Q671 286 681 336 Q676 386 628 408 Q554 439 460 410 Q389 391 346 352Z" fill="url(#hide)" stroke="#1d4938" stroke-width="8.5" stroke-linejoin="round"/>
-<path d="M382 342 Q420 355 479 359 Q547 365 631 340 Q661 335 669 354 Q650 403 587 417 Q486 433 411 392Z" fill="url(#belly)" stroke="#597451" stroke-width="3.5"/>
+<path d="M382 342 Q423 355 482 359 Q548 364 630 340 Q656 336 664 351 Q644 391 586 405 Q497 421 423 390 Q392 369 382 342Z" fill="url(#belly)" stroke="#597451" stroke-width="3.5"/>
 <path d="M411 375 Q476 398 538 397 M428 389 Q483 412 533 411 M552 391 Q597 390 624 371" fill="none" stroke="#8f996d" stroke-width="3" opacity=".7"/>
 <!-- torso musculature and shoulder planes -->
 <path d="M386 288 Q427 244 494 251 Q532 259 548 291 Q518 325 467 334 Q416 330 382 310Z" fill="#a9d77b" opacity=".45"/>
@@ -56,22 +56,27 @@
 <!-- cream underside flows into the throat -->
 <path d="M376 292 Q391 322 424 350 Q465 381 526 377 Q551 373 568 354 Q539 399 482 397 Q415 386 377 342Z" fill="#e4dba9" opacity=".8"/>
 <!-- neck joins chest and skull with clear muscle transitions -->
-<path d="M394 304 Q356 270 320 245 Q292 223 285 200 Q309 193 339 210 Q390 232 433 271 Q445 292 428 314Z" fill="url(#hide)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
-<path d="M365 280 Q338 252 315 240 Q299 232 294 211 Q323 226 349 238 Q387 261 414 291Z" fill="#d0e99a" opacity=".48"/>
-<path d="M330 249 Q347 256 359 269 M347 265 Q366 278 378 290" stroke="#2e6947" stroke-width="3.5" fill="none" opacity=".7"/>
-<path d="M374 299 Q389 320 416 326" stroke="#e2e9b5" stroke-width="3.5" fill="none" opacity=".55"/>
+<!-- thick S-curve joins skull, throat and shoulder as one continuous anatomical mass -->
+<path d="M392 311 Q359 289 337 264 Q307 239 283 214 Q268 197 271 181 Q296 183 322 203 Q369 232 414 267 Q441 290 430 316 Q412 331 392 311Z" fill="url(#hide)" stroke="#1d4938" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M279 199 Q300 215 326 238 Q359 266 397 292 Q365 281 337 258 Q303 231 280 211Z" fill="#d0e99a" opacity=".56"/>
+<path d="M298 217 Q319 232 338 252 Q360 273 382 286" stroke="#2e6947" stroke-width="3.5" fill="none" opacity=".72"/>
+<path d="M321 239 Q346 254 364 274 M347 262 Q369 281 397 298" stroke="#e2e9b5" stroke-width="3.2" fill="none" opacity=".6"/>
+<path d="M381 292 Q399 310 419 319" stroke="#245a40" stroke-width="4.2" fill="none" opacity=".7"/>
 <g transform="translate(238 180) scale(1.08 1) translate(-238 -180)">
 <!-- head silhouette and muzzle, turned slightly toward the viewer -->
-<path d="M163 160 Q178 116 225 116 Q264 112 292 139 Q317 158 326 187 L304 221 Q286 244 247 239 L206 230 Q176 217 163 190Z" fill="url(#face)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
-<path d="M180 171 Q195 149 229 150 Q266 148 292 172 Q303 187 289 202 Q261 218 219 212 L184 198Z" fill="#a9d77b" opacity=".75"/>
-<path d="M173 184 Q201 197 238 197 Q269 197 296 185" fill="none" stroke="#3e764b" stroke-width="3.5" opacity=".6"/>
+<!-- refined wedge-shaped theropod skull: narrower snout, deeper cheek and a clear jaw hinge -->
+<path d="M145 165 Q153 138 182 124 Q212 110 247 121 Q281 131 300 158 Q315 177 308 195 Q300 212 278 222 Q249 232 216 223 Q183 218 160 197 Q145 182 145 165Z" fill="url(#face)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
+<path d="M151 165 Q179 153 219 149 Q266 143 291 166 Q304 179 292 194 Q269 209 230 207 Q186 202 158 188Z" fill="#a9d77b" opacity=".72"/>
+<path d="M150 178 Q188 190 229 187 Q270 185 300 176" fill="none" stroke="#3e764b" stroke-width="3.5" opacity=".62"/>
+<path d="M160 157 Q184 145 215 141" fill="none" stroke="#dff0a9" stroke-width="3" opacity=".55" stroke-linecap="round"/>
+<path d="M274 145 Q291 154 299 171" fill="none" stroke="#5b965b" stroke-width="4" opacity=".5" stroke-linecap="round"/>
 <!-- closed neutral jaw: alert expression, with the teeth reserved for dedicated action drawings -->
-<path d="M176 190 Q218 205 298 186 Q301 198 294 212 Q282 231 253 238 Q216 239 192 220 Q181 208 176 190Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
-<path d="M176 190 Q220 204 298 186" fill="none" stroke="#1d4938" stroke-width="4.4" stroke-linecap="round"/>
-<path d="M183 198 Q221 211 288 196" fill="none" stroke="#c5e38d" stroke-width="3.2" stroke-linecap="round" opacity=".78"/>
-<path d="M193 220 Q225 237 260 231 Q281 226 293 211" fill="none" stroke="#275b40" stroke-width="3" stroke-linecap="round" opacity=".74"/>
-<path d="M204 226 Q230 236 250 232" fill="none" stroke="#9ac66f" stroke-width="2.2" stroke-linecap="round" opacity=".6"/>
-<path d="M180 194 Q177 203 183 211" fill="none" stroke="#e1efa9" stroke-width="2.2" opacity=".6"/>
+<path d="M148 183 Q192 201 301 176 Q303 191 295 205 Q278 224 248 229 Q207 228 176 208 Q157 198 148 183Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
+<path d="M148 183 Q197 199 301 176" fill="none" stroke="#1d4938" stroke-width="4.4" stroke-linecap="round"/>
+<path d="M157 190 Q206 207 291 187" fill="none" stroke="#c5e38d" stroke-width="3.2" stroke-linecap="round" opacity=".78"/>
+<path d="M176 209 Q214 229 250 223 Q279 217 295 199" fill="none" stroke="#275b40" stroke-width="3" stroke-linecap="round" opacity=".74"/>
+<path d="M190 215 Q224 229 248 224" fill="none" stroke="#9ac66f" stroke-width="2.2" stroke-linecap="round" opacity=".6"/>
+<path d="M152 187 Q148 197 158 205" fill="none" stroke="#e1efa9" stroke-width="2.2" opacity=".6"/>
 <!-- cheek and brow -->
 <path d="M199 151 Q221 128 252 138 Q267 144 277 157" fill="none" stroke="#d8eda2" stroke-width="5.5" stroke-linecap="round" opacity=".75"/>
 <path d="M185 142 Q214 120 247 127" fill="none" stroke="#316747" stroke-width="6.2" stroke-linecap="round"/>
@@ -82,9 +87,9 @@
 <path d="M224 148 Q245 128 268 144" fill="none" stroke="#294d39" stroke-width="6.2" stroke-linecap="round"/>
 <path d="M224 143 Q246 127 265 139" fill="none" stroke="#d7ed9c" stroke-width="3" stroke-linecap="round"/>
 <!-- nostril and muzzle texture -->
-<ellipse cx="178" cy="179" rx="5.5" ry="3.8" fill="#244c39" transform="rotate(-14 178 179)"/>
-<ellipse cx="190" cy="166" rx="3.5" ry="2.2" fill="#d9eda1"/>
-<path d="M169 189 Q180 193 190 193" stroke="#e3f0b3" stroke-width="3" fill="none" opacity=".7"/>
+<ellipse cx="157" cy="177" rx="5.8" ry="3.9" fill="#244c39" transform="rotate(-14 157 177)"/>
+<ellipse cx="172" cy="163" rx="3.8" ry="2.4" fill="#d9eda1"/>
+<path d="M148 187 Q161 191 176 190" stroke="#e3f0b3" stroke-width="3" fill="none" opacity=".7"/>
 <g fill="#d5e89a"><ellipse cx="282" cy="175" rx="3.5" ry="2.5"/><ellipse cx="292" cy="184" rx="2.8" ry="2.2"/><ellipse cx="275" cy="189" rx="2.8" ry="2"/></g>
 </g>
 <!-- short forearms, integrated close to the chest -->
