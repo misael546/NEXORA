@@ -276,7 +276,7 @@ try {
     };
   }));
   assert.equal(expressionAssets.length, 2, "La hoja debe contener dos estudios de expresión.");
-  assert.ok(expressionAssets.every(item => item.loaded && item.paintedPixels > 600), "Uno o más estudios de expresión están vacíos: " + JSON.stringify(expressionAssets));
+  assert.ok(expressionAssets.every(item => item.loaded && item.paintedPixels > 2500), "Uno o más estudios de expresión están incompletos o vacíos: " + JSON.stringify(expressionAssets));
   const designReviewPath = path.join(outputDir, "character-design-review.png");
   await page.screenshot({ path: designReviewPath, fullPage: true, animations: "disabled" });
   results.push({ name: "character-design-review", file: path.relative(repoRoot, designReviewPath), assets: designAssets });
