@@ -87,7 +87,7 @@ const cycles={
   if(/shoulder/.test(p))return{x:0,y:-.006*Math.abs(s)};
   return{x:0,y:0}
  },
- "dino-run":(p,t)=>{const s=cyc(t*1.3),phase=t*Math.PI*2*1.3;if(p==="hip"||p==="chest")return{x:0,y:-.04*Math.abs(s)};if(p==="head"||p==="neck")return{x:-.018*s,y:-.022*Math.abs(s)};if(p==="kneeL"||p==="footL")return{x:.055*s,y:Math.max(0,Math.cos(phase))*.05};if(p==="kneeR"||p==="footR")return{x:-.055*s,y:Math.max(0,-Math.cos(phase))*.05};if(/hand/.test(p))return{x:0,y:-.025+.02*s};if(/^tail[1-4]$/.test(p)){const n=Number(p.slice(4));return{x:.004*n,y:Math.sin(phase-n*.34)*(.014+n*.006)}}return{x:0,y:0}},
+ "dino-run":(p,t)=>{const s=cyc(t*1.3),phase=t*Math.PI*2*1.3;if(p==="hip"||p==="chest")return{x:0,y:-.04*Math.abs(s)};if(p==="head"||p==="neck")return{x:-.018*s,y:-.022*Math.abs(s)};if(p==="jaw")return{x:-.018*s,y:-.022*Math.abs(s)+.004*Math.max(0,Math.sin(phase))};if(p==="kneeL"||p==="footL")return{x:.055*s,y:Math.max(0,Math.cos(phase))*.05};if(p==="kneeR"||p==="footR")return{x:-.055*s,y:Math.max(0,-Math.cos(phase))*.05};if(/hand/.test(p))return{x:0,y:-.025+.02*s};if(/^tail[1-4]$/.test(p)){const n=Number(p.slice(4));return{x:.004*n,y:Math.sin(phase-n*.34)*(.014+n*.006)}}return{x:0,y:0}},
  "dino-roar":(p,t)=>{const a=pulse(t);if(p==="head")return{x:-.012*a,y:-.018*a};if(p==="neck")return{x:-.008*a,y:-.012*a};if(p==="jaw")return{x:-.018*a,y:.065*a};if(p==="chest")return{x:0,y:-.022*a};if(/hand/.test(p))return{x:0,y:-.025*a};if(/^tail[1-4]$/.test(p))return{x:0,y:.012*a*Number(p.slice(4))};return{x:0,y:0}},
  "dino-bite":(p,t)=>{const a=Math.sin(Math.PI*clamp(t));if(p==="head")return{x:-.045*a,y:.055*a};if(p==="neck")return{x:-.03*a,y:.035*a};if(p==="jaw")return{x:-.02*a,y:.135*a};if(p==="chest")return{x:-.015*a,y:.012*a};if(p==="hip")return{x:-.01*a,y:.01*a};if(/^tail[1-4]$/.test(p))return{x:.012*a,y:-.008*a*Number(p.slice(4))};return{x:0,y:0}},
  "dino-tail-swipe":(p,t)=>{const a=Math.sin(Math.PI*clamp(t));if(p==="tail1")return{x:-.006*a,y:.028*a};if(p==="tail2")return{x:.004*a,y:.075*a};if(p==="tail3")return{x:.025*a,y:.135*a};if(p==="tail4")return{x:.105*a,y:.19*a};if(p==="hip"||p==="spine")return{x:-.022*a,y:.008*a};if(p==="head"||p==="neck")return{x:.018*a,y:-.014*a};if(p==="chest")return{x:-.008*a,y:.006*a};return{x:0,y:0}},
@@ -117,7 +117,7 @@ function applyWalkKinematics(out,base,preset,progress){
  // A small suspension arc moves the torso as one mass instead of leaving it rigid above the legs.
  if(running){
   const airborne=Math.max(0,Math.cos(phase)),bob=airborne*(dinosaur?.024:.021);
-  const weights=dinosaur?{hip:1,chest:.82,neck:.55,head:.42,shoulderL:.72,shoulderR:.72}:{hip:1,neck:.55,head:.42,shoulderL:.72,shoulderR:.72};
+  const weights=dinosaur?{hip:1,chest:.82,neck:.55,head:.42,jaw:.42,shoulderL:.72,shoulderR:.72}:{hip:1,neck:.55,head:.42,shoulderL:.72,shoulderR:.72};
   for(const[name,weight]of Object.entries(weights))if(out[name])out[name].y=clamp(out[name].y-bob*weight);
  }
  const solveChain=(rootName,jointName,endName,phaseOffset,range,lift,pole)=>{
