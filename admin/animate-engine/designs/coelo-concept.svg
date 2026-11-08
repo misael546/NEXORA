@@ -63,29 +63,13 @@
 <path d="M163 160 Q178 116 225 116 Q264 112 292 139 Q317 158 326 187 L304 221 Q286 244 247 239 L206 230 Q176 217 163 190Z" fill="url(#face)" stroke="#1d4938" stroke-width="9" stroke-linejoin="round"/>
 <path d="M180 171 Q195 149 229 150 Q266 148 292 172 Q303 187 289 202 Q261 218 219 212 L184 198Z" fill="#a9d77b" opacity=".75"/>
 <path d="M173 184 Q201 197 238 197 Q269 197 296 185" fill="none" stroke="#3e764b" stroke-width="4" opacity=".6"/>
-<!-- lower jaw and open mouth -->
-<path d="M179 199 Q227 215 298 196 Q295 230 263 242 Q218 246 190 224Z" fill="#3a6447" stroke="#1d4938" stroke-width="7" stroke-linejoin="round"/>
-<path d="M184 194 Q224 206 297 187 Q302 196 295 207 Q237 224 188 210Z" fill="#462b32" stroke="#271f2b" stroke-width="4"/>
-<path d="M191 203 Q236 216 290 201" fill="none" stroke="#d77f73" stroke-width="5" opacity=".8"/>
-<g fill="#f4edcf" stroke="#827b5e" stroke-width="1.6">
- <path d="M201 203 L211 205 L207 219Z"/><path d="M222 208 L232 210 L228 223Z"/><path d="M246 209 L256 207 L252 221Z"/><path d="M270 203 L281 200 L278 213Z"/>
- <path d="M207 194 L217 195 L213 207Z"/><path d="M234 195 L244 194 L240 206Z"/><path d="M260 190 L270 188 L266 200Z"/>
-</g>
-<!-- facial plates, fine folds and skin pores for a more mature theropod design -->
-<path d="M172 158 Q186 133 214 131 M179 166 Q194 145 215 144" fill="none" stroke="#e4f3b0" stroke-width="3" stroke-linecap="round" opacity=".64"/>
-<path d="M180 189 Q197 199 218 198 M185 196 Q203 205 219 203" fill="none" stroke="#2e6946" stroke-width="2.4" opacity=".65"/>
-<path d="M264 181 Q278 179 287 190 M269 190 Q280 194 287 198" fill="none" stroke="#3f784b" stroke-width="2.5" opacity=".6"/>
-<path d="M204 218 Q228 226 255 225" fill="none" stroke="#d5e8a0" stroke-width="3" stroke-linecap="round" opacity=".6"/>
-<path d="M177 176 Q181 171 187 172 M174 183 Q181 181 186 184" fill="none" stroke="#173f30" stroke-width="2.3"/>
-<g fill="#d8eca1" opacity=".85">
- <circle cx="197" cy="160" r="2.2"/><circle cx="208" cy="154" r="1.7"/><circle cx="218" cy="160" r="1.9"/><circle cx="226" cy="149" r="1.5"/>
- <circle cx="269" cy="170" r="1.8"/><circle cx="278" cy="178" r="1.6"/><circle cx="286" cy="185" r="1.7"/>
-</g>
-<g fill="#2d6947" opacity=".6">
- <ellipse cx="194" cy="183" rx="2.4" ry="3.4" transform="rotate(-20 194 183)"/>
- <ellipse cx="203" cy="188" rx="2" ry="3" transform="rotate(-18 203 188)"/>
- <ellipse cx="287" cy="196" rx="2" ry="2.8"/>
-</g>
+<!-- closed neutral jaw: alert expression, with the teeth reserved for dedicated action drawings -->
+<path d="M176 190 Q218 205 298 186 Q301 198 294 212 Q282 231 253 238 Q216 239 192 220 Q181 208 176 190Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="7" stroke-linejoin="round"/>
+<path d="M176 190 Q220 204 298 186" fill="none" stroke="#1d4938" stroke-width="4.4" stroke-linecap="round"/>
+<path d="M183 198 Q221 211 288 196" fill="none" stroke="#c5e38d" stroke-width="3.2" stroke-linecap="round" opacity=".78"/>
+<path d="M193 220 Q225 237 260 231 Q281 226 293 211" fill="none" stroke="#275b40" stroke-width="3" stroke-linecap="round" opacity=".74"/>
+<path d="M204 226 Q230 236 250 232" fill="none" stroke="#9ac66f" stroke-width="2.2" stroke-linecap="round" opacity=".6"/>
+<path d="M180 194 Q177 203 183 211" fill="none" stroke="#e1efa9" stroke-width="2.2" opacity=".6"/>
 <!-- cheek and brow -->
 <path d="M199 151 Q221 128 252 138 Q267 144 277 157" fill="none" stroke="#d8eda2" stroke-width="7" stroke-linecap="round" opacity=".75"/>
 <path d="M185 142 Q214 120 247 127" fill="none" stroke="#316747" stroke-width="8" stroke-linecap="round"/>
