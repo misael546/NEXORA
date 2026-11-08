@@ -197,14 +197,15 @@
 
  </svg>
 <!-- roar study: lifted jaw, deep mouth cavity, tongue and irregular conical teeth -->
-<path d="M176 190 Q218 203 298 186 Q298 200 287 212 Q254 230 215 218 Q187 207 176 190Z" fill="#3a2028" stroke="#183d2e" stroke-width="4.2" stroke-linejoin="round"/>
-<path d="M188 198 Q213 211 244 210 Q269 207 290 195" fill="none" stroke="#ad5c62" stroke-width="4" opacity=".88"/>
-<path d="M206 211 Q227 217 249 213 Q244 220 231 221 Q216 220 206 211Z" fill="#c86d74"/>
+<path d="M150 183 Q196 199 301 176 Q302 191 291 207 Q258 225 216 218 Q177 207 150 183Z" fill="#3a2028" stroke="#183d2e" stroke-width="4.2" stroke-linejoin="round"/>
+<path d="M164 190 Q205 209 245 207 Q275 202 294 187" fill="none" stroke="#ad5c62" stroke-width="4" opacity=".9"/>
+<path d="M193 207 Q219 218 250 211 Q238 224 218 223 Q202 219 193 207Z" fill="#c86d74"/>
+<path d="M169 188 Q181 193 192 195" fill="none" stroke="#f0c2a0" stroke-width="2.5" opacity=".4"/>
 <g fill="#f4edcf" stroke="#827b5e" stroke-width="1.2">
- <path d="M190 192 L199 195 L196 207Z"/><path d="M210 197 L219 199 L215 212Z"/><path d="M234 200 L243 200 L239 213Z"/><path d="M258 198 L267 196 L264 209Z"/><path d="M279 192 L288 189 L285 202Z"/>
- <path d="M199 208 L208 211 L205 201Z"/><path d="M220 214 L229 216 L226 206Z"/><path d="M244 214 L252 212 L249 203Z"/><path d="M266 208 L276 204 L273 196Z"/>
+ <path d="M164 187 L174 190 L171 204Z"/><path d="M187 194 L197 198 L193 211Z"/><path d="M211 199 L221 201 L217 215Z"/><path d="M239 201 L249 200 L245 214Z"/><path d="M267 194 L277 190 L273 205Z"/><path d="M286 185 L295 181 L292 194Z"/>
+ <path d="M176 207 L186 210 L182 199Z"/><path d="M201 215 L211 219 L208 206Z"/><path d="M229 218 L239 218 L235 204Z"/><path d="M256 211 L266 208 L263 197Z"/><path d="M279 201 L288 197 L285 188Z"/>
 </g>
-<path d="M176 190 Q215 205 298 186" fill="none" stroke="#1c4935" stroke-width="3.5" stroke-linecap="round"/>
-<path d="M224 183 Q244 175 265 182" fill="none" stroke="#254b35" stroke-width="5" stroke-linecap="round"/>
+<path d="M150 183 Q196 199 301 176" fill="none" stroke="#1c4935" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M220 174 Q245 166 270 174" fill="none" stroke="#254b35" stroke-width="5" stroke-linecap="round"/>
 
 </svg>
