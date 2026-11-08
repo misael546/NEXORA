@@ -215,6 +215,9 @@ test("2D character stage composes worker and dinosaur with independent rigs and 
 test("2D scene compositor binds the selected per-shot actor action", () => {
   const bridge = require("node:fs").readFileSync(path.join(__dirname,"../admin/animate-engine/studio-bridge.js"),"utf8");
   assert.match(bridge,/makeShotActor\(shot\.secondaryActorType/);
+  assert.match(bridge,/shotMotion\.transitionTo\(motionName,duration,\.28,fromPose\)/);
+  assert.match(bridge,/previousPrimary\.motion\.sample\(previousPrimary\.motion\.duration\)/);
+  assert.match(bridge,/previousPrimary\.characterId===shot\.characterId/);
   assert.match(bridge,/characterStage\.setActors\(cast\)/);
   assert.match(bridge,/motionPreset:\$\("ns2DAction"\)\.value/);
   assert.match(bridge,/const actorType=\$\("ns2DCharacterType"\)\.value/);
