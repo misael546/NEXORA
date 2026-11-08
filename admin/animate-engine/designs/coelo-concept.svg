@@ -120,6 +120,35 @@
 <g fill="#d7e99f" opacity=".92">
  <circle cx="474" cy="337" r="3"/><circle cx="487" cy="345" r="2.8"/><circle cx="501" cy="336" r="2.8"/><circle cx="516" cy="346" r="3"/><circle cx="531" cy="333" r="2.5"/><circle cx="548" cy="345" r="2.7"/><circle cx="564" cy="333" r="2.6"/><circle cx="580" cy="344" r="2.8"/><circle cx="594" cy="329" r="2.4"/>
 </g>
+<!-- raptor hind-leg anatomy: tendon paths, joint folds and foot scales -->
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M526 382 Q549 388 563 410 Q568 423 558 437" stroke="#e1efae" stroke-width="4" opacity=".55"/>
+ <path d="M517 401 Q531 417 530 439 M536 409 Q546 419 542 433" stroke="#275f42" stroke-width="4" opacity=".65"/>
+ <path d="M507 463 Q521 472 539 466 M500 477 Q515 486 533 480 M494 494 Q509 501 526 496" stroke="#c6e08d" stroke-width="3" opacity=".54"/>
+ <path d="M493 514 Q510 521 535 512 M489 520 Q510 529 537 519" stroke="#24593f" stroke-width="3.5" opacity=".68"/>
+ <path d="M603 388 Q624 403 632 424 M620 405 Q630 422 626 440 M639 431 Q652 444 668 440" stroke="#c7e28e" stroke-width="3" opacity=".48"/>
+ <path d="M653 461 Q671 474 685 488 M661 473 Q676 488 690 499" stroke="#1e543a" stroke-width="3" opacity=".7"/>
+ <path d="M690 514 Q711 519 729 532 M686 520 Q707 527 724 540" stroke="#a9cc78" stroke-width="2.5" opacity=".6"/>
+</g>
+<g fill="#d5e99c" opacity=".78">
+ <ellipse cx="518" cy="416" rx="3" ry="4" transform="rotate(18 518 416)"/><ellipse cx="529" cy="424" rx="2.5" ry="3.5" transform="rotate(20 529 424)"/>
+ <ellipse cx="509" cy="450" rx="2.8" ry="4" transform="rotate(18 509 450)"/><ellipse cx="522" cy="460" rx="2.4" ry="3.4" transform="rotate(20 522 460)"/>
+ <ellipse cx="541" cy="448" rx="2.3" ry="3.2" transform="rotate(25 541 448)"/><ellipse cx="635" cy="449" rx="2.4" ry="3.1"/>
+ <ellipse cx="649" cy="456" rx="2" ry="2.8"/><ellipse cx="666" cy="476" rx="2.5" ry="3.2"/>
+</g>
+<!-- toe joints and keratin ridges improve the contact-foot silhouette -->
+<path d="M473 550 Q479 546 486 552 M496 558 Q503 553 511 558 M522 558 Q530 552 538 556" fill="none" stroke="#d7e6a8" stroke-width="2.3" opacity=".85"/>
+<path d="M684 540 Q694 537 704 542 M703 543 Q713 541 721 546" fill="none" stroke="#d1e2a0" stroke-width="2" opacity=".72"/>
+<path d="M480 543 Q486 539 491 545 M505 550 Q511 546 516 552 M532 548 Q537 544 542 549" fill="none" stroke="#315f43" stroke-width="2.5" opacity=".65"/>
+<!-- mottled patches along the flank, varied in scale and spacing -->
+<g fill="#2b6545" opacity=".46">
+ <ellipse cx="449" cy="300" rx="4.5" ry="7" transform="rotate(-18 449 300)"/>
+ <ellipse cx="467" cy="316" rx="3.3" ry="5" transform="rotate(-22 467 316)"/>
+ <ellipse cx="492" cy="304" rx="4" ry="6" transform="rotate(-15 492 304)"/>
+ <ellipse cx="523" cy="321" rx="3.8" ry="5.5" transform="rotate(-10 523 321)"/>
+ <ellipse cx="558" cy="311" rx="3.5" ry="5.2" transform="rotate(10 558 311)"/>
+ <ellipse cx="584" cy="334" rx="3" ry="4.5" transform="rotate(15 584 334)"/>
+</g>
 <!-- anatomically placed surface marks along thigh, forearm and lower jaw -->
 <g fill="none" stroke-linecap="round">
  <path d="M501 390 Q520 401 540 393 M506 399 Q522 407 535 402" stroke="#d1e69a" stroke-width="3" opacity=".54"/>
