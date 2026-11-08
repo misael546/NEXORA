@@ -175,6 +175,18 @@
  <path d="M251 504 l11 2 M250 510 l11 2 M355 504 l11 -3 M356 510 l11 -3"/>
  <path d="M249 421 l8 2 M349 420 l8 -2 M267 411 l13 3 M334 413 l12 -3"/>
 </g>
+<!-- glove construction: separate finger forms, knuckle guards and reinforced seams -->
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M184 484 Q188 480 192 483 L194 504 M193 482 Q198 479 201 484 L202 505 M202 485 Q207 483 209 490 L209 503" stroke="#111f30" stroke-width="2.6"/>
+ <path d="M184 488 L188 499 M193 488 L196 501 M202 490 L204 499" stroke="#aab8c4" stroke-width="1.8" opacity=".75"/>
+ <path d="M414 495 Q418 489 423 493 L424 510 M423 491 Q429 487 432 494 L433 509 M432 494 Q438 491 440 499 L438 511" stroke="#111f30" stroke-width="2.5"/>
+ <path d="M415 499 L419 506 M425 498 L428 507 M434 499 L436 506" stroke="#aab8c4" stroke-width="1.8" opacity=".75"/>
+ <path d="M179 489 Q174 496 181 505 M410 497 Q405 504 412 512" stroke="#8e9ba8" stroke-width="2"/>
+ <path d="M182 476 Q194 470 207 480 M411 484 Q425 478 437 489" stroke="#718195" stroke-width="2.4"/>
+</g>
+<path d="M187 478 Q196 475 205 480 L203 487 Q194 492 185 486Z" fill="#526174" stroke="#182638" stroke-width="2"/>
+<path d="M415 486 Q425 481 434 489 L431 496 Q421 500 414 493Z" fill="#526174" stroke="#182638" stroke-width="2"/>
+<path d="M190 481 L201 483 M418 489 L430 491" stroke="#c6d0d8" stroke-width="1.5" opacity=".7"/>
 <!-- silhouette highlights -->
 <path d="M239 301 Q255 286 278 281 M370 305 Q384 330 392 359" fill="none" stroke="#ffd18b" stroke-width="3" opacity=".55"/>
 <path d="M252 548 Q244 586 241 609 M349 549 Q361 584 367 609" fill="none" stroke="#9baabc" stroke-width="3" opacity=".45"/>
