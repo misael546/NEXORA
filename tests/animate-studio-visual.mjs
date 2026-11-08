@@ -239,14 +239,25 @@ try {
   })));
   assert.equal(designAssets.length, 2, "La hoja debe contener ambos personajes.");
   assert.ok(designAssets.every(item => item.loaded), "Uno o más dibujos SVG no pudieron cargarse.");
-  const detailAssets = await page.locator(".detail-card img").evaluateAll(images => images.map(image => ({
-    src: image.getAttribute("src"),
-    loaded: image.complete && image.naturalWidth > 0,
-    width: image.naturalWidth,
-    height: image.naturalHeight
-  })));
+  const detailAssets = await page.locator(".detail-card img").evaluateAll(images => images.map(image => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 96;
+    canvas.height = 96;
+    const context = canvas.getContext("2d");
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    let paintedPixels = 0;
+    for (let i = 3; i < pixels.length; i += 4) if (pixels[i] > 12) paintedPixels++;
+    return {
+      src: image.getAttribute("src"),
+      loaded: image.complete && image.naturalWidth > 0,
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+      paintedPixels
+    };
+  }));
   assert.equal(detailAssets.length, 4, "La hoja debe contener cuatro acercamientos de detalle.");
-  assert.ok(detailAssets.every(item => item.loaded), "Uno o más acercamientos de diseño no pudieron cargarse.");
+  assert.ok(detailAssets.every(item => item.loaded && item.paintedPixels > 600), "Uno o más acercamientos están vacíos o no pudieron cargar su ilustración interna: " + JSON.stringify(detailAssets));
   const designReviewPath = path.join(outputDir, "character-design-review.png");
   await page.screenshot({ path: designReviewPath, fullPage: true, animations: "disabled" });
   results.push({ name: "character-design-review", file: path.relative(repoRoot, designReviewPath), assets: designAssets });
