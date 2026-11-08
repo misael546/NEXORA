@@ -112,7 +112,14 @@ function applyWalkKinematics(out,base,preset,progress){
  const phase=progress*Math.PI*4*(running?1.35:1);
  const stride=dinosaur?(running?.07:.045):(running?.054:.032);
  const liftHeight=dinosaur?(running?.065:.048):(running?.086:.064);
- const armRange=dinosaur?(running?.022:.014):(running?.03:.018);
+ // Sprinting uses a wider counter-swing so the hands visibly oppose the legs.
+ const armRange=dinosaur?(running?.034:.014):(running?.05:.018);
+ // A small suspension arc moves the torso as one mass instead of leaving it rigid above the legs.
+ if(running){
+  const airborne=Math.max(0,Math.cos(phase)),bob=airborne*(dinosaur?.024:.021);
+  const weights=dinosaur?{hip:1,chest:.82,neck:.55,head:.42,shoulderL:.72,shoulderR:.72}:{hip:1,neck:.55,head:.42,shoulderL:.72,shoulderR:.72};
+  for(const[name,weight]of Object.entries(weights))if(out[name])out[name].y=clamp(out[name].y-bob*weight);
+ }
  const solveChain=(rootName,jointName,endName,phaseOffset,range,lift,pole)=>{
   const root=out[rootName],baseRoot=base[rootName],baseJoint=base[jointName],baseEnd=base[endName];
   if(!root||!baseRoot||!baseJoint||!baseEnd)return;
@@ -134,7 +141,7 @@ function applyWalkKinematics(out,base,preset,progress){
  solveChain("hip","kneeL","footL",0,stride,liftHeight,1);
  solveChain("hip","kneeR","footR",Math.PI,stride,liftHeight,-1);
  // Arms counter-swing against the legs, with smaller travel than the feet.
- const armLift=dinosaur?(running?.015:.008):(running?.02:.012);
+ const armLift=dinosaur?(running?.022:.008):(running?.042:.012);
  solveChain("shoulderL","elbowL","handL",Math.PI,armRange,armLift,1);
  solveChain("shoulderR","elbowR","handR",0,armRange,armLift,-1);
  if(dinosaur){
