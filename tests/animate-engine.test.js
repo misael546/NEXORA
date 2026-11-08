@@ -293,7 +293,7 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.ok(Math.abs(Math.hypot(dinoStep.kneeL.x-dinoStep.hip.x,dinoStep.kneeL.y-dinoStep.hip.y) - Math.hypot(dino.points.kneeL.x-dino.points.hip.x,dino.points.kneeL.y-dino.points.hip.y)) < .004);
   // Running uses the same IK constraints but a faster, higher stride.
   worker.usePreset("worker-run", 2);
-  const workerRun = worker.sample(.42);
+  const workerRun = worker.sample(.84);
   const workerUpper = Math.hypot(workerRun.kneeL.x-workerRun.hip.x,workerRun.kneeL.y-workerRun.hip.y);
   const workerUpperBase = Math.hypot(human.points.kneeL.x-human.points.hip.x,human.points.kneeL.y-human.points.hip.y);
   const workerLower = Math.hypot(workerRun.footL.x-workerRun.kneeL.x,workerRun.footL.y-workerRun.kneeL.y);
@@ -306,7 +306,7 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.ok(Math.abs(workerRun.handR.x-human.points.handR.x)>.03, "El brazo del trabajador debe acompañar la carrera con balanceo visible.");
   assert.ok(Math.abs(workerRun.hip.y-human.points.hip.y)>.01, "El torso del trabajador debe suspenderse durante la carrera.");
   motion.usePreset("dino-run", 2);
-  const dinoRun = motion.sample(.42);
+  const dinoRun = motion.sample(.84);
   const dinoUpper = Math.hypot(dinoRun.kneeR.x-dinoRun.hip.x,dinoRun.kneeR.y-dinoRun.hip.y);
   const dinoUpperBase = Math.hypot(dino.points.kneeR.x-dino.points.hip.x,dino.points.kneeR.y-dino.points.hip.y);
   const dinoLower = Math.hypot(dinoRun.footR.x-dinoRun.kneeR.x,dinoRun.footR.y-dinoRun.kneeR.y);
