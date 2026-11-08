@@ -77,13 +77,20 @@
 <path d="M169 189 Q180 193 190 193" stroke="#e3f0b3" stroke-width="3" fill="none" opacity=".7"/>
 <g fill="#d5e89a"><ellipse cx="282" cy="175" rx="3.5" ry="2.5"/><ellipse cx="292" cy="184" rx="2.8" ry="2.2"/><ellipse cx="275" cy="189" rx="2.8" ry="2"/></g>
 <!-- short forearms, integrated close to the chest -->
-<path d="M414 287 Q438 280 450 299 L445 337 Q438 351 424 343 L407 323Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="7"/>
-<path d="M435 331 Q451 331 459 344 L453 370 Q442 378 431 365Z" fill="url(#hide)" stroke="#1d4938" stroke-width="6"/>
-<path d="M450 366 L464 370 L467 386 L457 394 L449 383Z" fill="#2d6145" stroke="#1d4938" stroke-width="4"/>
-<path d="M463 381 L476 390 M457 386 L468 399 M450 383 L458 396" stroke="#d9dfad" stroke-width="3" stroke-linecap="round"/>
-<path d="M466 391 Q476 388 479 394" stroke="#eee4c5" stroke-width="4" stroke-linecap="round"/>
-<path d="M390 292 Q405 276 423 288 L422 317 Q411 328 397 314Z" fill="#80b866" stroke="#1d4938" stroke-width="6"/>
-<path d="M400 316 L408 341 L396 354 L385 340Z" fill="#3c794e" stroke="#1d4938" stroke-width="5"/>
+<!-- Far arm tucked behind the rib cage; only the shoulder and elbow contour remain visible. -->
+<path d="M389 288 Q406 276 420 293 Q428 306 418 321 L406 328 Q391 318 385 302Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="7" stroke-linejoin="round"/>
+<path d="M397 292 Q407 287 414 300" fill="none" stroke="#c7e69a" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+<!-- Near arm is one continuous, muscular silhouette from shoulder to wrist. -->
+<path d="M405 291 Q423 280 441 298 Q451 313 439 331 L454 351 Q464 363 450 375 Q438 376 428 362 L414 341 Q398 333 397 316 Q395 300 405 291Z" fill="url(#hide)" stroke="#1d4938" stroke-width="8" stroke-linejoin="round"/>
+<path d="M412 297 Q427 291 438 305 Q444 315 434 329" fill="none" stroke="#d4eda0" stroke-width="5" stroke-linecap="round" opacity=".65"/>
+<path d="M410 322 Q422 333 432 345 M432 333 Q441 346 448 357" fill="none" stroke="#2d6947" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+<ellipse cx="434" cy="333" rx="10" ry="8" transform="rotate(35 434 333)" fill="#73ad62" stroke="#24563e" stroke-width="3"/>
+<!-- three curved fingers and pale hooked claws -->
+<path d="M446 365 Q454 367 459 376 L456 387 Q449 393 443 384 L438 373Z" fill="#39784e" stroke="#1d4938" stroke-width="4"/>
+<path d="M454 379 Q468 384 469 395 Q463 400 455 391 M446 381 Q457 392 452 402 Q444 403 440 390 M438 373 Q447 385 439 394 Q432 393 432 382" fill="none" stroke="#2d6245" stroke-width="5" stroke-linecap="round"/>
+<path d="M468 393 Q476 391 480 398 Q474 406 465 400Z M451 400 Q457 398 460 405 Q454 412 447 406Z M434 392 Q441 391 444 398 Q437 405 431 399Z" fill="url(#claw)" stroke="#756f55" stroke-width="2.5"/>
+<!-- shoulder highlight and tendon line keep the arm attached to the chest -->
+<path d="M397 294 Q404 286 414 290 M400 312 Q408 327 420 331" fill="none" stroke="#d4eda0" stroke-width="3" stroke-linecap="round" opacity=".65"/>
 <!-- dorsal scutes: small, rounded and continuous, not spikes -->
 <g fill="#d4e99b" stroke="#386e48" stroke-width="3">
  <path d="M375 256 Q381 240 393 250 Q400 261 389 269Z"/><path d="M404 243 Q411 226 424 238 Q430 250 417 258Z"/><path d="M437 233 Q444 218 457 229 Q463 241 450 248Z"/><path d="M472 229 Q480 214 493 226 Q500 239 486 244Z"/><path d="M508 234 Q516 220 528 233 Q533 244 520 249Z"/><path d="M542 246 Q550 233 561 247 Q565 258 552 262Z"/><path d="M574 263 Q582 252 592 265 Q596 275 584 280Z"/>
