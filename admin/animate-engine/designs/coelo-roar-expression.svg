@@ -80,6 +80,9 @@
 <!-- cheek and brow -->
 <path d="M199 151 Q221 128 252 138 Q267 144 277 157" fill="none" stroke="#d8eda2" stroke-width="5.5" stroke-linecap="round" opacity=".75"/>
 <path d="M185 142 Q214 120 247 127" fill="none" stroke="#316747" stroke-width="6.2" stroke-linecap="round"/>
+<!-- deep temporal marking, kept behind the iris so Coelo has a recognizable eye silhouette -->
+<path d="M259 144 Q276 149 285 164 Q291 179 275 192 Q280 174 266 160Z" fill="#285d40" opacity=".5"/>
+<path d="M163 170 Q183 159 204 157" fill="none" stroke="#e0f4b0" stroke-width="2.6" stroke-linecap="round" opacity=".7"/>
 <!-- amber eye with slit pupil -->
 <ellipse cx="246" cy="159" rx="15.5" ry="16.5" fill="url(#amber)" stroke="#2a523d" stroke-width="4.2"/>
 <ellipse cx="250" cy="159" rx="4.2" ry="11.5" fill="#202d25"/>
@@ -90,7 +93,7 @@
 <ellipse cx="157" cy="177" rx="5.8" ry="3.9" fill="#244c39" transform="rotate(-14 157 177)"/>
 <ellipse cx="172" cy="163" rx="3.8" ry="2.4" fill="#d9eda1"/>
 <path d="M148 187 Q161 191 176 190" stroke="#e3f0b3" stroke-width="3" fill="none" opacity=".7"/>
-<g fill="#d5e89a"><ellipse cx="282" cy="175" rx="3.5" ry="2.5"/><ellipse cx="292" cy="184" rx="2.8" ry="2.2"/><ellipse cx="275" cy="189" rx="2.8" ry="2"/></g>
+<g fill="#d5e89a"><ellipse cx="282" cy="175" rx="3.5" ry="2.5"/><ellipse cx="292" cy="184" rx="2.8" ry="2.2"/><ellipse cx="275" cy="189" rx="2.8" ry="2"/><ellipse cx="265" cy="182" rx="2.1" ry="1.6"/><ellipse cx="258" cy="190" rx="2.3" ry="1.7"/></g>
 </g>
 <!-- short forearms, integrated close to the chest -->
 <!-- Far arm tucked behind the rib cage; only the shoulder and elbow contour remain visible. -->
