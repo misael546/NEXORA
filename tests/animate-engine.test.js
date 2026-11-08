@@ -1217,3 +1217,31 @@ test("worker walk keeps its stride inside a readable range and dinosaur tail swi
   assert.ok(tailPose.tail4.x > dino.points.tail4.x + 0.08);
   assert.ok(tailPose.tail4.y > dino.points.tail4.y + 0.1);
 });
+
+test("2D secondary acting adds delayed hammer recoil and dinosaur tail follow-through", () => {
+  const { api } = loadEngine();
+  const worker = new api.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const hammer = new api.NexoraMotionSystem.MotionTimeline(worker.points);
+  hammer.usePreset("worker-hammer", 2);
+  const impact = hammer.sample(1.2);
+  const settle = hammer.sample(1.52);
+  assert.notDeepEqual(settle.head, impact.head, "The worker head should settle after the hammer impact.");
+  assert.notDeepEqual(settle.neck, impact.neck, "The worker neck should follow the impact with a delay.");
+  for (const point of Object.values(settle)) {
+    assert.ok(Number.isFinite(point.x) && Number.isFinite(point.y), "Secondary worker motion must remain finite.");
+  }
+
+  const dinosaur = new api.NexoraAnimationTools.CharacterRig().createDinosaur();
+  const tail = new api.NexoraMotionSystem.MotionTimeline(dinosaur.points);
+  tail.usePreset("dino-tail-swipe", 2);
+  const swipe = tail.sample(1.04);
+  const followThrough = tail.sample(1.48);
+  assert.notDeepEqual(followThrough.tail4, swipe.tail4, "The dinosaur tail should continue settling after the main swipe.");
+  for (const name of ["tail1", "tail2", "tail3", "tail4"]) {
+    assert.ok(Number.isFinite(followThrough[name].x) && Number.isFinite(followThrough[name].y), "Tail follow-through must keep every segment finite.");
+  }
+
+  const bite = new api.NexoraMotionSystem.MotionTimeline(dinosaur.points);
+  bite.usePreset("dino-bite", 2);
+  assert.notDeepEqual(bite.sample(1.5).neck, bite.sample(1).neck, "The dinosaur neck should absorb and recover from the bite.");
+});
