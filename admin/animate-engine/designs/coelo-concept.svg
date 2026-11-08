@@ -62,6 +62,21 @@
  <path d="M201 203 L211 205 L207 219Z"/><path d="M222 208 L232 210 L228 223Z"/><path d="M246 209 L256 207 L252 221Z"/><path d="M270 203 L281 200 L278 213Z"/>
  <path d="M207 194 L217 195 L213 207Z"/><path d="M234 195 L244 194 L240 206Z"/><path d="M260 190 L270 188 L266 200Z"/>
 </g>
+<!-- facial plates, fine folds and skin pores for a more mature theropod design -->
+<path d="M172 158 Q186 133 214 131 M179 166 Q194 145 215 144" fill="none" stroke="#e4f3b0" stroke-width="3" stroke-linecap="round" opacity=".64"/>
+<path d="M180 189 Q197 199 218 198 M185 196 Q203 205 219 203" fill="none" stroke="#2e6946" stroke-width="2.4" opacity=".65"/>
+<path d="M264 181 Q278 179 287 190 M269 190 Q280 194 287 198" fill="none" stroke="#3f784b" stroke-width="2.5" opacity=".6"/>
+<path d="M204 218 Q228 226 255 225" fill="none" stroke="#d5e8a0" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+<path d="M177 176 Q181 171 187 172 M174 183 Q181 181 186 184" fill="none" stroke="#173f30" stroke-width="2.3"/>
+<g fill="#d8eca1" opacity=".85">
+ <circle cx="197" cy="160" r="2.2"/><circle cx="208" cy="154" r="1.7"/><circle cx="218" cy="160" r="1.9"/><circle cx="226" cy="149" r="1.5"/>
+ <circle cx="269" cy="170" r="1.8"/><circle cx="278" cy="178" r="1.6"/><circle cx="286" cy="185" r="1.7"/>
+</g>
+<g fill="#2d6947" opacity=".6">
+ <ellipse cx="194" cy="183" rx="2.4" ry="3.4" transform="rotate(-20 194 183)"/>
+ <ellipse cx="203" cy="188" rx="2" ry="3" transform="rotate(-18 203 188)"/>
+ <ellipse cx="287" cy="196" rx="2" ry="2.8"/>
+</g>
 <!-- cheek and brow -->
 <path d="M199 151 Q221 128 252 138 Q267 144 277 157" fill="none" stroke="#d8eda2" stroke-width="7" stroke-linecap="round" opacity=".75"/>
 <path d="M185 142 Q214 120 247 127" fill="none" stroke="#316747" stroke-width="8" stroke-linecap="round"/>
@@ -102,6 +117,21 @@
 <!-- tiny scale clusters -->
 <g fill="#d7e99f" opacity=".92">
  <circle cx="474" cy="337" r="3"/><circle cx="487" cy="345" r="2.8"/><circle cx="501" cy="336" r="2.8"/><circle cx="516" cy="346" r="3"/><circle cx="531" cy="333" r="2.5"/><circle cx="548" cy="345" r="2.7"/><circle cx="564" cy="333" r="2.6"/><circle cx="580" cy="344" r="2.8"/><circle cx="594" cy="329" r="2.4"/>
+</g>
+<!-- anatomically placed surface marks along thigh, forearm and lower jaw -->
+<g fill="none" stroke-linecap="round">
+ <path d="M501 390 Q520 401 540 393 M506 399 Q522 407 535 402" stroke="#d1e69a" stroke-width="3" opacity=".54"/>
+ <path d="M481 432 Q494 442 505 439 M481 443 Q495 450 511 445" stroke="#224f39" stroke-width="3" opacity=".6"/>
+ <path d="M530 479 Q544 471 554 458 M523 490 Q536 482 544 472" stroke="#c2de8b" stroke-width="3" opacity=".5"/>
+ <path d="M645 393 Q662 402 675 394 M648 405 Q661 413 672 405" stroke="#1f5139" stroke-width="3" opacity=".7"/>
+ <path d="M180 209 Q195 216 209 216 M200 226 Q218 234 235 232" stroke="#91bd6d" stroke-width="2.4" opacity=".55"/>
+</g>
+<g fill="#cfe59a" opacity=".72">
+ <ellipse cx="505" cy="444" rx="3" ry="4" transform="rotate(16 505 444)"/>
+ <ellipse cx="517" cy="454" rx="2.3" ry="3.2" transform="rotate(22 517 454)"/>
+ <ellipse cx="532" cy="449" rx="2.6" ry="3.6" transform="rotate(17 532 449)"/>
+ <ellipse cx="546" cy="439" rx="2.2" ry="3.2" transform="rotate(22 546 439)"/>
+ <ellipse cx="622" cy="360" rx="2.2" ry="3.2"/><ellipse cx="636" cy="354" rx="2" ry="2.7"/>
 </g>
 <!-- layered hide texture and deep cel-shaded body planes -->
 <g clip-path="url(#bodyClip)">
