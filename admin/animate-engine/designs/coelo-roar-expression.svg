@@ -21,14 +21,18 @@
   <path d="M614 321 Q702 295 773 279 Q849 257 958 246 Q930 276 885 298 Q800 343 714 362 Q654 371 611 363Z"/>
  </clipPath>
 </defs>
-<ellipse cx="535" cy="555" rx="370" ry="24" fill="#192b28" opacity=".22" filter="url(#shadow)"/>
+<ellipse cx="535" cy="596" rx="370" ry="24" fill="#192b28" opacity=".22" filter="url(#shadow)"/>
 <!-- far hind leg: strong thigh, hock and three-toed foot -->
+<g transform="translate(620 410) scale(1 1.25) translate(-620 -410)">
+
 <path d="M593 356 Q650 354 676 393 Q693 428 678 463 L719 515 Q728 530 713 537 L685 536 Q662 506 637 481 Q608 464 611 432 L562 410Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
 <path d="M646 389 Q675 405 666 441 L645 465 Q630 447 628 424Z" fill="#8abd68" opacity=".48"/>
 <path d="M678 458 Q695 474 708 501 L694 518 L661 490Z" fill="#2e6648" opacity=".9"/>
 <path d="M685 522 Q702 516 724 522 L754 537 Q763 547 747 553 L683 557 Q666 552 674 539Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5"/>
 <path d="M712 534 L746 542 M700 544 L737 550" stroke="#b2d384" stroke-width="3" opacity=".6"/>
 <path d="M738 540 Q750 537 759 542 L768 550 Q759 558 744 555Z" fill="url(#claw)" stroke="#756f55" stroke-width="3"/>
+
+</g>
 <!-- tail, deliberately tapered and muscular -->
 <path d="M614 321 Q702 295 773 279 Q849 257 958 246 Q930 276 885 298 Q800 343 714 362 Q654 371 611 363Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="7.7" stroke-linejoin="round"/>
 <path d="M645 329 Q755 299 845 283 Q904 269 948 253 Q907 291 849 312 Q741 355 657 356Z" fill="url(#hide)" opacity=".82"/>
@@ -39,12 +43,16 @@
  <ellipse cx="746" cy="303" rx="5" ry="8" transform="rotate(22 746 303)"/><ellipse cx="785" cy="292" rx="4" ry="7" transform="rotate(20 785 292)"/><ellipse cx="827" cy="280" rx="3.5" ry="6" transform="rotate(18 827 280)"/><ellipse cx="872" cy="267" rx="3" ry="5" transform="rotate(14 872 267)"/>
 </g>
 <!-- near hind leg: thigh and shin stay broad and athletic -->
+<g transform="translate(530 420) scale(1 1.28) translate(-530 -420)">
+
 <path d="M514 354 Q566 339 592 375 Q608 406 579 439 L543 481 Q533 508 538 527 Q540 543 523 548 L490 544 Q476 533 487 513 L499 463 Q491 428 472 408Z" fill="url(#hide)" stroke="#1d4938" stroke-width="7.7" stroke-linejoin="round"/>
 <path d="M512 376 Q551 362 576 390 Q575 421 545 441 Q512 438 500 412Z" fill="#c0df8b" opacity=".47"/>
 <path d="M501 458 Q525 467 550 455 L532 501 Q514 511 491 496Z" fill="#38794d" opacity=".7"/>
 <path d="M489 526 Q516 532 539 523 L568 544 Q574 558 553 565 L480 567 Q461 561 470 546Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5"/>
 <path d="M476 552 Q518 560 565 548" fill="none" stroke="#a8ce78" stroke-width="3.5" opacity=".6"/>
 <g fill="url(#claw)" stroke="#746e53" stroke-width="3"><path d="M481 552 Q464 542 453 551 Q465 565 486 562Z"/><path d="M505 559 Q491 551 480 562 Q491 575 510 568Z"/><path d="M535 558 Q526 550 516 563 Q528 575 544 567Z"/></g>
+
+</g>
 <!-- body mass -->
 <path d="M335 285 Q374 234 448 226 Q537 207 626 258 Q671 286 681 336 Q676 386 628 408 Q554 439 460 410 Q389 391 346 352Z" fill="url(#hide)" stroke="#1d4938" stroke-width="8.5" stroke-linejoin="round"/>
 <path d="M382 342 Q423 355 482 359 Q548 364 630 340 Q656 336 664 351 Q644 391 586 405 Q497 421 423 390 Q392 369 382 342Z" fill="url(#belly)" stroke="#597451" stroke-width="3.5"/>
@@ -57,12 +65,12 @@
 <path d="M376 292 Q391 322 424 350 Q465 381 526 377 Q551 373 568 354 Q539 399 482 397 Q415 386 377 342Z" fill="#e4dba9" opacity=".8"/>
 <!-- neck joins chest and skull with clear muscle transitions -->
 <!-- thick S-curve joins skull, throat and shoulder as one continuous anatomical mass -->
-<path d="M392 311 Q359 289 337 264 Q307 239 283 214 Q268 197 271 181 Q296 183 322 203 Q369 232 414 267 Q441 290 430 316 Q412 331 392 311Z" fill="url(#hide)" stroke="#1d4938" stroke-width="5.8" stroke-linejoin="round"/>
+<path d="M398 319 Q360 298 333 271 Q300 243 273 216 Q253 196 261 174 Q295 176 330 201 Q382 233 425 270 Q456 296 438 323 Q416 343 398 319Z" fill="url(#hide)" stroke="#1d4938" stroke-width="5.8" stroke-linejoin="round"/>
 <path d="M279 199 Q300 215 326 238 Q359 266 397 292 Q365 281 337 258 Q303 231 280 211Z" fill="#d0e99a" opacity=".56"/>
 <path d="M298 217 Q319 232 338 252 Q360 273 382 286" stroke="#2e6947" stroke-width="3.5" fill="none" opacity=".72"/>
 <path d="M321 239 Q346 254 364 274 M347 262 Q369 281 397 298" stroke="#e2e9b5" stroke-width="3.2" fill="none" opacity=".6"/>
 <path d="M381 292 Q399 310 419 319" stroke="#245a40" stroke-width="4.2" fill="none" opacity=".7"/>
-<g transform="translate(238 180) scale(1.08 1) translate(-238 -180)">
+<g transform="translate(238 180) scale(.94 .95) translate(-238 -180)">
 <!-- head silhouette and muzzle, turned slightly toward the viewer -->
 <!-- refined wedge-shaped theropod skull: narrower snout, deeper cheek and a clear jaw hinge -->
 <path d="M145 165 Q153 138 182 124 Q212 110 247 121 Q281 131 300 158 Q315 177 308 195 Q300 212 278 222 Q249 232 216 223 Q183 218 160 197 Q145 182 145 165Z" fill="url(#face)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
