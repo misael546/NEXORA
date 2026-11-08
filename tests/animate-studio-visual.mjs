@@ -226,6 +226,22 @@ try {
   await setAction("dinosaur", "dino-crouch", 0.45);
   await capture("dinosaur-crouch-motion");
 
+  // Review the static character-design pass independently from animation.
+  const designPage = await page.goto("http://127.0.0.1:4173/admin/animate-engine/designs/preview.html", { waitUntil: "domcontentloaded" });
+  assert.equal(designPage?.status(), 200, "La hoja de diseño no respondió correctamente.");
+  await page.locator("#worker-card img").waitFor({ state: "visible" });
+  await page.locator("#coelo-card img").waitFor({ state: "visible" });
+  const designAssets = await page.locator(".card img").evaluateAll(images => images.map(image => ({
+    src: image.getAttribute("src"),
+    loaded: image.complete && image.naturalWidth > 0,
+    width: image.naturalWidth,
+    height: image.naturalHeight
+  })));
+  assert.equal(designAssets.length, 2, "La hoja debe contener ambos personajes.");
+  assert.ok(designAssets.every(item => item.loaded), "Uno o más dibujos SVG no pudieron cargarse.");
+  const designReviewPath = path.join(outputDir, "character-design-review.png");
+  await page.screenshot({ path: designReviewPath, fullPage: true, animations: "disabled" });
+  results.push({ name: "character-design-review", file: path.relative(repoRoot, designReviewPath), assets: designAssets });
   assert.deepEqual(pageErrors, [], "El navegador encontró errores de JavaScript: " + pageErrors.join(" | "));
   assert.equal(await page.evaluate(() => window.__nexoraWebGLRequests), 0, "WebGL se inicializó durante la prueba 2D.");
 
