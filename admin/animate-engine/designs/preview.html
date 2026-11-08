@@ -37,6 +37,14 @@ footer strong{color:#f0c675}
 .detail-card b{display:block;font-size:13px;margin-bottom:3px}
 .detail-card span{font-size:11px;color:var(--muted)}
 .detail-title{margin:30px 0 10px;font-size:17px;letter-spacing:.04em;color:#d9e6ec}
+
+.expression-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+.expression-card{border:1px solid var(--line);border-radius:15px;background:linear-gradient(155deg,#1d2e3b,#14222e);overflow:hidden;min-width:0}
+.expression-card img{display:block;width:100%;height:250px;object-fit:contain;background:radial-gradient(ellipse at 50% 40%,#405366,#223342 75%)}
+.expression-card div{padding:12px 14px 14px}
+.expression-card b{display:block;font-size:13px;margin-bottom:3px}
+.expression-card span{font-size:11px;color:var(--muted)}
+
 @media(max-width:850px){.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.detail-crop{height:220px}}
 @media(max-width:500px){.detail-grid{grid-template-columns:1fr 1fr}.detail-crop{height:190px}}
 
@@ -45,7 +53,7 @@ footer strong{color:#f0c675}
 </head>
 <body>
 <main>
-<header><div><div class="kicker">NEXORA ANIMATE · VISUAL DEVELOPMENT</div><h1>Character design review</h1><p>Novena iteración: jerarquía de línea más fina, contornos menos pesados y detalle interno más delicado en ambos personajes. El objetivo de esta fase es definir una silueta clara, anatomía convincente y materiales legibles antes de reactivar el trabajo de animación.</p></div><div class="version">DESIGN PASS 09 · STATIC</div></header>
+<header><div><div class="kicker">NEXORA ANIMATE · VISUAL DEVELOPMENT</div><h1>Character design review</h1><p>Décima iteración: estudios estáticos de expresión para el trabajador y Coelo, conservando sus diseños base. El objetivo de esta fase es definir una silueta clara, anatomía convincente y materiales legibles antes de reactivar el trabajo de animación.</p></div><div class="version">DESIGN PASS 10 · STATIC</div></header>
 <section class="grid">
 <article class="card" id="worker-card">
 <div class="card-head"><div class="num">01 / HUMAN CHARACTER</div><h2>Trabajador</h2><p class="sub">Ropa industrial por capas · silueta atlética · rostro anime expresivo</p></div>
@@ -64,6 +72,11 @@ footer strong{color:#f0c675}
  <article class="detail-card"><div class="detail-crop" style="--zoom:3.4;--origin:48% 45%"><img src="./worker-concept.svg" alt="Acercamiento al vestuario del trabajador"></div><div><b>Trabajador · vestuario</b><span>Capas, costuras y materiales</span></div></article>
  <article class="detail-card"><div class="detail-crop" style="--zoom:4.7;--origin:24.5% 29%"><img src="./coelo-concept.svg" alt="Acercamiento a la cabeza de Coelo"></div><div><b>Coelo · cabeza</b><span>Perfil, ojo, hocico y mandíbula</span></div></article>
  <article class="detail-card"><div class="detail-crop" style="--zoom:2.7;--origin:52% 53%"><img src="./coelo-concept.svg" alt="Acercamiento al cuerpo de Coelo"></div><div><b>Coelo · anatomía</b><span>Torso, placas y estructura muscular</span></div></article>
+</section>
+<h3 class="detail-title">Expression studies · diseño estático</h3>
+<section class="expression-grid" aria-label="Estudios de expresión estática">
+ <article class="expression-card"><img src="./worker-focused-expression.svg" alt="Estudio de expresión concentrada del trabajador"><div><b>Trabajador · concentración</b><span>Mirada enfocada y gesto firme</span></div></article>
+ <article class="expression-card"><img src="./coelo-roar-expression.svg" alt="Estudio de Coelo rugiendo"><div><b>Coelo · rugido</b><span>Mandíbula abierta, encías y dientes</span></div></article>
 </section>
 <footer><strong>Fase actual: revisión de diseño estático.</strong> Estos dibujos son referencias originales del proyecto. El rig y las animaciones no se actualizarán con ellos hasta revisar proporciones, siluetas y calidad visual.</footer>
 </main>
