@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="232 85 170 205">
+<image href="./worker-concept.svg" x="0" y="0" width="620" height="900"/>
+<!-- focused work expression: stronger brow angle, compressed eyelids and a firm mouth -->
+<path d="M274 190 Q286 184 299 191 M315 190 Q329 183 342 187" fill="none" stroke="#493137" stroke-width="3.2" stroke-linecap="round"/>
+<path d="M279 192 Q289 189 298 195 M317 194 Q329 188 339 192" fill="none" stroke="#352a30" stroke-width="1.8" stroke-linecap="round"/>
+<path d="M303 184 L308 181 M309 184 L313 182" fill="none" stroke="#8a5148" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+<path d="M293 239 Q307 240 322 236" fill="none" stroke="#854d4b" stroke-width="2.8" stroke-linecap="round"/>
+<path d="M298 243 Q308 245 317 241" fill="none" stroke="#f0b49c" stroke-width="1.8" stroke-linecap="round" opacity=".75"/>
+</svg>
