@@ -155,6 +155,69 @@ function applyWalkKinematics(out,base,preset,progress){
   });
  }
 }
+
+function addSecondaryOffset(out,name,x=0,y=0){
+ const point=out[name];if(!point)return;
+ out[name]={x:clamp(point.x+x),y:clamp(point.y+y)};
+}
+function applyTailFollowThrough(out,base,t,strength=1){
+ if(!out.hip)return;
+ const activation=ease(clamp((t-.34)/.66));
+ let parent=out.hip;
+ for(let i=1;i<=4;i++){
+  const name="tail"+i,current=out[name],baseParent=i===1?base.hip:base["tail"+(i-1)],basePoint=base[name];
+  if(!current||!baseParent||!basePoint)continue;
+  const length=Math.hypot(current.x-parent.x,current.y-parent.y);
+  const sourceLength=Math.hypot(basePoint.x-baseParent.x,basePoint.y-baseParent.y);
+  const safeLength=length>.001?length:sourceLength;
+  const angle=Math.atan2(current.y-parent.y,current.x-parent.x);
+  const lag=Math.sin((t*2.15-i*.105)*Math.PI*2)*(.0045*i*strength*activation);
+  const nextAngle=angle+lag;
+  const next={x:clamp(parent.x+Math.cos(nextAngle)*safeLength),y:clamp(parent.y+Math.sin(nextAngle)*safeLength)};
+  out[name]=next;parent=next;
+ }
+}
+function applySecondaryActing(out,base,preset,t){
+ if(preset==="worker-hammer"){
+  const elapsed=Math.max(0,t-.60),ring=Math.sin(elapsed*Math.PI*5)*Math.exp(-elapsed*8);
+  addSecondaryOffset(out,"head",-.006*ring,.003*Math.abs(ring));
+  addSecondaryOffset(out,"neck",-.004*ring,.002*Math.abs(ring));
+  addSecondaryOffset(out,"hip",.002*ring,.001*Math.abs(ring));
+  addSecondaryOffset(out,"handR",.003*ring,.002*ring);
+ }
+ if(preset==="worker-dig"){
+  const settle=Math.sin(t*Math.PI*4.2)*Math.sin(Math.PI*clamp(t));
+  addSecondaryOffset(out,"head",.0025*settle,-.002*Math.abs(settle));
+  addSecondaryOffset(out,"neck",.002*settle,-.0015*Math.abs(settle));
+  addSecondaryOffset(out,"hip",-.0015*settle,.001*Math.abs(settle));
+ }
+ if(preset==="dino-tail-swipe"){
+  applyTailFollowThrough(out,base,t,1);
+  const settle=Math.sin(t*Math.PI*3.2)*Math.sin(Math.PI*clamp(t));
+  addSecondaryOffset(out,"head",.002*settle,-.0015*Math.abs(settle));
+  addSecondaryOffset(out,"chest",-.0015*settle,.001*Math.abs(settle));
+ }
+ if(preset==="dino-bite"){
+  const recovery=Math.sin(Math.PI*clamp((t-.5)/.5));
+  addSecondaryOffset(out,"head",.008*recovery,-.003*recovery);
+  addSecondaryOffset(out,"neck",.005*recovery,-.002*recovery);
+  addSecondaryOffset(out,"chest",-.002*recovery,.002*recovery);
+  applyTailFollowThrough(out,base,t,.55);
+ }
+ if(preset==="dino-hit"){
+  const recovery=Math.sin(Math.PI*clamp((t-.28)/.72));
+  addSecondaryOffset(out,"head",.006*recovery,-.002*recovery);
+  addSecondaryOffset(out,"neck",.004*recovery,-.001*recovery);
+  applyTailFollowThrough(out,base,t,.72);
+ }
+ if(preset==="dino-roar"){
+  const breath=Math.sin(t*Math.PI*4);
+  addSecondaryOffset(out,"chest",0,-.0035*breath);
+  addSecondaryOffset(out,"neck",-.0015*breath,-.001*breath);
+  addSecondaryOffset(out,"head",-.001*breath,-.0012*breath);
+ }
+}
+
 class MotionTimeline{
  constructor(points={}){this.base=copyPoints(points);this.duration=2;this.preset="idle";this.keyframes=[];this.transition=null}
  setBase(points){this.base=copyPoints(points);return this.base}
@@ -186,6 +249,7 @@ class MotionTimeline{
   const t=current/this.duration,fn=cycles[this.preset]||cycles.idle,single=new Set(["worker-lift","worker-push","worker-pull","worker-kneel","worker-point","worker-hammer","dino-roar","dino-bite","dino-tail-swipe","dino-hit","dino-crouch","dino-sniff","dino-stomp","dino-pounce","dino-threat"]),phase=single.has(this.preset)?t:t*2,out={};
   for(const[name,p]of Object.entries(this.base)){const d=fn(name,phase);out[name]={x:clamp(p.x+d.x),y:clamp(p.y+d.y)}}
   if(["worker-walk","worker-run","dino-walk","dino-run"].includes(this.preset))applyWalkKinematics(out,this.base,this.preset,t);
+  else applySecondaryActing(out,this.base,this.preset,t);
   return finish(out);
  }
  apply(rig,time){rig.points=this.sample(time);return rig.points}
