@@ -26,9 +26,13 @@
 <path d="M593 356 Q650 354 676 393 Q693 428 678 463 L719 515 Q728 530 713 537 L685 536 Q662 506 637 481 Q608 464 611 432 L562 410Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5" stroke-linejoin="round"/>
 <path d="M646 389 Q675 405 666 441 L645 465 Q630 447 628 424Z" fill="#8abd68" opacity=".48"/>
 <path d="M678 458 Q695 474 708 501 L694 518 L661 490Z" fill="#2e6648" opacity=".9"/>
-<path d="M685 522 Q702 516 724 522 L754 537 Q763 547 747 553 L683 557 Q666 552 674 539Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5"/>
-<path d="M712 534 L746 542 M700 544 L737 550" stroke="#b2d384" stroke-width="3" opacity=".6"/>
-<path d="M738 540 Q750 537 759 542 L768 550 Q759 558 744 555Z" fill="url(#claw)" stroke="#756f55" stroke-width="3"/>
+<path d="M685 522 Q702 516 724 522 L744 536 Q753 546 739 554 Q711 561 678 555 Q664 549 674 538Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5"/>
+<!-- far foot toes angle forward beneath the body, not backward like a heel -->
+<path d="M691 540 Q676 534 663 542 Q661 550 675 554 Q689 554 696 548Z" fill="#568f54" stroke="#1d4938" stroke-width="3"/>
+<path d="M712 546 Q698 542 686 553 Q687 561 701 562 Q714 559 719 553Z" fill="#447b4c" stroke="#1d4938" stroke-width="3"/>
+<path d="M734 543 Q721 540 711 551 Q713 559 726 559 Q739 555 741 550Z" fill="#366b45" stroke="#1d4938" stroke-width="3"/>
+<path d="M664 542 Q653 539 648 546 Q655 553 667 549Z M689 554 Q678 553 673 561 Q682 566 693 560Z M714 553 Q704 554 701 562 Q711 566 719 559Z" fill="url(#claw)" stroke="#756f55" stroke-width="2.1" stroke-linejoin="round"/>
+<path d="M683 535 Q691 540 697 543 M705 541 Q713 546 719 548 M727 539 Q733 544 738 547" fill="none" stroke="#afd17d" stroke-width="2.5" stroke-linecap="round" opacity=".65"/>
 
 </g>
 <!-- tail, deliberately tapered and muscular -->
@@ -46,9 +50,15 @@
 <path d="M514 354 Q566 339 592 375 Q608 406 579 439 L543 481 Q533 508 538 527 Q540 543 523 548 L490 544 Q476 533 487 513 L499 463 Q491 428 472 408Z" fill="url(#hide)" stroke="#1d4938" stroke-width="7.7" stroke-linejoin="round"/>
 <path d="M512 376 Q551 362 576 390 Q575 421 545 441 Q512 438 500 412Z" fill="#c0df8b" opacity=".47"/>
 <path d="M501 458 Q525 467 550 455 L532 501 Q514 511 491 496Z" fill="#38794d" opacity=".7"/>
-<path d="M489 526 Q516 532 539 523 L568 544 Q574 558 553 565 L480 567 Q461 561 470 546Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5"/>
-<path d="M476 552 Q518 560 565 548" fill="none" stroke="#a8ce78" stroke-width="3.5" opacity=".6"/>
-<g fill="url(#claw)" stroke="#746e53" stroke-width="3"><path d="M481 552 Q464 542 453 551 Q465 565 486 562Z"/><path d="M505 559 Q491 551 480 562 Q491 575 510 568Z"/><path d="M535 558 Q526 550 516 563 Q528 575 544 567Z"/></g>
+<path d="M489 526 Q516 532 539 523 L560 540 Q572 550 557 560 Q528 568 485 562 Q465 558 469 546 Q475 534 489 526Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="5.5"/>
+<path d="M478 548 Q515 558 559 546" fill="none" stroke="#a8ce78" stroke-width="3.2" opacity=".62"/>
+<!-- three separated forward toes with tapered keratin claws -->
+<path d="M489 543 Q474 537 458 544 Q454 550 467 556 Q482 558 493 552Z" fill="#73aa61" stroke="#1d4938" stroke-width="3.2"/>
+<path d="M508 551 Q493 547 478 557 Q478 565 493 567 Q507 565 515 559Z" fill="#5c9959" stroke="#1d4938" stroke-width="3.2"/>
+<path d="M535 550 Q520 548 508 559 Q510 567 525 568 Q539 565 543 558Z" fill="#477f50" stroke="#1d4938" stroke-width="3.2"/>
+<path d="M459 544 Q445 539 438 547 Q446 553 460 550Z M480 557 Q465 555 458 564 Q468 569 482 564Z M511 560 Q499 561 494 570 Q505 574 515 567Z" fill="url(#claw)" stroke="#756f55" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M483 536 Q489 542 493 546 M505 543 Q511 549 516 552 M530 542 Q536 548 540 551" fill="none" stroke="#d7e99b" stroke-width="2.5" stroke-linecap="round" opacity=".75"/>
+<g fill="#c9e29a"><circle cx="487" cy="551" r="2.1"/><circle cx="501" cy="558" r="1.8"/><circle cx="527" cy="557" r="1.8"/></g>
 
 </g>
 <!-- body mass -->
