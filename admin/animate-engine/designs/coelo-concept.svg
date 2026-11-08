@@ -81,16 +81,15 @@
 <path d="M389 288 Q406 276 420 293 Q428 306 418 321 L406 328 Q391 318 385 302Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="7" stroke-linejoin="round"/>
 <path d="M397 292 Q407 287 414 300" fill="none" stroke="#c7e69a" stroke-width="4" stroke-linecap="round" opacity=".7"/>
 <!-- Near arm is one continuous, muscular silhouette from shoulder to wrist. -->
-<path d="M405 291 Q423 280 441 298 Q451 313 439 331 L454 351 Q464 363 450 375 Q438 376 428 362 L414 341 Q398 333 397 316 Q395 300 405 291Z" fill="url(#hide)" stroke="#1d4938" stroke-width="8" stroke-linejoin="round"/>
-<path d="M412 297 Q427 291 438 305 Q444 315 434 329" fill="none" stroke="#d4eda0" stroke-width="5" stroke-linecap="round" opacity=".65"/>
-<path d="M410 322 Q422 333 432 345 M432 333 Q441 346 448 357" fill="none" stroke="#2d6947" stroke-width="4" stroke-linecap="round" opacity=".8"/>
-<ellipse cx="434" cy="333" rx="10" ry="8" transform="rotate(35 434 333)" fill="#73ad62" stroke="#24563e" stroke-width="3"/>
-<!-- three curved fingers and pale hooked claws -->
-<path d="M446 365 Q454 367 459 376 L456 387 Q449 393 443 384 L438 373Z" fill="#39784e" stroke="#1d4938" stroke-width="4"/>
-<path d="M454 379 Q468 384 469 395 Q463 400 455 391 M446 381 Q457 392 452 402 Q444 403 440 390 M438 373 Q447 385 439 394 Q432 393 432 382" fill="none" stroke="#2d6245" stroke-width="5" stroke-linecap="round"/>
-<path d="M468 393 Q476 391 480 398 Q474 406 465 400Z M451 400 Q457 398 460 405 Q454 412 447 406Z M434 392 Q441 391 444 398 Q437 405 431 399Z" fill="url(#claw)" stroke="#756f55" stroke-width="2.5"/>
-<!-- shoulder highlight and tendon line keep the arm attached to the chest -->
-<path d="M397 294 Q404 286 414 290 M400 312 Q408 327 420 331" fill="none" stroke="#d4eda0" stroke-width="3" stroke-linecap="round" opacity=".65"/>
+<path d="M405 291 Q423 282 437 298 Q444 311 431 326 Q422 337 430 349 L440 359 Q444 367 436 372 Q426 372 419 360 L405 340 Q393 332 394 316 Q393 300 405 291Z" fill="url(#hide)" stroke="#1d4938" stroke-width="7" stroke-linejoin="round"/>
+<path d="M408 297 Q422 291 432 305 Q436 314 426 327" fill="none" stroke="#d4eda0" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+<path d="M403 320 Q411 333 422 340 M421 332 Q430 345 433 355" fill="none" stroke="#2d6947" stroke-width="3.5" stroke-linecap="round" opacity=".78"/>
+<ellipse cx="426" cy="331" rx="8" ry="7" transform="rotate(30 426 331)" fill="#78b568" stroke="#24563e" stroke-width="2.5"/>
+<!-- compact two-digit theropod hand; claws sit close to the chest -->
+<path d="M434 361 Q443 362 445 370 Q443 379 436 375 L429 368Z M431 365 Q425 372 424 380 Q428 385 433 378" fill="none" stroke="#2d6245" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M443 371 Q450 371 451 378 Q446 383 440 377Z M425 378 Q431 375 432 382 Q427 387 422 382Z" fill="url(#claw)" stroke="#756f55" stroke-width="2"/>
+<!-- small tendon highlights and shoulder transition -->
+<path d="M398 296 Q406 287 416 291 M398 312 Q405 325 415 331" fill="none" stroke="#d4eda0" stroke-width="3" stroke-linecap="round" opacity=".65"/>
 <!-- dorsal scutes: small, rounded and continuous, not spikes -->
 <g fill="#d4e99b" stroke="#386e48" stroke-width="3">
  <path d="M375 256 Q381 240 393 250 Q400 261 389 269Z"/><path d="M404 243 Q411 226 424 238 Q430 250 417 258Z"/><path d="M437 233 Q444 218 457 229 Q463 241 450 248Z"/><path d="M472 229 Q480 214 493 226 Q500 239 486 244Z"/><path d="M508 234 Q516 220 528 233 Q533 244 520 249Z"/><path d="M542 246 Q550 233 561 247 Q565 258 552 262Z"/><path d="M574 263 Q582 252 592 265 Q596 275 584 280Z"/>
