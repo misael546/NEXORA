@@ -50,6 +50,7 @@
 <path d="M365 280 Q338 252 315 240 Q299 232 294 211 Q323 226 349 238 Q387 261 414 291Z" fill="#d0e99a" opacity=".48"/>
 <path d="M330 249 Q347 256 359 269 M347 265 Q366 278 378 290" stroke="#2e6947" stroke-width="4" fill="none" opacity=".7"/>
 <path d="M374 299 Q389 320 416 326" stroke="#e2e9b5" stroke-width="4" fill="none" opacity=".55"/>
+<g transform="translate(238 180) scale(1.08 1) translate(-238 -180)">
 <!-- head silhouette and muzzle, turned slightly toward the viewer -->
 <path d="M163 160 Q178 116 225 116 Q264 112 292 139 Q317 158 326 187 L304 221 Q286 244 247 239 L206 230 Q176 217 163 190Z" fill="url(#face)" stroke="#1d4938" stroke-width="9" stroke-linejoin="round"/>
 <path d="M180 171 Q195 149 229 150 Q266 148 292 172 Q303 187 289 202 Q261 218 219 212 L184 198Z" fill="#a9d77b" opacity=".75"/>
@@ -81,9 +82,9 @@
 <path d="M199 151 Q221 128 252 138 Q267 144 277 157" fill="none" stroke="#d8eda2" stroke-width="7" stroke-linecap="round" opacity=".75"/>
 <path d="M185 142 Q214 120 247 127" fill="none" stroke="#316747" stroke-width="8" stroke-linecap="round"/>
 <!-- amber eye with slit pupil -->
-<ellipse cx="246" cy="159" rx="19" ry="20" fill="url(#amber)" stroke="#2a523d" stroke-width="5"/>
-<ellipse cx="250" cy="159" rx="5" ry="14" fill="#202d25"/>
-<ellipse cx="241" cy="151" rx="5.2" ry="5.2" fill="#fffbd8"/>
+<ellipse cx="246" cy="159" rx="15.5" ry="16.5" fill="url(#amber)" stroke="#2a523d" stroke-width="5"/>
+<ellipse cx="250" cy="159" rx="4.2" ry="11.5" fill="#202d25"/>
+<ellipse cx="241" cy="151" rx="4.3" ry="4.3" fill="#fffbd8"/>
 <path d="M224 148 Q245 128 268 144" fill="none" stroke="#294d39" stroke-width="8" stroke-linecap="round"/>
 <path d="M224 143 Q246 127 265 139" fill="none" stroke="#d7ed9c" stroke-width="3" stroke-linecap="round"/>
 <!-- nostril and muzzle texture -->
@@ -91,6 +92,7 @@
 <ellipse cx="190" cy="166" rx="3.5" ry="2.2" fill="#d9eda1"/>
 <path d="M169 189 Q180 193 190 193" stroke="#e3f0b3" stroke-width="3" fill="none" opacity=".7"/>
 <g fill="#d5e89a"><ellipse cx="282" cy="175" rx="3.5" ry="2.5"/><ellipse cx="292" cy="184" rx="2.8" ry="2.2"/><ellipse cx="275" cy="189" rx="2.8" ry="2"/></g>
+</g>
 <!-- short forearms, integrated close to the chest -->
 <!-- Far arm tucked behind the rib cage; only the shoulder and elbow contour remain visible. -->
 <path d="M389 288 Q406 276 420 293 Q428 306 418 321 L406 328 Q391 318 385 302Z" fill="url(#hideDark)" stroke="#1d4938" stroke-width="7" stroke-linejoin="round"/>
