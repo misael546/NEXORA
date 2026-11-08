@@ -31,13 +31,14 @@ footer strong{color:#f0c675}
 
 .detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:20px}
 .detail-card{border:1px solid var(--line);border-radius:15px;background:linear-gradient(155deg,#1d2e3b,#14222e);overflow:hidden;min-width:0}
-.detail-card img{display:block;width:100%;height:260px;object-fit:contain;background:radial-gradient(ellipse at 50% 40%,#405366,#223342 75%)}
+.detail-crop{position:relative;width:100%;height:260px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#405366,#223342 75%)}
+.detail-crop img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transform:scale(var(--zoom,1));transform-origin:var(--origin,50% 50%)}
 .detail-card div{padding:12px 14px 14px}
 .detail-card b{display:block;font-size:13px;margin-bottom:3px}
 .detail-card span{font-size:11px;color:var(--muted)}
 .detail-title{margin:30px 0 10px;font-size:17px;letter-spacing:.04em;color:#d9e6ec}
-@media(max-width:850px){.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.detail-card img{height:220px}}
-@media(max-width:500px){.detail-grid{grid-template-columns:1fr 1fr}.detail-card img{height:190px}}
+@media(max-width:850px){.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.detail-crop{height:220px}}
+@media(max-width:500px){.detail-grid{grid-template-columns:1fr 1fr}.detail-crop{height:190px}}
 
 @media(max-width:850px){main{width:min(96vw,680px);padding-top:26px}header{display:block}.version{display:inline-block;margin-top:16px}.grid{grid-template-columns:1fr}.stage{min-height:540px}.stage.worker img{height:580px}.stage.coelo{min-height:450px}}
 </style>
@@ -59,10 +60,10 @@ footer strong{color:#f0c675}
 </section>
 <h3 class="detail-title">Detail inspection · rostro, materiales y anatomía</h3>
 <section class="detail-grid" aria-label="Acercamientos de diseño">
- <article class="detail-card"><img src="./worker-face-detail.svg" alt="Acercamiento al rostro y casco del trabajador"><div><b>Trabajador · rostro</b><span>Casco, cabello, ojos y expresión</span></div></article>
- <article class="detail-card"><img src="./worker-costume-detail.svg" alt="Acercamiento al vestuario del trabajador"><div><b>Trabajador · vestuario</b><span>Capas, costuras y materiales</span></div></article>
- <article class="detail-card"><img src="./coelo-face-detail.svg" alt="Acercamiento a la cabeza de Coelo"><div><b>Coelo · cabeza</b><span>Perfil, ojo, hocico y mandíbula</span></div></article>
- <article class="detail-card"><img src="./coelo-body-detail.svg" alt="Acercamiento al cuerpo de Coelo"><div><b>Coelo · anatomía</b><span>Torso, placas y estructura muscular</span></div></article>
+ <article class="detail-card"><div class="detail-crop" style="--zoom:4.1;--origin:51% 21%"><img src="./worker-concept.svg" alt="Acercamiento al rostro y casco del trabajador"></div><div><b>Trabajador · rostro</b><span>Casco, cabello, ojos y expresión</span></div></article>
+ <article class="detail-card"><div class="detail-crop" style="--zoom:3.4;--origin:48% 45%"><img src="./worker-concept.svg" alt="Acercamiento al vestuario del trabajador"></div><div><b>Trabajador · vestuario</b><span>Capas, costuras y materiales</span></div></article>
+ <article class="detail-card"><div class="detail-crop" style="--zoom:4.7;--origin:24.5% 29%"><img src="./coelo-concept.svg" alt="Acercamiento a la cabeza de Coelo"></div><div><b>Coelo · cabeza</b><span>Perfil, ojo, hocico y mandíbula</span></div></article>
+ <article class="detail-card"><div class="detail-crop" style="--zoom:2.7;--origin:52% 53%"><img src="./coelo-concept.svg" alt="Acercamiento al cuerpo de Coelo"></div><div><b>Coelo · anatomía</b><span>Torso, placas y estructura muscular</span></div></article>
 </section>
 <footer><strong>Fase actual: revisión de diseño estático.</strong> Estos dibujos son referencias originales del proyecto. El rig y las animaciones no se actualizarán con ellos hasta revisar proporciones, siluetas y calidad visual.</footer>
 </main>
