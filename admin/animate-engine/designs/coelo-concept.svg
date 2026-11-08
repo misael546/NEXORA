@@ -10,6 +10,14 @@
  <radialGradient id="amber"><stop stop-color="#fff2a5"/><stop offset=".38" stop-color="#f7c94d"/><stop offset=".78" stop-color="#c37a2a"/><stop offset="1" stop-color="#694525"/></radialGradient>
  <filter id="shadow" x="-20%" y="-30%" width="140%" height="170%"><feGaussianBlur stdDeviation="13"/></filter>
  <clipPath id="bodyClip"><path d="M335 285 Q374 234 448 226 Q537 207 626 258 Q671 286 681 336 Q676 386 628 408 Q554 439 460 410 Q389 391 346 352Z"/></clipPath>
+
+ <pattern id="scaleTexture" width="18" height="14" patternUnits="userSpaceOnUse">
+  <path d="M-4 7 Q0 0 5 7 Q9 0 14 7 Q18 1 22 7" fill="none" stroke="#174a34" stroke-width="1" opacity=".26"/>
+  <path d="M-4 13 Q0 7 5 13 Q9 7 14 13 Q18 7 22 13" fill="none" stroke="#d4e99b" stroke-width=".7" opacity=".2"/>
+ </pattern>
+ <clipPath id="coeloTailClip">
+  <path d="M614 321 Q702 295 773 279 Q849 257 958 246 Q930 276 885 298 Q800 343 714 362 Q654 371 611 363Z"/>
+ </clipPath>
 </defs>
 <ellipse cx="535" cy="555" rx="370" ry="24" fill="#192b28" opacity=".22" filter="url(#shadow)"/>
 <!-- far hind leg: strong thigh, hock and three-toed foot -->
@@ -164,6 +172,9 @@
  <ellipse cx="546" cy="439" rx="2.2" ry="3.2" transform="rotate(22 546 439)"/>
  <ellipse cx="622" cy="360" rx="2.2" ry="3.2"/><ellipse cx="636" cy="354" rx="2" ry="2.7"/>
 </g>
+<!-- fine scale grain follows the body and tail surfaces without obscuring the larger markings -->
+<rect x="330" y="215" width="360" height="230" fill="url(#scaleTexture)" clip-path="url(#bodyClip)" opacity=".62"/>
+<rect x="610" y="240" width="360" height="145" fill="url(#scaleTexture)" clip-path="url(#coeloTailClip)" opacity=".58"/>
 <!-- layered hide texture and deep cel-shaded body planes -->
 <g clip-path="url(#bodyClip)">
  <path d="M345 286 Q405 224 490 237 Q563 243 624 287 Q570 272 515 286 Q447 311 397 341Z" fill="#204a39" opacity=".17"/>
