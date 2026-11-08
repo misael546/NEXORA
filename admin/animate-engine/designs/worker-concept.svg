@@ -51,7 +51,7 @@
 <path d="M181 466 Q202 480 218 466 L215 494 Q206 512 188 507 Q174 500 181 466Z" fill="#303d51" stroke="#182537" stroke-width="4"/>
 <path d="M187 483 L202 489 M184 491 L199 497" stroke="#92a0ae" stroke-width="2" opacity=".7"/>
 <!-- head scale corrected to restore adult anime proportions -->
-<g transform="translate(310 185) scale(.84 .88) translate(-310 -185)">
+<g transform="translate(310 185) scale(.82 .78) translate(-310 -185)">
 <!-- neck and face -->
 <path d="M275 233 L328 231 L333 291 Q307 315 276 288Z" fill="url(#skinShadow)" stroke="#75473e" stroke-width="5"/>
 <path d="M264 160 Q275 127 308 129 Q346 131 354 166 L346 221 Q337 255 308 265 Q276 257 263 225Z" fill="url(#skin)" stroke="#593c39" stroke-width="6" stroke-linejoin="round"/>
