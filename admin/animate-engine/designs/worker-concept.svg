@@ -101,6 +101,21 @@
 <rect x="348" y="361" width="13" height="9" rx="2" fill="#93c1bc"/>
 <path d="M351 378 L358 378" stroke="#dbe8de" stroke-width="2"/>
 <path d="M246 454 Q306 469 374 450" fill="none" stroke="#843d2a" stroke-width="3" opacity=".8"/>
+<!-- hand-rendered cel shadows, seams and fabric folds -->
+<g clip-path="url(#jacketClip)">
+ <path d="M232 314 Q247 329 255 359 L250 447 Q252 470 268 487 L229 478 L224 429Z" fill="#7f332c" opacity=".19"/>
+ <path d="M359 306 Q376 327 378 371 L386 445 Q378 468 360 477 L350 442 Q369 404 359 306Z" fill="#7f3029" opacity=".2"/>
+ <path d="M275 348 Q291 362 300 376 M329 348 Q319 364 315 379" fill="none" stroke="#ffc57c" stroke-width="4" stroke-linecap="round" opacity=".65"/>
+ <path d="M255 410 Q274 420 286 415 M326 417 Q345 407 360 402 M268 461 Q289 470 302 465 M320 464 Q340 461 355 451" fill="none" stroke="#9b432f" stroke-width="3" stroke-linecap="round" opacity=".68"/>
+ <path d="M287 356 L281 365 M333 364 L341 372 M262 390 L270 397 M345 389 L353 395" stroke="#ffe0a6" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+ <path d="M263 401 L283 405 M330 403 L350 399 M255 432 L280 438 M333 440 L362 432" stroke="#6f342a" stroke-width="1.6" stroke-dasharray="3 5" opacity=".7"/>
+ <path d="M240 460 Q306 479 375 458" fill="none" stroke="#ffd18a" stroke-width="2" opacity=".55"/>
+</g>
+<!-- individual hair strands and subtle face accents -->
+<path d="M266 148 Q278 128 298 128 M279 154 Q294 137 308 136 M335 137 Q349 147 350 163" fill="none" stroke="#7c8798" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+<path d="M278 186 Q289 180 299 186 M316 184 Q330 179 341 185" fill="none" stroke="#2b303b" stroke-width="2.2" opacity=".9"/>
+<path d="M270 217 Q277 224 285 224 M331 224 Q340 221 344 213" fill="none" stroke="#f8d2b5" stroke-width="2" opacity=".7"/>
+<path d="M293 246 Q306 251 321 245" fill="none" stroke="#854e49" stroke-width="2" opacity=".65"/>
 <!-- cuffs -->
 <path d="M174 426 Q195 437 221 428 L216 446 Q195 458 176 443Z" fill="url(#reflect)" stroke="#64716e" stroke-width="3"/>
 <path d="M397 407 Q415 416 433 407 L438 425 Q420 437 401 427Z" fill="url(#reflect)" stroke="#64716e" stroke-width="3"/>
