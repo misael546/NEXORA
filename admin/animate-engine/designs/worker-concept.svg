@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 900" role="img" aria-labelledby="title desc">
+<svg style="shape-rendering:geometricPrecision" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 900" role="img" aria-labelledby="title desc">
 <title id="title">NEXORA — trabajador, diseño 2D</title>
 <desc id="desc">Diseño original de personaje de anime: trabajador de construcción con casco amarillo, chaqueta naranja de alta visibilidad, pantalones utilitarios y botas resistentes.</desc>
 <defs>
@@ -30,53 +30,53 @@
 <!-- grounded character sheet -->
 <ellipse cx="311" cy="828" rx="150" ry="19" fill="#172333" opacity=".2" filter="url(#shadow)"/>
 <!-- far leg -->
-<path d="M322 472 Q359 470 377 495 L385 610 Q389 675 398 746 L365 770 Q344 727 334 669 L307 567Z" fill="url(#navy)" stroke="#17263b" stroke-width="7" stroke-linejoin="round"/>
+<path d="M322 472 Q359 470 377 495 L385 610 Q389 675 398 746 L365 770 Q344 727 334 669 L307 567Z" fill="url(#navy)" stroke="#17263b" stroke-width="5.7" stroke-linejoin="round"/>
 <path d="M347 505 Q370 508 373 545 L369 592 L344 601 L331 564Z" fill="#52657a" opacity=".7"/>
 <path d="M349 624 Q366 632 381 625 L390 704 L361 718 Q350 678 349 624Z" fill="#34465e" stroke="#17263b" stroke-width="3"/>
 <path d="M359 652 L382 649 M363 663 L385 660 M368 674 L387 671" stroke="#75879a" stroke-width="3" opacity=".7"/>
-<path d="M365 746 Q390 751 405 766 L417 801 Q419 813 404 817 L350 817 Q340 812 345 799Z" fill="url(#boot)" stroke="#101a29" stroke-width="6" stroke-linejoin="round"/>
+<path d="M365 746 Q390 751 405 766 L417 801 Q419 813 404 817 L350 817 Q340 812 345 799Z" fill="url(#boot)" stroke="#101a29" stroke-width="4.2" stroke-linejoin="round"/>
 <path d="M365 762 Q393 765 408 782 L411 793 L353 794Z" fill="#708096" opacity=".55"/>
-<path d="M349 803 Q377 809 415 799 L419 813 Q414 827 395 828 L349 825 Q336 819 349 803Z" fill="#111b2b" stroke="#0a1320" stroke-width="4"/>
+<path d="M349 803 Q377 809 415 799 L419 813 Q414 827 395 828 L349 825 Q336 819 349 803Z" fill="#111b2b" stroke="#0a1320" stroke-width="3.4"/>
 <path d="M369 779 L394 785 M365 788 L400 793" stroke="#9daaba" stroke-width="2" opacity=".55"/>
 <!-- near leg -->
-<path d="M247 474 Q281 461 312 485 L300 588 Q284 654 269 752 L224 766 Q227 696 230 639 L218 536Z" fill="url(#navy)" stroke="#17263b" stroke-width="7" stroke-linejoin="round"/>
-<path d="M236 516 Q263 507 292 521 L283 575 Q258 591 234 569Z" fill="#455a72" stroke="#182a40" stroke-width="4"/>
+<path d="M247 474 Q281 461 312 485 L300 588 Q284 654 269 752 L224 766 Q227 696 230 639 L218 536Z" fill="url(#navy)" stroke="#17263b" stroke-width="5.7" stroke-linejoin="round"/>
+<path d="M236 516 Q263 507 292 521 L283 575 Q258 591 234 569Z" fill="#455a72" stroke="#182a40" stroke-width="3.4"/>
 <path d="M236 526 Q262 538 286 527" fill="none" stroke="#91a0b0" stroke-width="3" opacity=".5"/>
 <path d="M230 615 Q253 628 286 619 L273 697 Q250 708 226 696Z" fill="#25364c" opacity=".85"/>
 <path d="M230 641 L277 651 M228 654 L274 664" stroke="#738398" stroke-width="3" opacity=".55"/>
-<path d="M221 743 Q249 752 272 744 L278 777 L266 802 Q261 814 245 816 L189 812 Q177 808 184 791 L203 764Z" fill="url(#boot)" stroke="#101a29" stroke-width="6" stroke-linejoin="round"/>
+<path d="M221 743 Q249 752 272 744 L278 777 L266 802 Q261 814 245 816 L189 812 Q177 808 184 791 L203 764Z" fill="url(#boot)" stroke="#101a29" stroke-width="4.2" stroke-linejoin="round"/>
 <path d="M198 780 Q224 789 271 775 L273 794 Q242 806 188 800Z" fill="#718095" opacity=".6"/>
-<path d="M184 800 Q218 810 277 794 L282 810 Q278 828 260 829 L188 826 Q174 819 184 800Z" fill="#111b2b" stroke="#0a1320" stroke-width="4"/>
+<path d="M184 800 Q218 810 277 794 L282 810 Q278 828 260 829 L188 826 Q174 819 184 800Z" fill="#111b2b" stroke="#0a1320" stroke-width="3.4"/>
 <path d="M202 782 L218 767 L250 769" fill="none" stroke="#aab7c6" stroke-width="3"/>
 <path d="M202 812 L260 815" stroke="#5e6e81" stroke-width="2"/>
 <!-- rear arm -->
-<path d="M362 303 Q388 290 404 313 L430 392 Q438 414 421 426 L401 437 Q382 427 378 407 L354 347Z" fill="url(#orange)" stroke="#873e2d" stroke-width="6" stroke-linejoin="round"/>
+<path d="M362 303 Q388 290 404 313 L430 392 Q438 414 421 426 L401 437 Q382 427 378 407 L354 347Z" fill="url(#orange)" stroke="#873e2d" stroke-width="4.2" stroke-linejoin="round"/>
 <path d="M398 324 L417 386 L399 396 L376 334Z" fill="#ffb96f" opacity=".52"/>
-<path d="M393 414 Q412 406 430 420 L438 467 Q438 485 421 491 L400 482 Q390 466 393 414Z" fill="url(#skin)" stroke="#75483f" stroke-width="5"/>
-<path d="M400 461 Q416 468 436 457 L438 477 Q424 492 405 481Z" fill="#2a3545" stroke="#172333" stroke-width="4"/>
-<path d="M404 483 Q423 485 434 476 L443 499 Q444 513 428 517 L407 512 Q395 501 404 483Z" fill="#2e3c50" stroke="#182537" stroke-width="4"/>
+<path d="M393 414 Q412 406 430 420 L438 467 Q438 485 421 491 L400 482 Q390 466 393 414Z" fill="url(#skin)" stroke="#75483f" stroke-width="4.2"/>
+<path d="M400 461 Q416 468 436 457 L438 477 Q424 492 405 481Z" fill="#2a3545" stroke="#172333" stroke-width="3.4"/>
+<path d="M404 483 Q423 485 434 476 L443 499 Q444 513 428 517 L407 512 Q395 501 404 483Z" fill="#2e3c50" stroke="#182537" stroke-width="3.4"/>
 <!-- near arm -->
-<path d="M257 302 Q236 286 219 302 L184 380 Q174 405 194 423 L217 437 Q237 430 243 406 L275 348Z" fill="url(#orange)" stroke="#873e2d" stroke-width="6" stroke-linejoin="round"/>
+<path d="M257 302 Q236 286 219 302 L184 380 Q174 405 194 423 L217 437 Q237 430 243 406 L275 348Z" fill="url(#orange)" stroke="#873e2d" stroke-width="4.2" stroke-linejoin="round"/>
 <path d="M238 315 L208 383 L229 395 L259 335Z" fill="#ffbc79" opacity=".6"/>
-<path d="M188 397 Q206 407 226 397 L219 460 Q215 479 199 478 L180 462Z" fill="url(#skin)" stroke="#75483f" stroke-width="5"/>
-<path d="M183 449 Q202 461 221 447 L216 469 Q198 485 181 468Z" fill="#2d394b" stroke="#172333" stroke-width="4"/>
-<path d="M181 466 Q202 480 218 466 L215 494 Q206 512 188 507 Q174 500 181 466Z" fill="#303d51" stroke="#182537" stroke-width="4"/>
+<path d="M188 397 Q206 407 226 397 L219 460 Q215 479 199 478 L180 462Z" fill="url(#skin)" stroke="#75483f" stroke-width="4.2"/>
+<path d="M183 449 Q202 461 221 447 L216 469 Q198 485 181 468Z" fill="#2d394b" stroke="#172333" stroke-width="3.4"/>
+<path d="M181 466 Q202 480 218 466 L215 494 Q206 512 188 507 Q174 500 181 466Z" fill="#303d51" stroke="#182537" stroke-width="3.4"/>
 <path d="M187 483 L202 489 M184 491 L199 497" stroke="#92a0ae" stroke-width="2" opacity=".7"/>
 <!-- head scale corrected to restore adult anime proportions -->
 <g transform="translate(310 185) scale(.82 .78) translate(-310 -185)">
 <!-- neck and face -->
-<path d="M275 233 L328 231 L333 291 Q307 315 276 288Z" fill="url(#skinShadow)" stroke="#75473e" stroke-width="5"/>
-<path d="M264 160 Q275 127 308 129 Q346 131 354 166 L346 221 Q337 255 308 265 Q276 257 263 225Z" fill="url(#skin)" stroke="#593c39" stroke-width="6" stroke-linejoin="round"/>
+<path d="M275 233 L328 231 L333 291 Q307 315 276 288Z" fill="url(#skinShadow)" stroke="#75473e" stroke-width="4.2"/>
+<path d="M264 160 Q275 127 308 129 Q346 131 354 166 L346 221 Q337 255 308 265 Q276 257 263 225Z" fill="url(#skin)" stroke="#593c39" stroke-width="4.2" stroke-linejoin="round"/>
 <path d="M265 199 Q259 218 276 236 Q286 249 302 249 Q278 239 277 214Z" fill="#a85f55" opacity=".3"/>
-<path d="M338 180 Q359 186 355 211 Q350 231 339 230" fill="url(#skinShadow)" stroke="#75473e" stroke-width="4"/>
+<path d="M338 180 Q359 186 355 211 Q350 231 339 230" fill="url(#skinShadow)" stroke="#75473e" stroke-width="3.4"/>
 <!-- hair under helmet -->
-<path d="M262 174 Q249 145 270 132 Q287 112 317 122 Q348 118 357 149 L352 174 Q338 159 323 160 L307 174 L293 158 Q279 170 262 174Z" fill="#28303c" stroke="#17202c" stroke-width="5"/>
+<path d="M262 174 Q249 145 270 132 Q287 112 317 122 Q348 118 357 149 L352 174 Q338 159 323 160 L307 174 L293 158 Q279 170 262 174Z" fill="#28303c" stroke="#17202c" stroke-width="4.2"/>
 <path d="M266 154 Q283 123 311 128 Q292 141 282 158Z" fill="#566173" opacity=".65"/>
 <path d="M347 162 Q359 185 348 221 L338 229 L340 187Z" fill="#222a37"/>
 <g transform="translate(307 197) scale(.91 .92) translate(-307 -197)">
 <!-- face details, expressive anime eyes -->
-<path d="M273 190 Q285 181 299 188" fill="none" stroke="#603b36" stroke-width="5" stroke-linecap="round"/>
-<path d="M313 188 Q329 180 342 188" fill="none" stroke="#603b36" stroke-width="5" stroke-linecap="round"/>
+<path d="M273 190 Q285 181 299 188" fill="none" stroke="#603b36" stroke-width="4.2" stroke-linecap="round"/>
+<path d="M313 188 Q329 180 342 188" fill="none" stroke="#603b36" stroke-width="4.2" stroke-linecap="round"/>
 <path d="M274 195 Q286 188 300 197 Q291 210 278 205Z" fill="#fff7e9" stroke="#533e3a" stroke-width="2.5"/>
 <path d="M315 196 Q329 188 341 194 Q335 207 321 206Z" fill="#fff7e9" stroke="#533e3a" stroke-width="2.5"/>
 <ellipse cx="290" cy="198" rx="5.5" ry="7.5" fill="url(#iris)"/><ellipse cx="330" cy="197" rx="5" ry="7" fill="url(#iris)"/>
@@ -96,7 +96,7 @@
  <path d="M296 226 Q306 229 319 225" fill="none" stroke="#f7d6bd" stroke-width="2.2" stroke-linecap="round" opacity=".75"/>
  <path d="M267 215 Q271 231 288 238 M337 216 Q335 229 324 236" fill="none" stroke="#9c6057" stroke-width="2" opacity=".38"/>
  <path d="M270 238 Q278 244 290 246 M326 241 Q334 236 340 226" fill="none" stroke="#ffd6ba" stroke-width="2" opacity=".55"/>
- <path d="M257 169 Q251 184 260 197 M351 169 Q359 185 354 199" fill="none" stroke="#27303a" stroke-width="5" stroke-linecap="round"/>
+ <path d="M257 169 Q251 184 260 197 M351 169 Q359 185 354 199" fill="none" stroke="#27303a" stroke-width="4.2" stroke-linecap="round"/>
  <path d="M258 178 Q251 189 255 202 M352 178 Q358 191 353 204" fill="none" stroke="#626d7c" stroke-width="2.4" stroke-linecap="round"/>
 </g>
 <!-- hardhat engineering details: molded ridge, anchor points, vent cuts and wear -->
@@ -109,21 +109,21 @@
 <path d="M286 116 L293 114 M322 113 L328 115" stroke="#fff8cc" stroke-width="2.4" stroke-linecap="round"/>
 </g>
 <!-- helmet shell -->
-<path d="M250 158 Q251 104 306 99 Q362 103 369 158 L357 171 Q307 151 260 171Z" fill="url(#helmet)" stroke="#8a511b" stroke-width="7" stroke-linejoin="round"/>
-<path d="M265 135 Q277 109 306 109 Q338 108 354 135" fill="none" stroke="#fff2b2" stroke-width="7" stroke-linecap="round"/>
-<path d="M307 104 L307 145" stroke="#fff4ba" stroke-width="5" opacity=".85"/>
-<path d="M253 157 Q307 145 369 158 L376 174 Q307 164 246 177Z" fill="#ed9c25" stroke="#8a511b" stroke-width="5" stroke-linejoin="round"/>
+<path d="M250 158 Q251 104 306 99 Q362 103 369 158 L357 171 Q307 151 260 171Z" fill="url(#helmet)" stroke="#8a511b" stroke-width="5.7" stroke-linejoin="round"/>
+<path d="M265 135 Q277 109 306 109 Q338 108 354 135" fill="none" stroke="#fff2b2" stroke-width="5.7" stroke-linecap="round"/>
+<path d="M307 104 L307 145" stroke="#fff4ba" stroke-width="4.2" opacity=".85"/>
+<path d="M253 157 Q307 145 369 158 L376 174 Q307 164 246 177Z" fill="#ed9c25" stroke="#8a511b" stroke-width="4.2" stroke-linejoin="round"/>
 <path d="M251 160 Q308 149 369 162" fill="none" stroke="#fff0a0" stroke-width="3"/>
 <rect x="296" y="111" width="22" height="17" rx="5" fill="#f8e48e" stroke="#a66a20" stroke-width="2"/>
 </g>
 <!-- torso / high visibility jacket -->
-<path d="M238 298 Q253 279 279 273 L321 273 Q353 280 373 300 L388 449 Q390 478 369 489 Q308 506 244 485 Q224 479 229 450Z" fill="url(#orange)" stroke="#843d2a" stroke-width="7" stroke-linejoin="round"/>
+<path d="M238 298 Q253 279 279 273 L321 273 Q353 280 373 300 L388 449 Q390 478 369 489 Q308 506 244 485 Q224 479 229 450Z" fill="url(#orange)" stroke="#843d2a" stroke-width="5.7" stroke-linejoin="round"/>
 <path d="M246 308 Q262 291 280 288 L294 299 L284 466 L244 475 Q231 466 238 431Z" fill="#ffbd72" opacity=".35"/>
 <path d="M333 293 Q357 301 366 320 L378 449 Q377 469 360 475 L349 455Z" fill="#a83f2d" opacity=".2"/>
 <!-- jacket panels, seams and collar -->
-<path d="M278 275 L307 300 L336 275 L324 313 L306 328 L286 311Z" fill="#ffd08a" stroke="#8a452c" stroke-width="4"/>
+<path d="M278 275 L307 300 L336 275 L324 313 L306 328 L286 311Z" fill="#ffd08a" stroke="#8a452c" stroke-width="3.4"/>
 <path d="M291 304 L306 324 L321 304 L317 339 L306 350 L295 338Z" fill="#29374a" stroke="#6d392d" stroke-width="3"/>
-<path d="M307 329 L307 474" stroke="#8b3e2b" stroke-width="4"/>
+<path d="M307 329 L307 474" stroke="#8b3e2b" stroke-width="3.4"/>
 <path d="M313 339 L313 468" stroke="#ffc17b" stroke-width="2"/>
 <path d="M249 369 Q306 382 373 365 L376 385 Q309 404 245 389Z" fill="url(#reflect)" stroke="#64716e" stroke-width="3"/>
 <path d="M247 374 Q307 389 374 371" fill="none" stroke="#fff" stroke-width="3" opacity=".7"/>
@@ -143,7 +143,7 @@
 <g clip-path="url(#jacketClip)">
  <path d="M232 314 Q247 329 255 359 L250 447 Q252 470 268 487 L229 478 L224 429Z" fill="#7f332c" opacity=".19"/>
  <path d="M359 306 Q376 327 378 371 L386 445 Q378 468 360 477 L350 442 Q369 404 359 306Z" fill="#7f3029" opacity=".2"/>
- <path d="M275 348 Q291 362 300 376 M329 348 Q319 364 315 379" fill="none" stroke="#ffc57c" stroke-width="4" stroke-linecap="round" opacity=".65"/>
+ <path d="M275 348 Q291 362 300 376 M329 348 Q319 364 315 379" fill="none" stroke="#ffc57c" stroke-width="3.4" stroke-linecap="round" opacity=".65"/>
  <path d="M255 410 Q274 420 286 415 M326 417 Q345 407 360 402 M268 461 Q289 470 302 465 M320 464 Q340 461 355 451" fill="none" stroke="#9b432f" stroke-width="3" stroke-linecap="round" opacity=".68"/>
  <path d="M287 356 L281 365 M333 364 L341 372 M262 390 L270 397 M345 389 L353 395" stroke="#ffe0a6" stroke-width="2" stroke-linecap="round" opacity=".55"/>
  <path d="M263 401 L283 405 M330 403 L350 399 M255 432 L280 438 M333 440 L362 432" stroke="#6f342a" stroke-width="1.6" stroke-dasharray="3 5" opacity=".7"/>
@@ -158,7 +158,7 @@
 <path d="M174 426 Q195 437 221 428 L216 446 Q195 458 176 443Z" fill="url(#reflect)" stroke="#64716e" stroke-width="3"/>
 <path d="M397 407 Q415 416 433 407 L438 425 Q420 437 401 427Z" fill="url(#reflect)" stroke="#64716e" stroke-width="3"/>
 <!-- belt and utility tools -->
-<path d="M244 480 Q307 497 372 478 L373 501 Q306 519 240 502Z" fill="#182739" stroke="#101927" stroke-width="4"/>
+<path d="M244 480 Q307 497 372 478 L373 501 Q306 519 240 502Z" fill="#182739" stroke="#101927" stroke-width="3.4"/>
 <path d="M292 492 L323 495 L322 516 L293 513Z" fill="#d5b56b" stroke="#493e35" stroke-width="3"/>
 <path d="M300 498 L315 499 L314 508 L300 507Z" fill="#25364a"/>
 <path d="M251 496 L270 500 L264 539 L244 534Z" fill="#36465a" stroke="#172537" stroke-width="3"/>
@@ -172,9 +172,9 @@
 <path d="M197 341 L224 353 M193 353 L216 367 M394 344 L416 359 M401 356 L421 370" stroke="#ffd18b" stroke-width="3" opacity=".7" stroke-linecap="round"/>
 <path d="M191 409 L214 415 M405 398 L425 393" stroke="#9b432d" stroke-width="3" opacity=".6"/>
 <!-- gloves -->
-<path d="M181 478 Q190 472 203 480 L211 500 Q206 515 191 511 L179 498Z" fill="#344455" stroke="#172536" stroke-width="4"/>
+<path d="M181 478 Q190 472 203 480 L211 500 Q206 515 191 511 L179 498Z" fill="#344455" stroke="#172536" stroke-width="3.4"/>
 <path d="M188 484 L194 500 M197 482 L202 497" stroke="#9eacb9" stroke-width="2" stroke-linecap="round"/>
-<path d="M410 488 Q423 480 434 489 L443 506 Q440 521 425 519 L411 510Z" fill="#344455" stroke="#172536" stroke-width="4"/>
+<path d="M410 488 Q423 480 434 489 L443 506 Q440 521 425 519 L411 510Z" fill="#344455" stroke="#172536" stroke-width="3.4"/>
 <path d="M419 490 L425 505 M429 488 L434 502" stroke="#9eacb9" stroke-width="2" stroke-linecap="round"/>
 <!-- fine tailoring, fabric tension folds and realistic trouser paneling -->
 <g fill="none" stroke-linecap="round" stroke-linejoin="round">
