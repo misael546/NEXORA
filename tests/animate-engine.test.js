@@ -303,6 +303,8 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.ok(workerRun.kneeL.x < workerRun.kneeR.x, "Las rodillas del trabajador no deben cruzarse al correr.");
   assert.ok(workerRun.footL.x < workerRun.footR.x, "Los pies del trabajador deben conservar su lado al correr.");
   assert.notDeepEqual(workerRun.footL,human.points.footL);
+  assert.ok(Math.abs(workerRun.handR.x-human.points.handR.x)>.03, "El brazo del trabajador debe acompañar la carrera con balanceo visible.");
+  assert.ok(Math.abs(workerRun.hip.y-human.points.hip.y)>.01, "El torso del trabajador debe suspenderse durante la carrera.");
   motion.usePreset("dino-run", 2);
   const dinoRun = motion.sample(.42);
   const dinoUpper = Math.hypot(dinoRun.kneeR.x-dinoRun.hip.x,dinoRun.kneeR.y-dinoRun.hip.y);
@@ -314,6 +316,8 @@ test("worker and dinosaur 2D action libraries animate their dedicated landmarks"
   assert.ok(dinoRun.kneeL.x < dinoRun.kneeR.x, "Las rodillas del dinosaurio no deben cruzarse al correr.");
   assert.ok(dinoRun.footL.x < dinoRun.footR.x, "Los pies del dinosaurio deben conservar su lado al correr.");
   assert.notDeepEqual(dinoRun.tail4,dino.points.tail4);
+  assert.ok(Math.abs(dinoRun.handR.x-dino.points.handR.x)>.02, "Los brazos cortos del dinosaurio deben acompañar la carrera.");
+  assert.ok(Math.abs(dinoRun.chest.y-dino.points.chest.y)>.01, "El torso del dinosaurio debe tener una suspensión visible.");
   assert.ok(api.NexoraMotionSystem.profiles.dinosaur.includes("dino-bite"));
 });
 
