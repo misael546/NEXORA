@@ -61,6 +61,7 @@
 <path d="M262 174 Q249 145 270 132 Q287 112 317 122 Q348 118 357 149 L352 174 Q338 159 323 160 L307 174 L293 158 Q279 170 262 174Z" fill="#28303c" stroke="#17202c" stroke-width="5"/>
 <path d="M266 154 Q283 123 311 128 Q292 141 282 158Z" fill="#566173" opacity=".65"/>
 <path d="M347 162 Q359 185 348 221 L338 229 L340 187Z" fill="#222a37"/>
+<g transform="translate(307 197) scale(.91 .92) translate(-307 -197)">
 <!-- face details, expressive anime eyes -->
 <path d="M273 190 Q285 181 299 188" fill="none" stroke="#603b36" stroke-width="5" stroke-linecap="round"/>
 <path d="M313 188 Q329 180 342 188" fill="none" stroke="#603b36" stroke-width="5" stroke-linecap="round"/>
@@ -94,6 +95,7 @@
 <circle cx="259" cy="164" r="3.4" fill="#d78b28" stroke="#874d1c" stroke-width="1.5"/>
 <circle cx="362" cy="164" r="3.4" fill="#d78b28" stroke="#874d1c" stroke-width="1.5"/>
 <path d="M286 116 L293 114 M322 113 L328 115" stroke="#fff8cc" stroke-width="2.4" stroke-linecap="round"/>
+</g>
 <!-- helmet shell -->
 <path d="M250 158 Q251 104 306 99 Q362 103 369 158 L357 171 Q307 151 260 171Z" fill="url(#helmet)" stroke="#8a511b" stroke-width="7" stroke-linejoin="round"/>
 <path d="M265 135 Q277 109 306 109 Q338 108 354 135" fill="none" stroke="#fff2b2" stroke-width="7" stroke-linecap="round"/>
