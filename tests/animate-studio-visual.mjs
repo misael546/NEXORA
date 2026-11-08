@@ -171,7 +171,7 @@ try {
   assert.ok(workerWalk.bounds.width < 235, "The worker stride spreads the silhouette too far horizontally.");
   await setAction("worker", "worker-run", 0.31);
   const workerRunStart = await capture("worker-run-start");
-  await setAction("worker", "worker-run", 0.58);
+  await setAction("worker", "worker-run", 0.42);
   const workerRun = await capture("worker-run-motion");
   assert.notEqual(workerRun.hash, workerRunStart.hash, "La carrera del trabajador no produjo movimiento visible.");
   await setAction("worker", "worker-hammer", 0.26);
@@ -202,7 +202,7 @@ try {
   assert.notEqual(dinoWalk.hash, dinoWalkStart.hash, "La caminata del dinosaurio no produjo cambios visibles entre fotogramas.");
   await setAction("dinosaur", "dino-run", 0.31);
   const dinoRunStart = await capture("dinosaur-run-start");
-  await setAction("dinosaur", "dino-run", 0.58);
+  await setAction("dinosaur", "dino-run", 0.42);
   const dinoRun = await capture("dinosaur-run-motion");
   assert.notEqual(dinoRun.hash, dinoRunStart.hash, "La carrera del dinosaurio no produjo movimiento visible.");
 
