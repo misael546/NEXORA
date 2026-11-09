@@ -74,3 +74,37 @@ No se debe entrenar con conversaciones privadas de usuarios por defecto. La memo
 ## Criterio de aceptación
 
 Un usuario puede entrar, describir un vídeo en español, opcionalmente adjuntar una referencia, recibir estados honestos, ver el resultado terminado y descargarlo. Desde cualquier página habilitada puede abrir NEXORA IA y conversar en español sin perder su contexto de trabajo.
+
+
+---
+
+## Estado técnico verificado — 9 de noviembre de 2026
+
+Esta sección distingue lo que ya existe de lo que todavía no debe presentarse como funcional.
+
+### Componentes localizados en el repositorio NEXORA
+
+- Sitio público estático en HTML, CSS y JavaScript.
+- Funciones de Cloudflare Pages para artículos, fondos de pantalla y operaciones administrativas.
+- Área administrativa privada con páginas de NEXORA ANIMATE.
+- Galería privada de animaciones con reproductor y descarga.
+- Módulos JavaScript de arte de personajes, esqueleto, movimiento, deformación de malla, animación facial, continuidad, composición, audio y puente de estudio.
+- Pruebas automatizadas del motor en `tests/animate-engine.test.js`.
+
+### Pendientes confirmados
+
+- No se encontró todavía una ruta pública `/api/nexora/chat` ni un servicio conversacional de NEXORA IA.
+- No se encontró una API pública completa para enviar descripciones, crear trabajos de vídeo, consultar su estado y recuperar el resultado.
+- La portada todavía funciona como portal editorial; no es aún la experiencia pública simplificada de creación audiovisual.
+- El motor está organizado en el área administrativa del repositorio NEXORA. El repositorio independiente `misael546/VideoGPT-Studio` también existe y debe evaluarse antes de duplicar responsabilidades o mover código.
+
+### Próxima implementación segura
+
+1. Definir contratos y validaciones para conversaciones y trabajos audiovisuales.
+2. Crear el servicio servidor de NEXORA IA con proveedor/modelo configurable por secretos; nunca exponer claves en el navegador.
+3. Crear una lista permitida de herramientas: ayuda del sitio, consulta de trabajos y solicitud de creación de vídeo.
+4. Crear la cola asíncrona de trabajos y estados persistentes antes de conectar el render.
+5. Añadir la burbuja de chat y el panel de creación solo cuando sus rutas de servidor estén listas.
+6. Probar errores, límites, permisos, archivos adjuntos, cancelación y recuperación de trabajos antes de publicar.
+
+No afirmar que NEXORA IA está entrenada, que el chat funciona o que se genera un vídeo automáticamente hasta que exista un modelo conectado y las pruebas de extremo a extremo pasen.
