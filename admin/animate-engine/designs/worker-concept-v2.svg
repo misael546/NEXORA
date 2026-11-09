@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1080" role="img" aria-labelledby="t d">
+<title id="t">NEXORA — trabajador, rediseño editorial 2D</title><desc id="d">Concepto de personaje anime de cuerpo completo, uniforme industrial naranja y azul petróleo, casco amarillo, anatomía adulta y sombreado por planos.</desc>
+<defs>
+ <linearGradient id="skin" x2=".9" y2="1"><stop stop-color="#ffe2c6"/><stop offset=".45" stop-color="#e9ae8e"/><stop offset="1" stop-color="#a95e55"/></linearGradient>
+ <linearGradient id="hair" x2=".8" y2="1"><stop stop-color="#5b4038"/><stop offset="1" stop-color="#201e27"/></linearGradient>
+ <linearGradient id="helmet" x2=".9" y2="1"><stop stop-color="#fff1a4"/><stop offset=".35" stop-color="#ffd34d"/><stop offset=".78" stop-color="#e99a27"/><stop offset="1" stop-color="#a95020"/></linearGradient>
+ <linearGradient id="jacket" x2=".85" y2="1"><stop stop-color="#ffad63"/><stop offset=".36" stop-color="#f4773d"/><stop offset=".72" stop-color="#c64d31"/><stop offset="1" stop-color="#713b35"/></linearGradient>
+ <linearGradient id="vest" x2="0" y2="1"><stop stop-color="#ffe2a0"/><stop offset=".5" stop-color="#e7b95c"/><stop offset="1" stop-color="#98734a"/></linearGradient>
+ <linearGradient id="pants" x2=".9" y2="1"><stop stop-color="#526a82"/><stop offset=".5" stop-color="#293c55"/><stop offset="1" stop-color="#121f32"/></linearGradient>
+ <linearGradient id="boot" x2="0" y2="1"><stop stop-color="#5c4a43"/><stop offset="1" stop-color="#171c27"/></linearGradient>
+ <radialGradient id="eye"><stop stop-color="#a9d8e8"/><stop offset=".6" stop-color="#4e7d91"/><stop offset="1" stop-color="#1d3444"/></radialGradient>
+ <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="13"/></filter>
+ </defs>
+ <ellipse cx="360" cy="1010" rx="190" ry="24" fill="#101b2b" opacity=".25" filter="url(#soft)"/>
+ <!-- silhouette and rear equipment -->
+ <path d="M250 345 Q188 365 177 468 L156 603 Q153 628 177 636 L215 639 252 484 286 430Z" fill="#263b50" stroke="#172536" stroke-width="9" stroke-linejoin="round"/>
+ <path d="M459 360 Q516 374 536 454 L557 577 Q561 603 537 614 L505 614 470 490 439 429Z" fill="#b84c32" stroke="#512f32" stroke-width="9" stroke-linejoin="round"/>
+ <!-- legs -->
+ <path d="M275 657 Q265 734 267 817 L253 928 Q248 954 276 962 L328 962 Q347 949 340 925 L355 811 378 690Z" fill="url(#pants)" stroke="#17263a" stroke-width="10" stroke-linejoin="round"/>
+ <path d="M367 683 Q390 752 394 822 L408 923 Q411 949 438 955 L489 952 Q510 941 494 915 L471 807 466 690Z" fill="url(#pants)" stroke="#17263a" stroke-width="10" stroke-linejoin="round"/>
+ <path d="M255 916 Q292 930 342 920 L338 968 Q330 992 297 997 L222 997 Q203 987 215 967Z" fill="url(#boot)" stroke="#151a22" stroke-width="10"/>
+ <path d="M405 912 Q449 924 494 909 L515 958 Q513 985 483 992 L408 990 Q389 981 394 958Z" fill="url(#boot)" stroke="#151a22" stroke-width="10"/>
+ <path d="M226 978 Q276 987 334 978 M407 974 Q457 985 505 970" fill="none" stroke="#d0b18a" stroke-width="6" stroke-linecap="round"/>
+ <path d="M286 709 L334 721 M401 711 L452 723 M270 824 L330 832 M402 835 L470 839" stroke="#8196a8" stroke-width="5" opacity=".5"/>
+ <path d="M301 751 L322 753 318 812 296 810Z M423 751 L448 752 457 817 433 820Z" fill="#18283c" opacity=".8"/>
+ <!-- torso -->
+ <path d="M275 326 Q319 301 367 310 Q422 305 461 341 L490 467 464 666 Q407 707 274 670 L236 477Z" fill="url(#jacket)" stroke="#4d3032" stroke-width="11" stroke-linejoin="round"/>
+ <path d="M280 344 Q318 325 353 333 L344 654 281 643 255 473Z" fill="#f28a4b" opacity=".9"/>
+ <path d="M372 332 Q422 326 449 351 L469 470 442 652 377 666Z" fill="#a84434" opacity=".5"/>
+ <!-- shoulder and sleeves -->
+ <path d="M278 348 Q230 350 218 401 L188 538 Q180 565 205 576 L237 584 278 463 313 405Z" fill="url(#jacket)" stroke="#4d3032" stroke-width="10"/>
+ <path d="M456 350 Q499 365 509 419 L535 536 Q541 566 514 578 L482 584 448 462 418 405Z" fill="url(#jacket)" stroke="#4d3032" stroke-width="10"/>
+ <!-- arms / gloves -->
+ <path d="M202 562 Q187 608 183 672 L198 700 Q218 710 236 691 L250 602 239 572Z" fill="url(#skin)" stroke="#543a39" stroke-width="8"/>
+ <path d="M502 560 Q526 610 536 670 L522 701 Q500 709 484 690 L469 602 480 571Z" fill="url(#skin)" stroke="#543a39" stroke-width="8"/>
+ <path d="M184 670 Q205 657 237 674 L243 714 Q229 737 197 727 Q176 714 184 670Z" fill="#293e51" stroke="#172638" stroke-width="8"/>
+ <path d="M483 672 Q511 658 536 676 L541 714 Q524 738 493 726 Q477 710 483 672Z" fill="#293e51" stroke="#172638" stroke-width="8"/>
+ <path d="M193 689 L229 697 M493 694 L529 688" stroke="#d6e1e2" stroke-width="4" opacity=".8"/>
+ <!-- vest reflective bands -->
+ <path d="M253 440 Q356 460 473 433 L469 464 Q354 489 245 469Z" fill="url(#vest)" stroke="#76543d" stroke-width="4"/>
+ <path d="M244 480 Q352 501 467 478 L462 499 Q352 523 238 501Z" fill="#e8c77c" opacity=".95"/>
+ <path d="M266 431 L283 435 270 506 253 502Z M436 434 L453 429 466 493 449 497Z" fill="#fff0b2" opacity=".75"/>
+ <path d="M346 341 L344 662 M378 339 L379 663" stroke="#713b35" stroke-width="5" opacity=".65"/>
+ <path d="M354 350 L357 652" stroke="#ffd0a0" stroke-width="2.5" opacity=".55"/>
+ <!-- collar -->
+ <path d="M303 319 L359 357 337 394 286 347Z" fill="#f8a05c" stroke="#62383a" stroke-width="7"/>
+ <path d="M414 320 L360 357 385 395 432 348Z" fill="#a94436" stroke="#62383a" stroke-width="7"/>
+ <path d="M350 355 L370 355 381 402 359 420 338 400Z" fill="#293d50" stroke="#182638" stroke-width="5"/>
+ <!-- utility pockets -->
+ <path d="M273 532 L333 542 328 605 267 595Z" fill="#c85635" stroke="#733b34" stroke-width="5"/>
+ <path d="M391 541 L450 530 455 592 394 605Z" fill="#a74435" stroke="#693735" stroke-width="5"/>
+ <path d="M279 543 L328 551 M399 551 L445 541" stroke="#ffc17d" stroke-width="4"/>
+ <path d="M302 567 L302 586 M424 563 L424 585" stroke="#673d35" stroke-width="3"/>
+ <rect x="291" y="612" width="39" height="25" rx="5" fill="#e2ba69" stroke="#633f36" stroke-width="4"/>
+ <rect x="397" y="612" width="39" height="25" rx="5" fill="#e2ba69" stroke="#633f36" stroke-width="4"/>
+ <!-- tool radio -->
+ <path d="M461 390 L492 399 486 461 454 454Z" fill="#25394d" stroke="#142638" stroke-width="5"/>
+ <path d="M469 394 L473 377 481 380 479 398" fill="none" stroke="#25394d" stroke-width="5"/>
+ <circle cx="470" cy="421" r="5" fill="#b9d6d6"/><path d="M464 438 L480 442" stroke="#93b2b9" stroke-width="3"/>
+ <!-- neck -->
+ <path d="M320 268 L319 326 Q353 363 398 326 L392 267Z" fill="url(#skin)" stroke="#593b39" stroke-width="8"/>
+ <path d="M321 293 Q350 316 392 292 L391 327 Q354 350 320 325Z" fill="#b96d62" opacity=".35"/>
+ <!-- head silhouette -->
+ <path d="M289 170 Q292 119 349 112 Q410 112 427 166 L422 242 Q414 281 375 299 Q335 302 302 268 Q278 236 289 170Z" fill="url(#skin)" stroke="#4b3434" stroke-width="9"/>
+ <!-- ears -->
+ <path d="M291 212 Q267 202 268 227 Q271 247 294 246 M418 209 Q444 201 443 226 Q440 247 420 246" fill="#d99178" stroke="#593b39" stroke-width="6"/>
+ <!-- hair side locks -->
+ <path d="M292 183 Q270 155 288 127 Q302 92 351 92 Q406 89 428 125 Q443 149 422 191 L411 160 Q396 146 382 146 Q349 169 310 154Z" fill="url(#hair)" stroke="#201f29" stroke-width="8"/>
+ <path d="M300 139 Q323 98 366 106 Q344 117 337 142 M367 104 Q404 103 421 140 Q399 124 383 128" fill="none" stroke="#9a7160" stroke-width="5" opacity=".7"/>
+ <path d="M294 173 Q278 197 294 237 L306 256 313 202Z M417 174 Q431 207 416 249 L404 263 404 202Z" fill="#3b2b31" stroke="#211e28" stroke-width="5"/>
+ <!-- brows, eyes anime -->
+ <path d="M307 196 Q326 179 348 194 M370 192 Q394 176 410 193" fill="none" stroke="#503332" stroke-width="8" stroke-linecap="round"/>
+ <path d="M309 207 Q328 195 350 208 Q336 228 316 222Z M370 207 Q390 194 409 206 Q396 226 376 222Z" fill="#fff5e9" stroke="#583a39" stroke-width="4"/>
+ <ellipse cx="332" cy="211" rx="8" ry="12" fill="url(#eye)"/><ellipse cx="390" cy="210" rx="8" ry="12" fill="url(#eye)"/>
+ <circle cx="335" cy="207" r="3.5" fill="#fff"/><circle cx="393" cy="206" r="3.5" fill="#fff"/>
+ <path d="M357 211 Q350 233 361 237" fill="none" stroke="#a9695d" stroke-width="4" stroke-linecap="round"/>
+ <path d="M341 256 Q361 265 381 253" fill="none" stroke="#8e4d4e" stroke-width="4" stroke-linecap="round"/>
+ <path d="M347 258 Q361 263 375 257" fill="none" stroke="#fff0dd" stroke-width="2"/>
+ <path d="M307 237 Q315 247 328 247 M389 245 Q402 246 411 235" fill="none" stroke="#d88b7b" stroke-width="4" opacity=".65"/>
+ <!-- helmet band and shell -->
+ <path d="M278 160 Q279 95 348 77 Q414 71 441 130 L445 158 Q362 139 278 160Z" fill="url(#helmet)" stroke="#75451f" stroke-width="9"/>
+ <path d="M292 125 Q347 80 411 110" fill="none" stroke="#fff4bd" stroke-width="7" opacity=".8"/>
+ <path d="M272 155 Q360 133 450 154 L451 172 Q357 157 269 176Z" fill="#f2ad36" stroke="#75451f" stroke-width="7"/>
+ <path d="M355 83 L357 143 M346 91 L347 143" stroke="#ffe9a0" stroke-width="5" opacity=".65"/>
+ <path d="M286 163 Q360 148 435 162" fill="none" stroke="#fff1b0" stroke-width="3" opacity=".7"/>
+ <!-- face lighting -->
+ <path d="M304 228 Q310 267 343 282 M397 238 Q391 271 369 282" fill="none" stroke="#ffe4c9" stroke-width="5" opacity=".55"/>
+ <circle cx="316" cy="240" r="8" fill="#e98e81" opacity=".18"/><circle cx="400" cy="239" r="8" fill="#e98e81" opacity=".18"/>
+ <!-- seam / stitches -->
+ <path d="M252 511 L267 514 M450 513 L466 509 M274 622 L330 631 M394 630 L449 619" stroke="#ffca92" stroke-width="2.5" stroke-dasharray="4 5"/>
+ <!-- belt and pouches -->
+ <path d="M271 660 Q363 686 469 655 L472 681 Q362 714 270 687Z" fill="#443b39" stroke="#1d2734" stroke-width="5"/>
+ <rect x="351" y="666" width="34" height="24" rx="4" fill="#d9b36b" stroke="#604b3b" stroke-width="4"/>
+ <path d="M282 679 L305 682 302 718 277 714Z M432 679 L457 674 464 711 439 716Z" fill="#6e5547" stroke="#202c3a" stroke-width="4"/>
+ <!-- knee guards -->
+ <path d="M270 801 Q300 791 335 804 L329 847 Q300 861 269 846Z M401 810 Q437 796 469 810 L470 850 Q437 864 405 851Z" fill="#52697d" stroke="#17273b" stroke-width="6"/>
+ <path d="M281 812 L323 815 M412 820 L456 817" stroke="#b6c4ca" stroke-width="3"/>
+ <!-- highlights -->
+ <path d="M245 402 Q252 372 279 360 M474 384 Q492 410 494 444 M277 356 Q307 338 327 342" fill="none" stroke="#ffd1a0" stroke-width="5" opacity=".6"/>
+ <path d="M292 726 Q280 805 279 883 M415 729 Q438 795 444 876" fill="none" stroke="#90a4b8" stroke-width="4" opacity=".4"/>
+</svg>
