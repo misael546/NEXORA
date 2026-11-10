@@ -108,3 +108,22 @@ Esta sección distingue lo que ya existe de lo que todavía no debe presentarse 
 6. Probar errores, límites, permisos, archivos adjuntos, cancelación y recuperación de trabajos antes de publicar.
 
 No afirmar que NEXORA IA está entrenada, que el chat funciona o que se genera un vídeo automáticamente hasta que exista un modelo conectado y las pruebas de extremo a extremo pasen.
+
+
+---
+
+## Decisión de producto — flujo principal fotograma por fotograma
+
+La dirección vigente de NEXORA ANIMATE es **animación 2D dibujada fotograma por fotograma**. Los sistemas de esqueleto, rig, poses, IK y deformación quedan como prototipos heredados/experimentales y no forman parte del flujo principal ni deben bloquear o reemplazar los dibujos originales.
+
+Orden obligatorio:
+1. Definir y dibujar el personaje/escenario con calidad suficiente.
+2. Crear una ficha maestra con referencias visuales, silueta, proporciones, rostro, paleta, vestuario y rasgos.
+3. Revisar y aprobar el diseño antes de animar.
+4. Crear imágenes independientes para cada fotograma, manteniendo la ficha aprobada.
+5. Ordenar, ajustar exposición/duración y revisar la continuidad de la secuencia.
+6. Reproducir y exportar el vídeo final.
+
+La primera entrega del editor local se encuentra en admin/animate-frames.html; su modelo de proyecto está en admin/animate-engine/frame-animation.js. La aprobación de diseño es una barrera explícita para añadir fotogramas. La revisión visual de esta primera versión es manual; no se afirma que exista detección automática de errores o generación de dibujos por IA.
+
+La generación automática de arte, la asistencia de IA para producir variaciones coherentes, la evaluación visual automatizada y el renderizado escalable quedan pendientes de integrar y probar. El editor actual almacena imágenes y proyectos en el navegador/dispositivo; no sincroniza automáticamente los recursos entre dispositivos.
