@@ -4,8 +4,10 @@ on:
     branches: [main]
     paths:
       - "admin/animate-studio.html"
+      - "admin/animate-frames.html"
       - "admin/animate-engine/**"
       - "tests/animate-studio-visual.mjs"
+      - "tests/frame-editor-visual.mjs"
       - ".github/workflows/animate-studio-visual-qa.yml"
   pull_request:
     paths:
@@ -31,11 +33,13 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run 2D visual review
         run: node tests/animate-studio-visual.mjs
+      - name: Test frame-by-frame editor
+        run: node tests/frame-editor-visual.mjs
       - name: Upload visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nexora-2d-visual-qa
-          path: artifacts/nexora-2d-visual-qa/
+          name: nexora-animate-visual-qa
+          path: artifacts/nexora-2d-visual-qa/\n            artifacts/nexora-frame-editor-qa/
           if-no-files-found: warn
           retention-days: 7
