@@ -308,3 +308,29 @@ El arte incluido es una ilustración vectorial procedimental original, no una se
 - Las acciones de oficio del trabajador ahora llevan utilería dibujada y sincronizada con el clip: martillo en `worker-hammer`, pala en `worker-dig`, y caja/carga en `worker-carry` y `worker-lift`. La pose de carga aproxima ambas manos al objeto, y el renderizador recibe el nombre de la acción para dibujar el accesorio correspondiente. El clip de levantamiento también cierra los brazos alrededor de la caja.
 
 - El dibujo del dinosaurio incluye una fila de dientes inferiores anclados a la mandíbula móvil, para que sigan la apertura durante rugidos y mordidas.
+
+
+---
+
+# Dirección vigente — animación dibujada fotograma por fotograma
+
+La decisión de producto más reciente establece que el flujo principal **no utiliza esqueletos, articulaciones, IK, rigging ni deformación de malla**. Los módulos históricos que implementan esas técnicas se conservan para experimentación y compatibilidad, pero no son el camino principal de creación.
+
+## Nuevo módulo principal
+
+- animate-engine/frame-animation.js: modelo de proyecto independiente de cualquier rig. Cada fotograma referencia una imagen distinta y conserva su orden, etiqueta, notas y duración de exposición. El proyecto calcula duración, consulta el fotograma visible para un instante, permite reordenar/eliminar y serializa el trabajo.
+- animate-frames.html: editor privado local-first. Primero recoge ficha maestra, referencias y una revisión visual manual. Solo tras aprobar la ficha habilita la importación de dibujos como fotogramas. Incluye timeline, previsualización, reproducción y exportación WebM cuando el navegador lo admite.
+- tests/frame-animation.test.js: pruebas del bloqueo de animación antes de aprobar diseño, aprobación de ficha, duración/exposición, orden, edición, continuidad y persistencia.
+
+## Flujo de trabajo aprobado
+
+1. Diseñar y revisar el personaje y el escenario; todavía no animar.
+2. Registrar referencias maestras y rasgos que no pueden variar.
+3. Aprobar manualmente la calidad del diseño.
+4. Incorporar cada dibujo como un fotograma independiente.
+5. Revisar secuencia y continuidad; ajustar orden y exposición.
+6. Reproducir y exportar.
+
+## Límites actuales
+
+La primera entrega no genera ilustraciones automáticamente, no corrige dibujos ni detecta visualmente cambios de identidad. El usuario aporta o crea las imágenes y realiza la revisión de calidad. Los activos se guardan en IndexedDB y el proyecto en almacenamiento local del navegador; no hay sincronización en la nube. La exportación depende de MediaRecorder y canvas.captureStream() del navegador. La integración con NEXORA IA, los trabajos de generación asíncronos y la evaluación automática de continuidad siguen pendientes.
