@@ -44,6 +44,11 @@ try{
  assert.equal(saved.design.approved,true);assert.equal(saved.frames.length,2);
  assert.deepEqual(errors,[],"Errores de navegador: "+errors.join(" | "));
  await page.screenshot({path:path.join(out,"frame-editor-approved.png"),fullPage:true,animations:"disabled"});
- fs.writeFileSync(path.join(out,"report.json"),JSON.stringify({status:"passed",approved:saved.design.approved,frameCount:saved.frames.length,errors},null,2));
+ const designPage=await browser.newPage({viewport:{width:1440,height:1100}});designPage.on("pageerror",e=>errors.push(e.message));
+ await designPage.goto("http://127.0.0.1:4174/admin/animate-engine/designs/preview-v2.html",{waitUntil:"domcontentloaded"});
+ await designPage.waitForFunction(()=>Array.from(document.querySelectorAll(".art img")).length===2&&Array.from(document.querySelectorAll(".art img")).every(img=>img.complete&&img.naturalWidth>0));
+ const designAssets=await designPage.locator(".art img").evaluateAll(imgs=>imgs.map(img=>({alt:img.alt,width:img.naturalWidth,height:img.naturalHeight})));
+ assert.equal(designAssets.length,2);await designPage.screenshot({path:path.join(out,"character-design-v2.png"),fullPage:true,animations:"disabled"});
+ fs.writeFileSync(path.join(out,"report.json"),JSON.stringify({status:"passed",approved:saved.design.approved,frameCount:saved.frames.length,designAssets,errors},null,2));
  console.log("NEXORA_FRAME_EDITOR_QA=passed frames="+saved.frames.length);
 }finally{if(browser)await browser.close();await new Promise(resolve=>server.close(resolve))}
