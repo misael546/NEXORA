@@ -12,8 +12,10 @@ on:
   pull_request:
     paths:
       - "admin/animate-studio.html"
+      - "admin/animate-frames.html"
       - "admin/animate-engine/**"
       - "tests/animate-studio-visual.mjs"
+      - "tests/frame-editor-visual.mjs"
       - ".github/workflows/animate-studio-visual-qa.yml"
   workflow_dispatch:
 permissions:
@@ -40,6 +42,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nexora-animate-visual-qa
-          path: artifacts/nexora-2d-visual-qa/\n            artifacts/nexora-frame-editor-qa/
+          path: |
+            artifacts/nexora-2d-visual-qa/
+            artifacts/nexora-frame-editor-qa/
           if-no-files-found: warn
           retention-days: 7
