@@ -239,6 +239,11 @@
       buildActor();
       applyMode();
       function applyMode() {
+        if (raf) {
+          cancelAnimationFrame(raf);
+          raf = 0;
+          $("play").textContent = "▶ Previsualizar";
+        }
         var isSequence = mode === "sequence";
         var isCamera = mode === "camera";
         $("sequencePanel").style.display = isSequence ? "" : "none";
