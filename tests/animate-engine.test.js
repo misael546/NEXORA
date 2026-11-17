@@ -2155,3 +2155,46 @@ test("frame sequence reorders, removes and draws the current frame", () => {
   const empty = makeFrameSequence(api, 2, "loop");
   assert.equal(empty.draw(ctx, 0, 640, 360), -1);
 });
+
+test("frame sequence cuts a sprite sheet into ordered frames", () => {
+  const { api } = loadEngine();
+  const seq = makeFrameSequence(api, 2, "loop");
+  const cuts = [];
+  const makeCanvas = () => ({
+    width: 0,
+    height: 0,
+    getContext() {
+      return {
+        drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh) {
+          cuts.push({ image, sx, sy, sw, sh, dx, dy, dw, dh });
+        },
+      };
+    },
+  });
+  // Hoja de 400x200 en 4 columnas x 2 filas: celdas de 100x100.
+  const added = seq.addSpriteSheet(fakeImage(400, 200), 4, 2, makeCanvas);
+  assert.equal(added.length, 8);
+  assert.equal(seq.count, 8);
+  assert.equal(seq.duration(), 4);
+  assert.equal(seq.frames[0].name, "Hoja 1");
+  assert.equal(seq.frames[7].name, "Hoja 8");
+  assert.equal(seq.frames[0].width, 100);
+  assert.equal(seq.frames[0].height, 100);
+  assert.equal(cuts.length, 8);
+  assert.equal(cuts[0].sx, 0);
+  assert.equal(cuts[0].sy, 0);
+  assert.equal(cuts[5].sx, 100);
+  assert.equal(cuts[5].sy, 100);
+  assert.equal(cuts[5].sw, 100);
+  assert.equal(cuts[5].sh, 100);
+  assert.equal(cuts[5].dx, 0);
+  assert.equal(cuts[5].dy, 0);
+  assert.throws(
+    () => seq.addSpriteSheet(fakeImage(10, 10), 0, 2, makeCanvas),
+    /Columnas y filas deben ser 1 o más/,
+  );
+  assert.throws(
+    () => seq.addSpriteSheet(fakeImage(10, 10), 20, 20, makeCanvas),
+    /demasiado pequeña/,
+  );
+});

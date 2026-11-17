@@ -88,6 +88,55 @@
       this.frames.splice(index, 1);
       return true;
     }
+    // Corta una hoja de sprites: una sola imagen con los fotogramas en
+    // rejilla (cols columnas x rows filas), de izquierda a derecha y de
+    // arriba abajo. Cada celda se añade como un fotograma, sin perder
+    // resolución: el corte es exacto, celda a celda. makeCanvas es
+    // inyectable para poder probarlo sin DOM.
+    addSpriteSheet(image, cols, rows, makeCanvas) {
+      if (
+        !image ||
+        !Number.isFinite(image.width) ||
+        !Number.isFinite(image.height)
+      )
+        throw new Error("La hoja debe ser una imagen con ancho y alto");
+      const columns = Math.floor(cols);
+      const lines = Math.floor(rows);
+      if (
+        !Number.isFinite(columns) ||
+        columns < 1 ||
+        !Number.isFinite(lines) ||
+        lines < 1
+      )
+        throw new Error("Columnas y filas deben ser 1 o más");
+      const cellWidth = Math.floor(image.width / columns);
+      const cellHeight = Math.floor(image.height / lines);
+      if (cellWidth < 1 || cellHeight < 1)
+        throw new Error("La hoja es demasiado pequeña para esa rejilla");
+      const create = makeCanvas || (() => document.createElement("canvas"));
+      const added = [];
+      for (let row = 0; row < lines; row++) {
+        for (let col = 0; col < columns; col++) {
+          const canvas = create();
+          canvas.width = cellWidth;
+          canvas.height = cellHeight;
+          const cellCtx = canvas.getContext("2d");
+          cellCtx.drawImage(
+            image,
+            col * cellWidth,
+            row * cellHeight,
+            cellWidth,
+            cellHeight,
+            0,
+            0,
+            cellWidth,
+            cellHeight,
+          );
+          added.push(this.addImage(canvas, "Hoja " + (added.length + 1)));
+        }
+      }
+      return added;
+    }
     move(index, direction) {
       const target = index + direction;
       if (

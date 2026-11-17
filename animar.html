@@ -54,6 +54,12 @@
           <div><label for="seqOnion">Piel de cebolla</label><select id="seqOnion"><option value="off">Apagada</option><option value="on">Encendida</option></select></div>
         </div>
         <p class="studio-note" id="seqInfo">Aún no hay fotogramas. Sube tus dibujos en orden: el primero es el fotograma 1, el segundo el 2, y así.</p>
+        <div class="studio-controls">
+          <div><label for="sheetFile">Hoja de sprites (una sola imagen)</label><input id="sheetFile" type="file" accept="image/*"></div>
+          <div><label for="sheetCols">Columnas</label><input id="sheetCols" type="number" min="1" max="16" step="1" value="4"></div>
+          <div><label for="sheetRows">Filas</label><input id="sheetRows" type="number" min="1" max="16" step="1" value="2"></div>
+          <div><label>&nbsp;</label><button class="button button-outline" id="cutSheet" type="button">Cortar en fotogramas</button></div>
+        </div>
         <div id="frameList"></div>
       </div>
       <div class="studio-actions">
@@ -62,7 +68,7 @@
         <button class="button button-outline" id="exportFrames" type="button">Exportar fotogramas PNG</button>
       </div>
       <p class="studio-status" id="status" role="status">Motor listo. Elige un personaje y una acción.</p>
-      <p class="studio-note">En modo secuencia, cada imagen que subes es un fotograma: a 12 fps, 12 dibujos duran 1 segundo. Puedes reordenarlos con las flechas y quitarlos con la ✕. La exportación de vídeo graba en tiempo real; si cambias de pestaña, la grabación se pausa sola y continúa al volver. La exportación de fotogramas no depende del tiempo real: renderiza cada fotograma en su tiempo exacto y descarga una imagen PNG por fotograma, lista para montar en un editor de vídeo.</p>
+      <p class="studio-note">En modo secuencia, cada imagen que subes es un fotograma: a 12 fps, 12 dibujos duran 1 segundo. Puedes reordenarlos con las flechas y quitarlos con la ✕. También puedes subir una sola imagen con todos los fotogramas en rejilla (una hoja de sprites): indica cuántas columnas y filas tiene y pulsa “Cortar en fotogramas”; el motor corta cada celda sin perder resolución. La exportación de vídeo graba en tiempo real; si cambias de pestaña, la grabación se pausa sola y continúa al volver. La exportación de fotogramas no depende del tiempo real: renderiza cada fotograma en su tiempo exacto y descarga una imagen PNG por fotograma, lista para montar en un editor de vídeo.</p>
     </section>
   </main>
   <footer class="site-footer"><div class="wrap footer-inner"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXORA<span class="brand-dot">.</span></span></a><span>Explora lo que viene.</span><div class="footer-links"><a href="acerca.html">Sobre NEXORA</a><a href="privacidad.html">Privacidad</a><a href="cookies.html">Cookies</a><a href="contacto.html">Contacto</a><a href="animar.html">Crear animación</a></div><span>© <span id="year"></span> NEXORA.</span></div></footer>
@@ -281,6 +287,37 @@
         renderFrameList();
         applyMode();
         status(sequence.count + " fotogramas listos. Dale a Previsualizar para verlos animados.");
+      });
+      $("cutSheet").addEventListener("click", async function () {
+        var input = $("sheetFile");
+        var file = input.files && input.files[0];
+        if (!file) {
+          status("Elige primero una hoja de sprites: una sola imagen con los fotogramas en rejilla.");
+          return;
+        }
+        var cols = Number($("sheetCols").value);
+        var rows = Number($("sheetRows").value);
+        var url = URL.createObjectURL(file);
+        try {
+          var img = await new Promise(function (resolve, reject) {
+            var image = new Image();
+            image.onload = function () { resolve(image); };
+            image.onerror = function () { reject(new Error("No se pudo cargar " + file.name)); };
+            image.src = url;
+          });
+          var cut = sequence.addSpriteSheet(img, cols, rows);
+          cut.forEach(function (frame) {
+            frame.thumb = frame.image.toDataURL("image/jpeg", 0.85);
+          });
+          input.value = "";
+          renderFrameList();
+          applyMode();
+          status("Hoja cortada: " + cut.length + " fotogramas de " + cols + "×" + rows + ". Dale a Previsualizar para verlos animados.");
+        } catch (err) {
+          status("No se pudo cortar la hoja: " + err.message);
+        } finally {
+          URL.revokeObjectURL(url);
+        }
       });
       $("seqFps").addEventListener("input", function (e) {
         sequence.setFps(Number(e.target.value));
