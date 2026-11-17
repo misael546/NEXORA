@@ -49,6 +49,7 @@ function loadEngine() {
     "scene-project.js",
     "mesh-deformer.js",
     "compositor.js",
+    "frame-sequence.js",
   ]) {
     const source = fs.readFileSync(
       path.join(__dirname, "../admin/animate-engine", file),
@@ -2072,4 +2073,85 @@ test("frame-by-frame export rejects too many frames and honours cancellation", a
     () => compositor.exportFrames({ fps: 0 }),
     /fps deben estar entre 1 y 60/,
   );
+});
+
+function makeFrameSequence(api, fps = 2, loop = "loop") {
+  return new api.NexoraFrameSequence.FrameSequence({ fps, loop });
+}
+function fakeImage(width = 100, height = 50) {
+  return { width, height };
+}
+
+test("frame sequence plays uploaded frames in order at the given fps", () => {
+  const { api } = loadEngine();
+  const seq = makeFrameSequence(api, 2, "loop");
+  seq.addImage(fakeImage(), "a.png");
+  seq.addImage(fakeImage(), "b.png");
+  seq.addImage(fakeImage(), "c.png");
+  assert.equal(seq.count, 3);
+  assert.equal(seq.duration(), 1.5);
+  assert.equal(seq.frameIndexAt(0), 0);
+  assert.equal(seq.frameIndexAt(0.5), 1);
+  assert.equal(seq.frameIndexAt(1), 2);
+  assert.equal(seq.frameIndexAt(1.5), 0);
+  assert.equal(seq.frameAt(0.5).name, "b.png");
+  assert.equal(seq.frameIndexAt(-1), 0);
+  assert.throws(() => seq.setFps(0), /fps deben estar entre 1 y 60/);
+  assert.throws(() => seq.setLoop("random"), /Modo de repetición/);
+  assert.throws(
+    () => seq.addImage({ width: 10 }),
+    /fotograma debe ser una imagen/,
+  );
+});
+
+test("frame sequence once and pingpong modes stop and bounce correctly", () => {
+  const { api } = loadEngine();
+  const once = makeFrameSequence(api, 2, "once");
+  once.addImage(fakeImage());
+  once.addImage(fakeImage());
+  once.addImage(fakeImage());
+  assert.equal(once.frameIndexAt(0), 0);
+  assert.equal(once.frameIndexAt(1), 2);
+  assert.equal(once.frameIndexAt(10), 2);
+  const bounce = makeFrameSequence(api, 2, "pingpong");
+  bounce.addImage(fakeImage());
+  bounce.addImage(fakeImage());
+  bounce.addImage(fakeImage());
+  assert.deepEqual(
+    [0, 0.5, 1, 1.5, 2, 2.5, 3].map((t) => bounce.frameIndexAt(t)),
+    [0, 1, 2, 1, 0, 1, 2],
+  );
+});
+
+test("frame sequence reorders, removes and draws the current frame", () => {
+  const { api } = loadEngine();
+  const seq = makeFrameSequence(api, 2, "loop");
+  seq.addImage(fakeImage(), "a.png");
+  seq.addImage(fakeImage(), "b.png");
+  seq.addImage(fakeImage(), "c.png");
+  assert.equal(seq.move(0, 1), true);
+  assert.equal(seq.frames[0].name, "b.png");
+  assert.equal(seq.frames[1].name, "a.png");
+  assert.equal(seq.move(0, -1), false);
+  assert.equal(seq.remove(2), true);
+  assert.equal(seq.count, 2);
+  const drawn = [];
+  const ctx = {
+    save() {},
+    restore() {},
+    drawImage(image, x, y, w, h) {
+      drawn.push({ image, x, y, w, h });
+    },
+  };
+  // 100x50 en un lienzo 640x360: escala 1, centrado.
+  assert.equal(seq.draw(ctx, 0.5, 640, 360), 1);
+  assert.equal(drawn.length, 1);
+  assert.equal(drawn[0].x, 270);
+  assert.equal(drawn[0].y, 155);
+  seq.onionSkin = true;
+  drawn.length = 0;
+  assert.equal(seq.draw(ctx, 0.5, 640, 360), 1);
+  assert.equal(drawn.length, 2);
+  const empty = makeFrameSequence(api, 2, "loop");
+  assert.equal(empty.draw(ctx, 0, 640, 360), -1);
 });

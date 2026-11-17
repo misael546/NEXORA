@@ -37,13 +37,24 @@
   <main class="studio-wrap">
     <div class="eyebrow"><span class="pulse"></span> NEXORA ANIMATE · ESTUDIO PÚBLICO</div>
     <h1>Crea tu propia <span>animación.</span></h1>
-    <p class="hero-lead">Elige un personaje y una acción, previsualízala y expórtala como vídeo o fotograma a fotograma. Todo se hace en tu navegador: nada se sube a ningún servidor.</p>
+    <p class="hero-lead">Sube tus dibujos como fotogramas en orden y el motor los anima. O prueba con un personaje 2D. Todo se hace en tu navegador: nada se sube a ningún servidor.</p>
     <section class="studio-panel" aria-label="Estudio de animación">
       <canvas id="studioCanvas" width="640" height="360"></canvas>
       <div class="studio-controls">
-        <div><label for="characterType">Personaje</label><select id="characterType"><option value="worker">Trabajador 2D</option><option value="dinosaur">Dinosaurio 2D</option></select></div>
-        <div><label for="action">Acción</label><select id="action"></select></div>
-        <div><label for="duration">Duración (segundos)</label><input id="duration" type="number" min="1" max="10" step="1" value="3"></div>
+        <div><label for="mode">Animar con</label><select id="mode"><option value="sequence">Mis fotogramas</option><option value="character">Personaje 2D</option></select></div>
+        <div id="characterControls"><label for="characterType">Personaje</label><select id="characterType"><option value="worker">Trabajador 2D</option><option value="dinosaur">Dinosaurio 2D</option></select></div>
+        <div id="actionControls"><label for="action">Acción</label><select id="action"></select></div>
+        <div id="durationControls"><label for="duration">Duración (segundos)</label><input id="duration" type="number" min="1" max="10" step="1" value="3"></div>
+      </div>
+      <div id="sequencePanel">
+        <div class="studio-controls">
+          <div><label for="frameFiles">Tus fotogramas (en orden)</label><input id="frameFiles" type="file" accept="image/*" multiple></div>
+          <div><label for="seqFps">Velocidad: <span id="seqFpsValue">12</span> fps</label><input id="seqFps" type="range" min="1" max="30" step="1" value="12"></div>
+          <div><label for="seqLoop">Repetición</label><select id="seqLoop"><option value="loop">Repetir</option><option value="once">Una vez</option><option value="pingpong">Ir y venir</option></select></div>
+          <div><label for="seqOnion">Piel de cebolla</label><select id="seqOnion"><option value="off">Apagada</option><option value="on">Encendida</option></select></div>
+        </div>
+        <p class="studio-note" id="seqInfo">Aún no hay fotogramas. Sube tus dibujos en orden: el primero es el fotograma 1, el segundo el 2, y así.</p>
+        <div id="frameList"></div>
       </div>
       <div class="studio-actions">
         <button class="button button-primary" id="play" type="button">▶ Previsualizar</button>
@@ -51,7 +62,7 @@
         <button class="button button-outline" id="exportFrames" type="button">Exportar fotogramas PNG</button>
       </div>
       <p class="studio-status" id="status" role="status">Motor listo. Elige un personaje y una acción.</p>
-      <p class="studio-note">La exportación de vídeo graba en tiempo real; si cambias de pestaña, la grabación se pausa sola y continúa al volver. La exportación de fotogramas no depende del tiempo real: renderiza cada fotograma en su tiempo exacto y descarga una imagen PNG por fotograma, lista para montar en un editor de vídeo.</p>
+      <p class="studio-note">En modo secuencia, cada imagen que subes es un fotograma: a 12 fps, 12 dibujos duran 1 segundo. Puedes reordenarlos con las flechas y quitarlos con la ✕. La exportación de vídeo graba en tiempo real; si cambias de pestaña, la grabación se pausa sola y continúa al volver. La exportación de fotogramas no depende del tiempo real: renderiza cada fotograma en su tiempo exacto y descarga una imagen PNG por fotograma, lista para montar en un editor de vídeo.</p>
     </section>
   </main>
   <footer class="site-footer"><div class="wrap footer-inner"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXORA<span class="brand-dot">.</span></span></a><span>Explora lo que viene.</span><div class="footer-links"><a href="acerca.html">Sobre NEXORA</a><a href="privacidad.html">Privacidad</a><a href="cookies.html">Cookies</a><a href="contacto.html">Contacto</a><a href="animar.html">Crear animación</a></div><span>© <span id="year"></span> NEXORA.</span></div></footer>
@@ -68,6 +79,7 @@
   <script src="animate-engine/spatial-actions.js"></script>
   <script src="animate-engine/audio-engine.js"></script>
   <script src="animate-engine/compositor.js"></script>
+  <script src="animate-engine/frame-sequence.js"></script>
   <script src="animate-engine/motion-system.js"></script>
   <script src="animate-engine/scene-project.js"></script>
   <script src="animate-engine/mesh-deformer.js"></script>
@@ -79,7 +91,7 @@
       var $ = function (id) { return document.getElementById(id); };
       var statusEl = $("status");
       function status(text) { statusEl.textContent = text; }
-      if (!window.NexoraVisualEngine || !window.NexoraCompositor || !window.NexoraCharacterStage) {
+      if (!window.NexoraVisualEngine || !window.NexoraCompositor || !window.NexoraCharacterStage || !window.NexoraFrameSequence) {
         status("No se pudo cargar el motor de animación. Recarga la página.");
         return;
       }
@@ -105,6 +117,8 @@
       var characterType = "worker";
       var action = "worker-idle";
       var duration = 3;
+      var mode = "sequence";
+      var sequence = new window.NexoraFrameSequence.FrameSequence({ fps: 12, loop: "loop" });
       var engine = new window.NexoraVisualEngine.VisualEngine($("studioCanvas"));
       engine.addLayer({
         name: "Fondo",
@@ -127,7 +141,7 @@
       var stage = new window.NexoraCharacterStage.CharacterStage(
         window.NexoraCharacterArt.draw,
       );
-      engine.addLayer({
+      var characterLayer = engine.addLayer({
         name: "Personajes",
         type: "custom",
         z: 25,
@@ -135,8 +149,32 @@
           stage.render(ctx, engine.width, engine.height, t);
         },
       });
+      var sequenceLayer = engine.addLayer({
+        name: "Secuencia de fotogramas",
+        type: "custom",
+        z: 25,
+        draw: function (ctx, t) {
+          if (!sequence.count) {
+            ctx.save();
+            ctx.fillStyle = "#9aa7bd";
+            ctx.font = "16px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Sube tus fotogramas para animarlos", engine.width / 2, engine.height / 2);
+            ctx.restore();
+            return;
+          }
+          sequence.draw(ctx, t, engine.width, engine.height);
+        },
+      });
       var compositor = new window.NexoraCompositor.SceneCompositor(engine);
       var trackId = null;
+      function currentDuration() {
+        return mode === "sequence" ? Math.max(sequence.duration(), 0.1) : duration;
+      }
+      function syncCompositor() {
+        if (trackId) compositor.removeTrack(trackId);
+        trackId = compositor.addTrack({ name: "Plano", duration: currentDuration(), render: function () {} });
+      }
       function buildActor() {
         var rig = new window.NexoraAnimationTools.CharacterRig()[
           characterType === "dinosaur" ? "createDinosaur" : "createHumanoid"
@@ -146,8 +184,7 @@
         stage.setActors([
           { id: "actor", type: characterType, rig: rig, motion: motion, action: action, time: null },
         ]);
-        if (trackId) compositor.removeTrack(trackId);
-        trackId = compositor.addTrack({ name: "Plano", duration: duration, render: function () {} });
+        syncCompositor();
         engine.draw(0);
       }
       function fillActions() {
@@ -164,6 +201,99 @@
       }
       fillActions();
       buildActor();
+      applyMode();
+      function applyMode() {
+        var isSequence = mode === "sequence";
+        $("sequencePanel").style.display = isSequence ? "" : "none";
+        $("characterControls").style.display = isSequence ? "none" : "";
+        $("actionControls").style.display = isSequence ? "none" : "";
+        $("durationControls").style.display = isSequence ? "none" : "";
+        engine.updateLayer(characterLayer, { visible: !isSequence });
+        engine.updateLayer(sequenceLayer, { visible: isSequence });
+        syncCompositor();
+        engine.draw(0);
+      }
+      $("mode").addEventListener("change", function (e) {
+        mode = e.target.value;
+        applyMode();
+        status(mode === "sequence" ? "Modo fotogramas: sube tus dibujos en orden." : "Modo personaje 2D.");
+      });
+      function renderFrameList() {
+        var list = $("frameList");
+        list.innerHTML = "";
+        $("seqInfo").textContent = sequence.count
+          ? sequence.count + " fotogramas · " + sequence.duration().toFixed(1) + " s a " + sequence.fps + " fps."
+          : "Aún no hay fotogramas. Sube tus dibujos en orden: el primero es el fotograma 1, el segundo el 2, y así.";
+        sequence.frames.forEach(function (frame, i) {
+          var row = document.createElement("div");
+          row.style.cssText = "display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid rgba(160,180,220,.12)";
+          var thumb = document.createElement("img");
+          thumb.src = frame.thumb || "";
+          thumb.alt = frame.name;
+          thumb.style.cssText = "width:64px;height:36px;object-fit:contain;background:#080c14;border-radius:4px";
+          var label = document.createElement("span");
+          label.textContent = (i + 1) + ". " + frame.name;
+          label.style.cssText = "flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+          var up = document.createElement("button");
+          up.className = "button button-outline";
+          up.textContent = "↑";
+          up.disabled = i === 0;
+          up.addEventListener("click", function () { sequence.move(i, -1); renderFrameList(); applyMode(); });
+          var down = document.createElement("button");
+          down.className = "button button-outline";
+          down.textContent = "↓";
+          down.disabled = i === sequence.count - 1;
+          down.addEventListener("click", function () { sequence.move(i, 1); renderFrameList(); applyMode(); });
+          var del = document.createElement("button");
+          del.className = "button button-outline";
+          del.textContent = "✕";
+          del.addEventListener("click", function () {
+            if (frame.thumb) URL.revokeObjectURL(frame.thumb);
+            sequence.remove(i);
+            renderFrameList();
+            applyMode();
+          });
+          row.append(thumb, label, up, down, del);
+          list.append(row);
+        });
+      }
+      $("frameFiles").addEventListener("change", async function (e) {
+        var files = Array.from(e.target.files || []);
+        for (var k = 0; k < files.length; k++) {
+          var file = files[k];
+          if (!String(file.type || "").startsWith("image/")) continue;
+          var url = URL.createObjectURL(file);
+          try {
+            var img = await new Promise(function (resolve, reject) {
+              var image = new Image();
+              image.onload = function () { resolve(image); };
+              image.onerror = function () { reject(new Error("No se pudo cargar " + file.name)); };
+              image.src = url;
+            });
+            var frame = sequence.addImage(img, file.name);
+            frame.thumb = url;
+          } catch (err) {
+            URL.revokeObjectURL(url);
+            status("No se pudo cargar: " + err.message);
+          }
+        }
+        e.target.value = "";
+        renderFrameList();
+        applyMode();
+        status(sequence.count + " fotogramas listos. Dale a Previsualizar para verlos animados.");
+      });
+      $("seqFps").addEventListener("input", function (e) {
+        sequence.setFps(Number(e.target.value));
+        $("seqFpsValue").textContent = sequence.fps;
+        renderFrameList();
+        syncCompositor();
+      });
+      $("seqLoop").addEventListener("change", function (e) {
+        sequence.setLoop(e.target.value);
+      });
+      $("seqOnion").addEventListener("change", function (e) {
+        sequence.onionSkin = e.target.value === "on";
+      });
       $("characterType").addEventListener("change", function (e) {
         characterType = e.target.value;
         fillActions();
@@ -191,13 +321,21 @@
         $("play").textContent = "⏸ Detener";
         startAt = performance.now();
         var tick = function (now) {
-          var t = ((now - startAt) / 1000) % duration;
+          var elapsed = (now - startAt) / 1000;
+          var t = elapsed;
+          if (mode === "character") t = elapsed % duration;
+          else if (sequence.loop === "once") t = Math.min(elapsed, sequence.duration());
           engine.draw(t);
           raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);
       });
       $("exportVideo").addEventListener("click", async function () {
+        if (mode === "sequence" && !sequence.count) {
+          status("Sube al menos un fotograma antes de exportar.");
+          return;
+        }
+        syncCompositor();
         $("exportVideo").disabled = true;
         status("Renderizando vídeo… si cambias de pestaña, la grabación se pausa sola y continúa al volver.");
         try {
@@ -216,11 +354,16 @@
         }
       });
       $("exportFrames").addEventListener("click", async function () {
+        if (mode === "sequence" && !sequence.count) {
+          status("Sube al menos un fotograma antes de exportar.");
+          return;
+        }
+        syncCompositor();
         $("exportFrames").disabled = true;
         status("Renderizando fotogramas… no depende del tiempo real.");
         try {
           var result = await compositor.exportFrames({
-            fps: 24,
+            fps: mode === "sequence" ? sequence.fps : 24,
             onProgress: function (p) {
               status("Renderizando fotogramas: " + Math.round(p * 100) + "%");
             },
@@ -235,7 +378,7 @@
             setTimeout(function (u) { return function () { URL.revokeObjectURL(u); }; }(url), 10000);
             await new Promise(function (resolve) { setTimeout(resolve, 150); });
           }
-          status(result.count + " fotogramas PNG listos a 24 fps. Si el navegador bloqueó algunas descargas, permite varias descargas para este sitio y vuelve a intentarlo.");
+          status(result.count + " fotogramas PNG listos a " + result.fps + " fps. Si el navegador bloqueó algunas descargas, permite varias descargas para este sitio y vuelve a intentarlo.");
         } catch (err) {
           status("No se pudo exportar: " + err.message);
         } finally {
