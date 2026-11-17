@@ -37,11 +37,11 @@
   <main class="studio-wrap">
     <div class="eyebrow"><span class="pulse"></span> NEXORA ANIMATE · ESTUDIO PÚBLICO</div>
     <h1>Crea tu propia <span>animación.</span></h1>
-    <p class="hero-lead">Sube tus dibujos como fotogramas en orden y el motor los anima. O prueba con un personaje 2D. Todo se hace en tu navegador: nada se sube a ningún servidor.</p>
+    <p class="hero-lead">Sube tus dibujos como fotogramas en orden y el motor los anima. O sube una foto y muévele la cámara para hacer un vídeo. O prueba con un personaje 2D. Todo se hace en tu navegador: nada se sube a ningún servidor.</p>
     <section class="studio-panel" aria-label="Estudio de animación">
       <canvas id="studioCanvas" width="640" height="360"></canvas>
       <div class="studio-controls">
-        <div><label for="mode">Animar con</label><select id="mode"><option value="sequence">Mis fotogramas</option><option value="character">Personaje 2D</option></select></div>
+        <div><label for="mode">Animar con</label><select id="mode"><option value="sequence">Mis fotogramas</option><option value="camera">Foto con cámara</option><option value="character">Personaje 2D</option></select></div>
         <div id="characterControls"><label for="characterType">Personaje</label><select id="characterType"><option value="worker">Trabajador 2D</option><option value="dinosaur">Dinosaurio 2D</option></select></div>
         <div id="actionControls"><label for="action">Acción</label><select id="action"></select></div>
         <div id="durationControls"><label for="duration">Duración (segundos)</label><input id="duration" type="number" min="1" max="10" step="1" value="3"></div>
@@ -62,13 +62,21 @@
         </div>
         <div id="frameList"></div>
       </div>
+      <div id="cameraPanel" style="display:none">
+        <div class="studio-controls">
+          <div><label for="camFile">Tu foto</label><input id="camFile" type="file" accept="image/*"></div>
+          <div><label for="camMove">Movimiento de cámara</label><select id="camMove"><option value="drift">Deriva lenta</option><option value="zoom-in">Acercar</option><option value="zoom-out">Alejar</option><option value="pan-left">Mover a la izquierda</option><option value="pan-right">Mover a la derecha</option></select></div>
+          <div><label for="camDuration">Duración (segundos)</label><input id="camDuration" type="number" min="2" max="15" step="1" value="5"></div>
+        </div>
+        <p class="studio-note" id="camInfo">Sube una foto: la cámara se mueve sobre ella y el motor graba el movimiento como vídeo. La foto no cambia, lo que se mueve es la cámara.</p>
+      </div>
       <div class="studio-actions">
         <button class="button button-primary" id="play" type="button">▶ Previsualizar</button>
         <button class="button button-outline" id="exportVideo" type="button">Exportar vídeo WebM</button>
         <button class="button button-outline" id="exportFrames" type="button">Exportar fotogramas PNG</button>
       </div>
       <p class="studio-status" id="status" role="status">Motor listo. Elige un personaje y una acción.</p>
-      <p class="studio-note">En modo secuencia, cada imagen que subes es un fotograma: a 12 fps, 12 dibujos duran 1 segundo. Puedes reordenarlos con las flechas y quitarlos con la ✕. También puedes subir una sola imagen con todos los fotogramas en rejilla (una hoja de sprites): indica cuántas columnas y filas tiene y pulsa “Cortar en fotogramas”; el motor corta cada celda sin perder resolución. La exportación de vídeo graba en tiempo real; si cambias de pestaña, la grabación se pausa sola y continúa al volver. La exportación de fotogramas no depende del tiempo real: renderiza cada fotograma en su tiempo exacto y descarga una imagen PNG por fotograma, lista para montar en un editor de vídeo.</p>
+      <p class="studio-note">En modo foto con cámara, sube una sola foto y elige el movimiento: acercar, alejar, desplazar o deriva lenta. La cámara se mueve sobre tu foto y puedes exportar ese movimiento como vídeo WebM. En modo secuencia, cada imagen que subes es un fotograma: a 12 fps, 12 dibujos duran 1 segundo. Puedes reordenarlos con las flechas y quitarlos con la ✕. También puedes subir una sola imagen con todos los fotogramas en rejilla (una hoja de sprites): indica cuántas columnas y filas tiene y pulsa “Cortar en fotogramas”; el motor corta cada celda sin perder resolución. La exportación de vídeo graba en tiempo real; si cambias de pestaña, la grabación se pausa sola y continúa al volver. La exportación de fotogramas no depende del tiempo real: renderiza cada fotograma en su tiempo exacto y descarga una imagen PNG por fotograma, lista para montar en un editor de vídeo.</p>
     </section>
   </main>
   <footer class="site-footer"><div class="wrap footer-inner"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXORA<span class="brand-dot">.</span></span></a><span>Explora lo que viene.</span><div class="footer-links"><a href="acerca.html">Sobre NEXORA</a><a href="privacidad.html">Privacidad</a><a href="cookies.html">Cookies</a><a href="contacto.html">Contacto</a><a href="animar.html">Crear animación</a></div><span>© <span id="year"></span> NEXORA.</span></div></footer>
@@ -86,6 +94,7 @@
   <script src="animate-engine/audio-engine.js"></script>
   <script src="animate-engine/compositor.js"></script>
   <script src="animate-engine/frame-sequence.js"></script>
+  <script src="animate-engine/camera-move.js"></script>
   <script src="animate-engine/motion-system.js"></script>
   <script src="animate-engine/scene-project.js"></script>
   <script src="animate-engine/mesh-deformer.js"></script>
@@ -97,7 +106,7 @@
       var $ = function (id) { return document.getElementById(id); };
       var statusEl = $("status");
       function status(text) { statusEl.textContent = text; }
-      if (!window.NexoraVisualEngine || !window.NexoraCompositor || !window.NexoraCharacterStage || !window.NexoraFrameSequence) {
+      if (!window.NexoraVisualEngine || !window.NexoraCompositor || !window.NexoraCharacterStage || !window.NexoraFrameSequence || !window.NexoraCameraMove) {
         status("No se pudo cargar el motor de animación. Recarga la página.");
         return;
       }
@@ -125,6 +134,9 @@
       var duration = 3;
       var mode = "sequence";
       var sequence = new window.NexoraFrameSequence.FrameSequence({ fps: 12, loop: "loop" });
+      var cameraImage = null;
+      var cameraMove = "drift";
+      var camDuration = 5;
       var engine = new window.NexoraVisualEngine.VisualEngine($("studioCanvas"));
       engine.addLayer({
         name: "Fondo",
@@ -173,8 +185,26 @@
         },
       });
       var compositor = new window.NexoraCompositor.SceneCompositor(engine);
+      var cameraLayer = engine.addLayer({
+        name: "Foto con cámara",
+        type: "custom",
+        z: 25,
+        draw: function (ctx, t) {
+          if (!cameraImage) {
+            ctx.save();
+            ctx.fillStyle = "#9aa7bd";
+            ctx.font = "16px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Sube una foto para moverle la cámara", engine.width / 2, engine.height / 2);
+            ctx.restore();
+            return;
+          }
+          window.NexoraCameraMove.CameraMove.draw(ctx, cameraImage, cameraMove, t, camDuration, engine.width, engine.height);
+        },
+      });
       var trackId = null;
       function currentDuration() {
+        if (mode === "camera") return camDuration;
         return mode === "sequence" ? Math.max(sequence.duration(), 0.1) : duration;
       }
       function syncCompositor() {
@@ -210,19 +240,53 @@
       applyMode();
       function applyMode() {
         var isSequence = mode === "sequence";
+        var isCamera = mode === "camera";
         $("sequencePanel").style.display = isSequence ? "" : "none";
-        $("characterControls").style.display = isSequence ? "none" : "";
-        $("actionControls").style.display = isSequence ? "none" : "";
-        $("durationControls").style.display = isSequence ? "none" : "";
-        engine.updateLayer(characterLayer, { visible: !isSequence });
+        $("cameraPanel").style.display = isCamera ? "" : "none";
+        $("characterControls").style.display = isSequence || isCamera ? "none" : "";
+        $("actionControls").style.display = isSequence || isCamera ? "none" : "";
+        $("durationControls").style.display = isSequence || isCamera ? "none" : "";
+        engine.updateLayer(characterLayer, { visible: !isSequence && !isCamera });
         engine.updateLayer(sequenceLayer, { visible: isSequence });
+        engine.updateLayer(cameraLayer, { visible: isCamera });
         syncCompositor();
         engine.draw(0);
       }
       $("mode").addEventListener("change", function (e) {
         mode = e.target.value;
         applyMode();
-        status(mode === "sequence" ? "Modo fotogramas: sube tus dibujos en orden." : "Modo personaje 2D.");
+        status(mode === "sequence" ? "Modo fotogramas: sube tus dibujos en orden." : mode === "camera" ? "Modo foto con cámara: sube una foto y elige el movimiento." : "Modo personaje 2D.");
+      });
+      $("camFile").addEventListener("change", async function (e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) return;
+        var url = URL.createObjectURL(file);
+        try {
+          var img = await new Promise(function (resolve, reject) {
+            var image = new Image();
+            image.onload = function () { resolve(image); };
+            image.onerror = function () { reject(new Error("No se pudo cargar " + file.name)); };
+            image.src = url;
+          });
+          cameraImage = img;
+          $("camInfo").textContent = "Foto lista: " + file.name + ". Dale a Previsualizar para ver la cámara moverse.";
+          applyMode();
+          status("Foto lista para el modo cámara.");
+        } catch (err) {
+          URL.revokeObjectURL(url);
+          status("No se pudo cargar: " + err.message);
+        }
+        e.target.value = "";
+      });
+      $("camMove").addEventListener("change", function (e) {
+        cameraMove = e.target.value;
+        applyMode();
+      });
+      $("camDuration").addEventListener("change", function (e) {
+        camDuration = Math.max(2, Math.min(15, Number(e.target.value) || 5));
+        e.target.value = camDuration;
+        syncCompositor();
+        applyMode();
       });
       function renderFrameList() {
         var list = $("frameList");
@@ -361,6 +425,7 @@
           var elapsed = (now - startAt) / 1000;
           var t = elapsed;
           if (mode === "character") t = elapsed % duration;
+          else if (mode === "camera") t = elapsed % camDuration;
           else if (sequence.loop === "once") t = Math.min(elapsed, sequence.duration());
           engine.draw(t);
           raf = requestAnimationFrame(tick);
@@ -370,6 +435,10 @@
       $("exportVideo").addEventListener("click", async function () {
         if (mode === "sequence" && !sequence.count) {
           status("Sube al menos un fotograma antes de exportar.");
+          return;
+        }
+        if (mode === "camera" && !cameraImage) {
+          status("Sube una foto antes de exportar.");
           return;
         }
         syncCompositor();
@@ -393,6 +462,10 @@
       $("exportFrames").addEventListener("click", async function () {
         if (mode === "sequence" && !sequence.count) {
           status("Sube al menos un fotograma antes de exportar.");
+          return;
+        }
+        if (mode === "camera" && !cameraImage) {
+          status("Sube una foto antes de exportar.");
           return;
         }
         syncCompositor();

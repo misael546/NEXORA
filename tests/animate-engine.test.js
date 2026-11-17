@@ -50,6 +50,7 @@ function loadEngine() {
     "mesh-deformer.js",
     "compositor.js",
     "frame-sequence.js",
+    "camera-move.js",
   ]) {
     const source = fs.readFileSync(
       path.join(__dirname, "../admin/animate-engine", file),
@@ -2197,4 +2198,86 @@ test("frame sequence cuts a sprite sheet into ordered frames", () => {
     () => seq.addSpriteSheet(fakeImage(10, 10), 20, 20, makeCanvas),
     /demasiado pequeña/,
   );
+});
+
+test("camera move zooms in and out with easing and stays centered", () => {
+  const { api } = loadEngine();
+  const move = api.NexoraCameraMove.CameraMove;
+  const start = move.computeView(1920, 1280, 640, 360, "zoom-in", 0, 5);
+  const end = move.computeView(1920, 1280, 640, 360, "zoom-in", 5, 5);
+  assert.equal(start.w, 640);
+  assert.equal(Math.round(end.w), 832);
+  assert.equal(Math.round(start.x), Math.round((640 - start.w) / 2));
+  assert.equal(Math.round(end.x), Math.round((640 - end.w) / 2));
+  const outStart = move.computeView(1920, 1280, 640, 360, "zoom-out", 0, 5);
+  const outEnd = move.computeView(1920, 1280, 640, 360, "zoom-out", 5, 5);
+  assert.equal(Math.round(outStart.w), 832);
+  assert.equal(outEnd.w, 640);
+  // La suavización frena al principio y al final: a 1/4 del tiempo el
+  // zoom avanzó menos de 1/4 del recorrido total.
+  const quarter = move.computeView(1920, 1280, 640, 360, "zoom-in", 1.25, 5);
+  assert.ok(quarter.w - start.w < (end.w - start.w) / 4);
+});
+
+test("camera move pans left and right and always covers the canvas", () => {
+  const { api } = loadEngine();
+  const move = api.NexoraCameraMove.CameraMove;
+  const leftStart = move.computeView(1920, 1280, 640, 360, "pan-left", 0, 5);
+  const leftEnd = move.computeView(1920, 1280, 640, 360, "pan-left", 5, 5);
+  assert.ok(leftEnd.x < leftStart.x);
+  const rightStart = move.computeView(1920, 1280, 640, 360, "pan-right", 0, 5);
+  const rightEnd = move.computeView(1920, 1280, 640, 360, "pan-right", 5, 5);
+  assert.ok(rightEnd.x > rightStart.x);
+  for (const name of move.MOVES) {
+    for (const t of [0, 1, 2.5, 4, 5, 9]) {
+      const view = move.computeView(1920, 1280, 640, 360, name, t, 5);
+      assert.ok(view.x <= 0.01);
+      assert.ok(view.y <= 0.01);
+      assert.ok(view.x + view.w >= 639.99);
+      assert.ok(view.y + view.h >= 359.99);
+    }
+  }
+});
+
+test("camera move drift shifts on both axes", () => {
+  const { api } = loadEngine();
+  const move = api.NexoraCameraMove.CameraMove;
+  const start = move.computeView(1920, 1280, 640, 360, "drift", 0, 5);
+  const end = move.computeView(1920, 1280, 640, 360, "drift", 5, 5);
+  assert.notEqual(end.x, start.x);
+  assert.notEqual(end.y, start.y);
+  assert.ok(end.w > start.w);
+});
+
+test("camera move rejects bad moves, durations and sizes", () => {
+  const { api } = loadEngine();
+  const move = api.NexoraCameraMove.CameraMove;
+  assert.throws(
+    () => move.computeView(1920, 1280, 640, 360, "giro", 0, 5),
+    /no válido/,
+  );
+  assert.throws(
+    () => move.computeView(1920, 1280, 640, 360, "zoom-in", 0, 0),
+    /duración/,
+  );
+  assert.throws(
+    () => move.computeView(0, 1280, 640, 360, "zoom-in", 0, 5),
+    /dimensiones/i,
+  );
+});
+
+test("camera move draw paints the frame with the computed view", () => {
+  const { api } = loadEngine();
+  const move = api.NexoraCameraMove.CameraMove;
+  const calls = [];
+  const ctx = {
+    drawImage(image, x, y, w, h) {
+      calls.push({ image, x, y, w, h });
+    },
+  };
+  const view = move.draw(ctx, { width: 1920, height: 1280 }, "zoom-in", 5, 5, 640, 360);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].w, view.w);
+  assert.equal(calls[0].h, view.h);
+  assert.throws(() => move.draw(null, { width: 10, height: 10 }, "zoom-in", 0, 5, 640, 360), /Falta/);
 });
