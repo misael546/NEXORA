@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d18">
+  <meta name="description" content="NEXORA ANIMATE: crea tu propia animación 2D en el navegador. Elige un personaje y una acción, previsualízala y expórtala como vídeo o fotogramas.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://nexora-ey8.pages.dev/animar.html">
+  <title>Crear animación — NEXORA ANIMATE</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .studio-wrap{max-width:860px;margin:0 auto;padding:24px 18px 60px}
+    .studio-panel{background:#101827;border:1px solid rgba(160,180,220,.15);border-radius:12px;padding:18px}
+    .studio-panel canvas{width:100%;aspect-ratio:16/9;background:#080c14;border:1px solid rgba(160,180,220,.15);border-radius:9px;display:block}
+    .studio-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0}
+    .studio-controls label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9aa7bd;margin-bottom:6px}
+    .studio-controls select,.studio-controls input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(160,180,220,.25);background:#0d1422;color:#f3f6ff;font:inherit}
+    .studio-actions{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 12px}
+    .studio-status{font-size:13px;color:#9aa7bd;min-height:20px}
+    .studio-note{font-size:12px;line-height:1.7;color:#9aa7bd}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="NEXORA inicio"><span class="brand-mark">N</span><span>NEXORA<span class="brand-dot">.</span></span></a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    <nav class="nav" id="mainNav" aria-label="Navegación principal">
+      <a href="index.html#ai">IA</a><a href="index.html#videojuegos">Videojuegos</a><a href="index.html#tech">Tecnología</a><a href="wallpaper.html">Fondos</a>
+      <a href="animar.html">Animar</a><a href="acerca.html">Sobre NEXORA</a><a class="nav-cta" href="contacto.html">Contacto <span>↗</span></a>
+    </nav>
+  </header>
+  <main class="studio-wrap">
+    <div class="eyebrow"><span class="pulse"></span> NEXORA ANIMATE · ESTUDIO PÚBLICO</div>
+    <h1>Crea tu propia <span>animación.</span></h1>
+    <p class="hero-lead">Elige un personaje y una acción, previsualízala y expórtala como vídeo o fotograma a fotograma. Todo se hace en tu navegador: nada se sube a ningún servidor.</p>
+    <section class="studio-panel" aria-label="Estudio de animación">
+      <canvas id="studioCanvas" width="640" height="360"></canvas>
+      <div class="studio-controls">
+        <div><label for="characterType">Personaje</label><select id="characterType"><option value="worker">Trabajador 2D</option><option value="dinosaur">Dinosaurio 2D</option></select></div>
+        <div><label for="action">Acción</label><select id="action"></select></div>
+        <div><label for="duration">Duración (segundos)</label><input id="duration" type="number" min="1" max="10" step="1" value="3"></div>
+      </div>
+      <div class="studio-actions">
+        <button class="button button-primary" id="play" type="button">▶ Previsualizar</button>
+        <button class="button button-outline" id="exportVideo" type="button">Exportar vídeo WebM</button>
+        <button class="button button-outline" id="exportFrames" type="button">Exportar fotogramas PNG</button>
+      </div>
+      <p class="studio-status" id="status" role="status">Motor listo. Elige un personaje y una acción.</p>
+      <p class="studio-note">La exportación de vídeo graba en tiempo real; si cambias de pestaña, la grabación se pausa sola y continúa al volver. La exportación de fotogramas no depende del tiempo real: renderiza cada fotograma en su tiempo exacto y descarga una imagen PNG por fotograma, lista para montar en un editor de vídeo.</p>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="wrap footer-inner"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXORA<span class="brand-dot">.</span></span></a><span>Explora lo que viene.</span><div class="footer-links"><a href="acerca.html">Sobre NEXORA</a><a href="privacidad.html">Privacidad</a><a href="cookies.html">Cookies</a><a href="contacto.html">Contacto</a><a href="animar.html">Crear animación</a></div><span>© <span id="year"></span> NEXORA.</span></div></footer>
+  <script src="script.js"></script>
+  <script src="animate-engine/visual-engine.js"></script>
+  <script src="animate-engine/continuity.js"></script>
+  <script src="animate-engine/asset-store.js"></script>
+  <script src="animate-engine/animation-tools.js"></script>
+  <script src="animate-engine/character-skeleton.js"></script>
+  <script src="animate-engine/spatial-engine.js"></script>
+  <script src="animate-engine/spatial-rig.js"></script>
+  <script src="animate-engine/facial-animation.js"></script>
+  <script src="animate-engine/spatial-motion.js"></script>
+  <script src="animate-engine/spatial-actions.js"></script>
+  <script src="animate-engine/audio-engine.js"></script>
+  <script src="animate-engine/compositor.js"></script>
+  <script src="animate-engine/motion-system.js"></script>
+  <script src="animate-engine/scene-project.js"></script>
+  <script src="animate-engine/mesh-deformer.js"></script>
+  <script src="animate-engine/character-art.js"></script>
+  <script src="animate-engine/character-stage.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var $ = function (id) { return document.getElementById(id); };
+      var statusEl = $("status");
+      function status(text) { statusEl.textContent = text; }
+      if (!window.NexoraVisualEngine || !window.NexoraCompositor || !window.NexoraCharacterStage) {
+        status("No se pudo cargar el motor de animación. Recarga la página.");
+        return;
+      }
+      var PRESETS = {
+        worker: [
+          ["worker-idle", "Respirar / reposo"], ["worker-walk", "Caminar"],
+          ["worker-run", "Correr"], ["worker-work", "Trabajar"],
+          ["worker-lift", "Levantar"], ["worker-carry", "Cargar"],
+          ["worker-hammer", "Martillar"], ["worker-dig", "Cavar"],
+          ["worker-wave", "Saludar"], ["worker-talk", "Hablar"],
+          ["worker-push", "Empujar"], ["worker-pull", "Jalar"],
+          ["worker-kneel", "Arrodillarse"], ["worker-point", "Señalar"],
+        ],
+        dinosaur: [
+          ["dino-idle", "Reposo"], ["dino-walk", "Caminar"],
+          ["dino-run", "Correr"], ["dino-roar", "Rugir"],
+          ["dino-bite", "Morder"], ["dino-tail-swipe", "Mover la cola"],
+          ["dino-hit", "Golpe"], ["dino-crouch", "Agacharse"],
+          ["dino-sniff", "Olfatear"], ["dino-stomp", "Pisotón"],
+          ["dino-pounce", "Saltar"], ["dino-threat", "Amenazar"],
+        ],
+      };
+      var characterType = "worker";
+      var action = "worker-idle";
+      var duration = 3;
+      var engine = new window.NexoraVisualEngine.VisualEngine($("studioCanvas"));
+      engine.addLayer({
+        name: "Fondo",
+        type: "custom",
+        z: 0,
+        draw: function (ctx) {
+          var w = engine.width, h = engine.height, horizon = h * 0.76;
+          var sky = ctx.createLinearGradient(0, 0, 0, horizon);
+          sky.addColorStop(0, "#182838");
+          sky.addColorStop(1, "#0d1824");
+          ctx.fillStyle = sky;
+          ctx.fillRect(0, 0, w, horizon);
+          var floor = ctx.createLinearGradient(0, horizon, 0, h);
+          floor.addColorStop(0, "#24343d");
+          floor.addColorStop(1, "#0c141c");
+          ctx.fillStyle = floor;
+          ctx.fillRect(0, horizon, w, h - horizon);
+        },
+      });
+      var stage = new window.NexoraCharacterStage.CharacterStage(
+        window.NexoraCharacterArt.draw,
+      );
+      engine.addLayer({
+        name: "Personajes",
+        type: "custom",
+        z: 25,
+        draw: function (ctx, t) {
+          stage.render(ctx, engine.width, engine.height, t);
+        },
+      });
+      var compositor = new window.NexoraCompositor.SceneCompositor(engine);
+      var trackId = null;
+      function buildActor() {
+        var rig = new window.NexoraAnimationTools.CharacterRig()[
+          characterType === "dinosaur" ? "createDinosaur" : "createHumanoid"
+        ]();
+        var motion = new window.NexoraMotionSystem.MotionTimeline(rig.points);
+        motion.usePreset(action, duration);
+        stage.setActors([
+          { id: "actor", type: characterType, rig: rig, motion: motion, action: action, time: null },
+        ]);
+        if (trackId) compositor.removeTrack(trackId);
+        trackId = compositor.addTrack({ name: "Plano", duration: duration, render: function () {} });
+        engine.draw(0);
+      }
+      function fillActions() {
+        var select = $("action");
+        select.innerHTML = "";
+        PRESETS[characterType].forEach(function (preset) {
+          var option = document.createElement("option");
+          option.value = preset[0];
+          option.textContent = preset[1];
+          select.append(option);
+        });
+        action = PRESETS[characterType][0][0];
+        select.value = action;
+      }
+      fillActions();
+      buildActor();
+      $("characterType").addEventListener("change", function (e) {
+        characterType = e.target.value;
+        fillActions();
+        buildActor();
+        status("Personaje listo: " + e.target.selectedOptions[0].textContent + ".");
+      });
+      $("action").addEventListener("change", function (e) {
+        action = e.target.value;
+        buildActor();
+      });
+      $("duration").addEventListener("change", function (e) {
+        duration = Math.max(1, Math.min(10, Number(e.target.value) || 3));
+        e.target.value = duration;
+        buildActor();
+      });
+      var raf = 0;
+      var startAt = 0;
+      $("play").addEventListener("click", function () {
+        if (raf) {
+          cancelAnimationFrame(raf);
+          raf = 0;
+          $("play").textContent = "▶ Previsualizar";
+          return;
+        }
+        $("play").textContent = "⏸ Detener";
+        startAt = performance.now();
+        var tick = function (now) {
+          var t = ((now - startAt) / 1000) % duration;
+          engine.draw(t);
+          raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+      });
+      $("exportVideo").addEventListener("click", async function () {
+        $("exportVideo").disabled = true;
+        status("Renderizando vídeo… si cambias de pestaña, la grabación se pausa sola y continúa al volver.");
+        try {
+          var result = await compositor.export({
+            fps: 30,
+            filename: "nexora-animacion.webm",
+            onProgress: function (p) {
+              status("Renderizando vídeo: " + Math.round(p * 100) + "%");
+            },
+          });
+          status("Vídeo WebM listo (" + Math.round((result.size / 1024 / 1024) * 10) / 10 + " MB).");
+        } catch (err) {
+          status("No se pudo exportar: " + err.message);
+        } finally {
+          $("exportVideo").disabled = false;
+        }
+      });
+      $("exportFrames").addEventListener("click", async function () {
+        $("exportFrames").disabled = true;
+        status("Renderizando fotogramas… no depende del tiempo real.");
+        try {
+          var result = await compositor.exportFrames({
+            fps: 24,
+            onProgress: function (p) {
+              status("Renderizando fotogramas: " + Math.round(p * 100) + "%");
+            },
+          });
+          for (var i = 0; i < result.frames.length; i++) {
+            var frame = result.frames[i];
+            var url = URL.createObjectURL(frame.blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "nexora-fotograma-" + String(frame.index + 1).padStart(4, "0") + ".png";
+            a.click();
+            setTimeout(function (u) { return function () { URL.revokeObjectURL(u); }; }(url), 10000);
+            await new Promise(function (resolve) { setTimeout(resolve, 150); });
+          }
+          status(result.count + " fotogramas PNG listos a 24 fps. Si el navegador bloqueó algunas descargas, permite varias descargas para este sitio y vuelve a intentarlo.");
+        } catch (err) {
+          status("No se pudo exportar: " + err.message);
+        } finally {
+          $("exportFrames").disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

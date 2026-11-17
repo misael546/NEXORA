@@ -1,9 +1,23 @@
 /* NEXORA ANIMATE — studio integration for continuity + visual engine. */
-(()=>{"use strict";
-const $=id=>document.getElementById(id);
-const aside=document.querySelector(".layout aside");
-if(!aside||!window.NexoraVisualEngine||!window.NexoraContinuity||!window.NexoraAnimationTools||!window.NexoraCompositor||!window.NexoraMeshDeformer||!window.NexoraCharacterArt||!window.NexoraCharacterStage)return;
-const panel=document.createElement("section");panel.className="panel";panel.style.marginTop="14px";panel.innerHTML=`
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const aside = document.querySelector(".layout aside");
+  if (
+    !aside ||
+    !window.NexoraVisualEngine ||
+    !window.NexoraContinuity ||
+    !window.NexoraAnimationTools ||
+    !window.NexoraCompositor ||
+    !window.NexoraMeshDeformer ||
+    !window.NexoraCharacterArt ||
+    !window.NexoraCharacterStage
+  )
+    return;
+  const panel = document.createElement("section");
+  panel.className = "panel";
+  panel.style.marginTop = "14px";
+  panel.innerHTML = `
 <h2>Biblioteca de personajes <span class="pill">CONTINUIDAD</span></h2>
 <p class="hint">Guarda una ficha maestra. Cada plano debe respetar estos rasgos y la voz asignada.</p>
 <div class="field"><label for="ncName">Nombre del personaje</label><input id="ncName" maxlength="60" placeholder="Ej. Akira"></div>
@@ -77,7 +91,7 @@ const panel=document.createElement("section");panel.className="panel";panel.styl
 <div class="field"><label for="nsCamera">Cámara</label><select id="nsCamera"><option value="wide">Plano general</option><option value="medium" selected>Plano medio</option><option value="close">Primer plano</option><option value="push">Acercamiento</option><option value="pull">Alejamiento</option><option value="pan-left">Paneo izquierda</option><option value="pan-right">Paneo derecha</option></select></div>
 <div class="field"><label for="nsDuration">Duración del plano (segundos)</label><input id="nsDuration" type="number" min="0.5" max="120" step="0.5" value="3"></div>
 <div class="actions"><button class="btn primary" id="nsAdd">＋ Añadir plano</button><button class="btn" id="nsValidate">Validar continuidad</button></div>
-<div class="actions"><button class="btn" id="nsPlay">▶ Previsualizar escena</button><button class="btn primary" id="nsVideo">Exportar vídeo WebM</button><button class="btn" id="nsExport">Exportar proyecto</button><button class="btn" id="nsImport">Importar proyecto</button><input id="nsFile" type="file" accept="application/json,.json" hidden></div>
+<div class="actions"><button class="btn" id="nsPlay">▶ Previsualizar escena</button><button class="btn primary" id="nsVideo">Exportar vídeo WebM</button><button class="btn" id="nsFrames">Exportar fotogramas PNG</button><button class="btn" id="nsExport">Exportar proyecto</button><button class="btn" id="nsImport">Importar proyecto</button><input id="nsFile" type="file" accept="application/json,.json" hidden></div>
 <div id="nsShots" class="status" style="white-space:normal">Todavía no hay planos.</div>
 <h2>Estudio de audio <span class="pill">MULTIPISTA</span></h2>
 <p class="hint">Pistas separadas para voces, narración, música, efectos y ambiente. Ajusta entrada, volumen, paneo y fundidos.</p>
@@ -117,152 +131,2120 @@ const panel=document.createElement("section");panel.className="panel";panel.styl
 
 <div class="status" id="nsStatus" role="status">Los planos se guardan en este navegador.</div>
 `;
-const notice=aside.querySelector(".notice");aside.insertBefore(panel,notice||null);
-const continuity=new window.NexoraContinuity.ContinuityManager();const assetStore=new window.NexoraAssetStore.AssetStore();const builtinProfiles=[{name:"Trabajador 2D",face:"Rostro anime ovalado, rasgos amables y mandíbula definida",eyes:"Ojos marrones expresivos",hair:"Cabello oscuro corto bajo casco de seguridad",body:"Complexión atlética media, proporciones anime",palette:"Naranja seguridad, amarillo reflectante, azul marino y tonos piel",outfit:"Chaqueta de trabajo naranja con bandas reflectantes, pantalón resistente, botas y casco amarillo",accessories:"Cinturón de herramientas y guantes"},{name:"Dinosaurio 2D",face:"Cabeza de dinosaurio de perfil, hocico fuerte y mandíbula articulada",eyes:"Ojo ámbar con pupila vertical",hair:"Escamas y placas dorsales",body:"Terópodo bípedo robusto con cola segmentada",palette:"Verde bosque, verde lima y vientre arena",outfit:"Piel escamosa natural, sin ropa",accessories:"Dientes visibles, garras y placas dorsales"}];for(const seed of builtinProfiles)if(!continuity.list().some(p=>p.name===seed.name))continuity.create({...seed,voiceId:"",visualStyle:"Ilustración anime 2D original"});
-const fields={name:"ncName",face:"ncFace",eyes:"ncEyes",hair:"ncHair",body:"ncBody",palette:"ncPalette",outfit:"ncOutfit",accessories:"ncAccessories",voiceProfile:"ncVoice"};
-let editingId=null;
-function status(message){$("ncStatus").textContent=message}
-function blobToDataURL(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob)})}
-function dataURLToBlob(url){const [meta,data]=url.split(",");const mime=meta.match(/data:([^;]+)/)?.[1]||"application/octet-stream";const raw=atob(data),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return new Blob([bytes],{type:mime})}
-async function renderCharacterReferences(profile){const root=$("ncReferenceList");if(!root)return;root.innerHTML="";const refs=profile?.referenceAssets||[];if(!refs.length){root.textContent="No hay referencias guardadas.";return}for(const ref of refs){const row=document.createElement("div");row.style.cssText="display:flex;gap:10px;align-items:center;margin:8px 0";const img=document.createElement("img");img.alt=ref.name||"Referencia";img.style.cssText="width:64px;height:64px;object-fit:cover;border-radius:7px;border:1px solid var(--line)";try{const record=await assetStore.get(ref.assetId);if(record?.blob)img.src=URL.createObjectURL(record.blob)}catch{}const label=document.createElement("span");label.className="hint";label.textContent=ref.name||"Imagen de referencia";const remove=document.createElement("button");remove.className="btn";remove.textContent="Quitar";remove.addEventListener("click",async()=>{if(!editingId)return;const current=continuity.get(editingId);continuity.update(editingId,{referenceAssets:(current.referenceAssets||[]).filter(x=>x.assetId!==ref.assetId)});try{await assetStore.remove(ref.assetId)}catch{}renderCharacterReferences(continuity.get(editingId));status("Referencia eliminada.")});row.append(img,label,remove);root.append(row)}}
-async function uploadCharacterReferences(files){if(!editingId)throw new Error("Guarda o carga primero la ficha del personaje.");const p=continuity.get(editingId),refs=[...(p.referenceAssets||[])];for(const file of files){if(!file.type.startsWith("image/"))continue;if(file.size>15*1024*1024)throw new Error("Cada imagen debe pesar menos de 15 MB.");const saved=await assetStore.put(file,{name:file.name});refs.push({assetId:saved.id,name:file.name,type:file.type,size:file.size})}continuity.update(editingId,{referenceAssets:refs});await renderCharacterReferences(continuity.get(editingId));status("Referencias guardadas para "+p.name+".")}
-function refresh(){const select=$("ncSelect"),current=select.value;select.innerHTML='<option value="">Selecciona un personaje…</option>';continuity.list().forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name;select.append(o)});if(current&&continuity.get(current))select.value=current;refreshSceneCharacters()}
-function formData(){const p={};for(const [k,id]of Object.entries(fields))p[k]=$(id).value;p.voiceId=$("voiceSpeaker")?.value||"";return p}
-function fill(p){for(const[k,id]of Object.entries(fields))$(id).value=p[k]||"";if(p.voiceId&&$("voiceSpeaker"))$("voiceSpeaker").value=p.voiceId;editingId=p.id;renderCharacterReferences(p);$("ncSave").textContent="Actualizar personaje"}
-function clear(){Object.values(fields).forEach(id=>$(id).value="");editingId=null;renderCharacterReferences(null);$("ncSave").textContent="Guardar personaje"}
-$("ncSave").addEventListener("click",()=>{try{const data=formData();if(!data.name.trim())throw new Error("Escribe el nombre del personaje");const saved=editingId?continuity.update(editingId,data):continuity.create(data);refresh();$("ncSelect").value=saved.id;fill(saved);status("Ficha maestra guardada en este navegador.");}catch(e){status(e.message)}});
-$("ncReset").addEventListener("click",clear);
-$("ncReferenceFiles").addEventListener("change",async e=>{try{await uploadCharacterReferences([...e.target.files||[]])}catch(err){status(err.message)}e.target.value=""});
-$("ncLoad").addEventListener("click",()=>{const p=continuity.get($("ncSelect").value);if(!p){status("Selecciona un personaje.");return}fill(p);status("Ficha cargada. Puedes editarla y actualizarla.")});
-$("ncCheck").addEventListener("click",()=>{const id=$("ncSelect").value;if(!id){status("Selecciona un personaje para revisar.");return}const report=continuity.validate(id,formData());status(report.consistent?"Continuidad declarada: 100%.":"Se detectaron "+report.issues.length+" diferencias: "+report.issues.map(x=>x.field).join(", ")+".")});
-$("ncExport").addEventListener("click",async()=>{try{const characters=[];for(const p of continuity.list()){const refs=[];for(const ref of p.referenceAssets||[]){const asset=await assetStore.get(ref.assetId);if(asset?.blob)refs.push({...ref,dataUrl:await blobToDataURL(asset.blob)})}characters.push({...p,referenceAssets:refs})}const pack={format:"nexora-character-bible-package",version:1,characters},blob=new Blob([JSON.stringify(pack,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nexora-biblia-personajes-completa.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);status("Biblia exportada con imágenes de referencia.")}catch(err){status("No se pudo exportar: "+err.message)}});
-$("ncImport").addEventListener("click",()=>$("ncFile").click());
-$("ncFile").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{const raw=JSON.parse(await file.text());if(raw.format==="nexora-character-bible-package"&&Array.isArray(raw.characters)){const characters=[];for(const p of raw.characters){const refs=[];for(const ref of p.referenceAssets||[]){if(ref.dataUrl){const saved=await assetStore.put(dataURLToBlob(ref.dataUrl),{name:ref.name});refs.push({...ref,assetId:saved.id,dataUrl:undefined})}else refs.push(ref)}characters.push({...p,referenceAssets:refs})}continuity.importJSON({format:"nexora-character-bible",version:1,characters})}else continuity.importJSON(raw);refresh();status("Biblia importada correctamente.")}catch(err){status("No se pudo importar: "+err.message)}e.target.value=""});
-refresh();
-const engine=new window.NexoraVisualEngine.VisualEngine($("nvCanvas"));
-const studioBackdrop=engine.addLayer({name:"Fondo de estudio 2D",type:"custom",z:0,draw:(ctx)=>{
- const w=engine.width,h=engine.height,horizon=h*.76;
- const sky=ctx.createLinearGradient(0,0,0,horizon);
- sky.addColorStop(0,"#182838");sky.addColorStop(1,"#0d1824");
- ctx.fillStyle=sky;ctx.fillRect(0,0,w,horizon);
- const floor=ctx.createLinearGradient(0,horizon,0,h);
- floor.addColorStop(0,"#24343d");floor.addColorStop(1,"#0c141c");
- ctx.fillStyle=floor;ctx.fillRect(0,horizon,w,h-horizon);
- const glow=ctx.createRadialGradient(w*.5,h*.52,4,w*.5,h*.52,w*.52);
- glow.addColorStop(0,"rgba(100,184,188,.13)");glow.addColorStop(1,"rgba(100,184,188,0)");
- ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
- ctx.save();ctx.strokeStyle="rgba(178,211,220,.09)";ctx.lineWidth=1;
- ctx.beginPath();ctx.moveTo(0,horizon);ctx.lineTo(w,horizon);ctx.stroke();
- for(let row=1;row<=4;row++){const y=horizon+(h-horizon)*row/5;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
- for(let col=-4;col<=4;col++){ctx.beginPath();ctx.moveTo(w*.5,horizon);ctx.lineTo(w*.5+col*w*.16,h);ctx.stroke()}
- ctx.restore();
-}});
-const compositor=new window.NexoraCompositor.SceneCompositor(engine);const scene=new window.NexoraSceneProject.SceneProject();const characterStage=new window.NexoraCharacterStage.CharacterStage(window.NexoraCharacterArt.draw);
-const audioTimeline=window.NexoraAudio?new window.NexoraAudio.AudioTimeline():null;let spatialRenderer=null;
-function drawAudioTracks(){const root=$("naTracks");root.innerHTML="";if(!audioTimeline.tracks.length){root.textContent="No hay pistas añadidas.";return}for(const t of audioTimeline.tracks){const row=document.createElement("div");row.style.cssText="padding:8px;margin:7px 0;border:1px solid var(--line);border-radius:8px";const title=document.createElement("strong");title.textContent=t.kind.toUpperCase()+" · "+t.name;row.append(title);for(const [label,key,min,max,step]of [["Entrada","start",0,3600,.1],["Volumen","volume",0,2,.05],["Paneo","pan",-1,1,.1],["Fundido entrada","fadeIn",0,30,.1],["Fundido salida","fadeOut",0,30,.1]]){const l=document.createElement("label");l.textContent=label+" ";l.style.cssText="font-size:10px;color:var(--muted);margin:5px";const i=document.createElement("input");i.type="number";i.min=min;i.max=max;i.step=step;i.value=t[key];i.style.width="75px";i.addEventListener("change",()=>audioTimeline.update(t.id,{[key]:Number(i.value)}));l.append(i);row.append(l)}const del=document.createElement("button");del.className="btn";del.textContent="Quitar";del.addEventListener("click",()=>{audioTimeline.remove(t.id);drawAudioTracks()});row.append(del);root.append(row)}}
-if(audioTimeline){$("naFiles").addEventListener("change",e=>{for(const file of e.target.files||[])if(file.type.startsWith("audio/"))audioTimeline.add(file,{kind:$("naKind").value,start:Number($("naStart").value),name:file.name});drawAudioTracks();$("naStatus").textContent=audioTimeline.tracks.length+" pistas preparadas.";e.target.value=""});$("naAddVoice").addEventListener("click",async()=>{const audio=$("audioTrack");if(!audio?.src){$("naStatus").textContent="Primero genera una narración o carga una voz.";return}try{const blob=await(await fetch(audio.src)).blob();audioTimeline.add(blob,{kind:"voice",name:"Voz generada",start:Number($("naStart").value)});drawAudioTracks();$("naStatus").textContent="Voz generada añadida a la mezcla."}catch(err){$("naStatus").textContent="No se pudo añadir la voz: "+err.message}});$("naPreview").addEventListener("click",async()=>{try{await audioTimeline.play();$("naStatus").textContent="Reproduciendo mezcla."}catch(err){$("naStatus").textContent=err.message}});$("naStop").addEventListener("click",()=>{audioTimeline.stop();$("naStatus").textContent="Audio detenido."});$("naExport").addEventListener("click",()=>{const blob=new Blob([JSON.stringify(audioTimeline.serialize(),null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nexora-audio-timeline.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)});drawAudioTracks()}
-const ENABLE_3D_STUDIO=false;
-if(ENABLE_3D_STUDIO){try{spatialRenderer=new window.NexoraSpatialEngine.SpatialRenderer($("n3dCanvas"));spatialRenderer.render();$("n3dStatus").textContent="WebGL activo · escena 3D renderizada."}catch(err){$("n3dStatus").textContent="WebGL no disponible: "+err.message}}else{$("n3dStatus").textContent="Motor 3D conservado · inactivo para priorizar el estudio 2D."}
-$("n3dFile").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file||!spatialRenderer)return;try{stopGLBPlayback();const result=spatialRenderer.importGLB(await file.arrayBuffer());const morphMeshes=spatialRenderer.meshes.filter(m=>m.morphTargets?.length),list=$("n3dMorphList");list.replaceChildren();$("n3dMorphControls").hidden=!morphMeshes.length;const facialNames=/smile|frown|blink|eyeclose|jaw|mouth|viseme|brow|angry|surprise|fear/i;const hasFacialMorphs=morphMeshes.some(mesh=>mesh.morphTargets.some(target=>facialNames.test(target.name||"")));$("n3dFacialControls").hidden=!hasFacialMorphs;for(const mesh of morphMeshes)mesh.morphTargets.forEach((target,index)=>{const wrap=document.createElement("div"),label=document.createElement("label"),range=document.createElement("input"),caption=document.createElement("small");label.textContent=mesh.name+" · "+(target.name||"Morph "+(index+1));range.type="range";range.min="-1";range.max="1";range.step=".01";range.value=mesh.morphWeights[index]||0;caption.className="hint";caption.textContent=Number(range.value).toFixed(2);range.addEventListener("input",()=>{const weights=mesh.morphWeights.slice();weights[index]=Number(range.value);caption.textContent=Number(range.value).toFixed(2);try{spatialRenderer.setMorphWeights(mesh.id,weights)}catch(err){$("n3dStatus").textContent=err.message}});wrap.append(label,range,caption);list.append(wrap)});$("n3dStatus").textContent=result.sceneName+" · "+result.meshCount+" mallas · "+result.vertexCount.toLocaleString()+" vértices · "+result.meshes.reduce((n,m)=>n+(m.morphTargets?.length||0),0)+" morph targets."}catch(err){$("n3dStatus").textContent="No se pudo importar el GLB: "+err.message}e.target.value=""});
-let glbFrame=0,glbLast=0,proceduralPlayers=[],sequencePlayers=[],sequenceSegments=[],facialTrack=[],facialExpression="",facialTime=0;
-const readFacialTrack=()=>{const track=JSON.parse($("n3dVisemeTrack").value.trim()||"[]");if(!Array.isArray(track))throw Error("La pista facial debe ser una lista JSON.");const keys=window.NexoraFacialAnimation?.phonemeVisemes||{};const visemes=window.NexoraFacialAnimation?.visemes||{};return track.map((cue,index)=>{const start=Number(cue.start),end=Number(cue.end),phoneme=String(cue.phoneme||"").toUpperCase(),viseme=String(cue.viseme||"").toUpperCase();if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start)throw Error("La marca "+(index+1)+" necesita tiempos válidos: start >= 0 y end > start.");if(!phoneme&&!viseme)throw Error("La marca "+(index+1)+" necesita phoneme o viseme.");if(phoneme&&!keys[phoneme])throw Error("Fonema no compatible en la marca "+(index+1)+": "+phoneme);if(viseme&&!visemes[viseme])throw Error("Visema no compatible en la marca "+(index+1)+": "+viseme);return{...cue,start,end,phoneme,viseme}}).sort((a,b)=>a.start-b.start)};
-const applyFacialFrame=time=>spatialRenderer?.applyFacialAnimation(time,facialTrack,{expression:facialExpression,expressionWeight:.7,blinkInterval:3.8,blinkDuration:.14});
-const stopGLBPlayback=()=>{if(glbFrame)cancelAnimationFrame(glbFrame);glbFrame=0;glbLast=0;spatialRenderer?.pauseAnimation();for(const player of proceduralPlayers)player.pause();for(const player of sequencePlayers)player.pause();proceduralPlayers=[];sequencePlayers=[]};
-const tickGLB=now=>{if(!spatialRenderer)return;const dt=glbLast?Math.min(.05,(now-glbLast)/1000):0;glbLast=now;facialTime+=dt;if(sequencePlayers.length){for(const player of sequencePlayers)player.advance(dt);spatialRenderer.updateSkinnedMeshes();spatialRenderer.render()}else if(proceduralPlayers.length){for(const player of proceduralPlayers)player.advance(dt);spatialRenderer.updateSkinnedMeshes();spatialRenderer.render()}else spatialRenderer.advanceAnimation(dt);applyFacialFrame(facialTime);const active=sequencePlayers.length?sequencePlayers.some(p=>p.playing):proceduralPlayers.length?proceduralPlayers.some(p=>p.playing):spatialRenderer.animationPlayers?.some(p=>p.playing);if(active)glbFrame=requestAnimationFrame(tickGLB);else{glbFrame=0;glbLast=0}};
-$("n3dPlay").addEventListener("click",()=>{try{stopGLBPlayback();facialTrack=readFacialTrack();facialExpression=$("n3dFaceExpression").value;facialTime=0;const action=$("n3dAction").value;if(action==="native"){spatialRenderer.playAnimation();$("n3dStatus").textContent="Reproduciendo animación del GLB."}else{if(!window.NexoraSpatialActions)throw Error("La biblioteca de actuaciones 3D no está cargada.");const rigs=(spatialRenderer.importedRigs||[]).map(item=>item.rig);if(!rigs.length)throw Error("Importa primero un personaje GLB con esqueleto y articulaciones.");proceduralPlayers=rigs.map(rig=>window.NexoraSpatialActions.createPlayer(rig,action,{direction:$("n3dTurnDirection").value,blendDuration:Number($("n3dBlend").value)}));for(const player of proceduralPlayers)player.play();const label=window.NexoraSpatialActions.actions.find(item=>item.id===action)?.label||action;$("n3dStatus").textContent="Actuación en curso: "+label+"."}applyFacialFrame(facialTime);glbLast=0;glbFrame=requestAnimationFrame(tickGLB)}catch(err){$("n3dStatus").textContent=err.message}});
-$("n3dPause").addEventListener("click",()=>{stopGLBPlayback();$("n3dStatus").textContent="Actuación pausada."});
-$("n3dFaceValidate").addEventListener("click",()=>{try{facialTrack=readFacialTrack();facialExpression=$("n3dFaceExpression").value;facialTime=0;applyFacialFrame(facialTime);$("n3dFaceStatus").textContent="Pista válida: "+facialTrack.length+" marcas fonéticas. Rostro actualizado."}catch(err){$("n3dFaceStatus").textContent="Pista no válida: "+err.message}});
+  const notice = aside.querySelector(".notice");
+  aside.insertBefore(panel, notice || null);
+  const continuity = new window.NexoraContinuity.ContinuityManager();
+  const assetStore = new window.NexoraAssetStore.AssetStore();
+  const builtinProfiles = [
+    {
+      name: "Trabajador 2D",
+      face: "Rostro anime ovalado, rasgos amables y mandíbula definida",
+      eyes: "Ojos marrones expresivos",
+      hair: "Cabello oscuro corto bajo casco de seguridad",
+      body: "Complexión atlética media, proporciones anime",
+      palette:
+        "Naranja seguridad, amarillo reflectante, azul marino y tonos piel",
+      outfit:
+        "Chaqueta de trabajo naranja con bandas reflectantes, pantalón resistente, botas y casco amarillo",
+      accessories: "Cinturón de herramientas y guantes",
+    },
+    {
+      name: "Dinosaurio 2D",
+      face: "Cabeza de dinosaurio de perfil, hocico fuerte y mandíbula articulada",
+      eyes: "Ojo ámbar con pupila vertical",
+      hair: "Escamas y placas dorsales",
+      body: "Terópodo bípedo robusto con cola segmentada",
+      palette: "Verde bosque, verde lima y vientre arena",
+      outfit: "Piel escamosa natural, sin ropa",
+      accessories: "Dientes visibles, garras y placas dorsales",
+    },
+  ];
+  for (const seed of builtinProfiles)
+    if (!continuity.list().some((p) => p.name === seed.name))
+      continuity.create({
+        ...seed,
+        voiceId: "",
+        visualStyle: "Ilustración anime 2D original",
+      });
+  const fields = {
+    name: "ncName",
+    face: "ncFace",
+    eyes: "ncEyes",
+    hair: "ncHair",
+    body: "ncBody",
+    palette: "ncPalette",
+    outfit: "ncOutfit",
+    accessories: "ncAccessories",
+    voiceProfile: "ncVoice",
+  };
+  let editingId = null;
+  function status(message) {
+    $("ncStatus").textContent = message;
+  }
+  function blobToDataURL(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  }
+  function dataURLToBlob(url) {
+    const [meta, data] = url.split(",");
+    const mime = meta.match(/data:([^;]+)/)?.[1] || "application/octet-stream";
+    const raw = atob(data),
+      bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  }
+  async function renderCharacterReferences(profile) {
+    const root = $("ncReferenceList");
+    if (!root) return;
+    root.innerHTML = "";
+    const refs = profile?.referenceAssets || [];
+    if (!refs.length) {
+      root.textContent = "No hay referencias guardadas.";
+      return;
+    }
+    for (const ref of refs) {
+      const row = document.createElement("div");
+      row.style.cssText =
+        "display:flex;gap:10px;align-items:center;margin:8px 0";
+      const img = document.createElement("img");
+      img.alt = ref.name || "Referencia";
+      img.style.cssText =
+        "width:64px;height:64px;object-fit:cover;border-radius:7px;border:1px solid var(--line)";
+      try {
+        const record = await assetStore.get(ref.assetId);
+        if (record?.blob) img.src = URL.createObjectURL(record.blob);
+      } catch {}
+      const label = document.createElement("span");
+      label.className = "hint";
+      label.textContent = ref.name || "Imagen de referencia";
+      const remove = document.createElement("button");
+      remove.className = "btn";
+      remove.textContent = "Quitar";
+      remove.addEventListener("click", async () => {
+        if (!editingId) return;
+        const current = continuity.get(editingId);
+        continuity.update(editingId, {
+          referenceAssets: (current.referenceAssets || []).filter(
+            (x) => x.assetId !== ref.assetId,
+          ),
+        });
+        try {
+          await assetStore.remove(ref.assetId);
+        } catch {}
+        renderCharacterReferences(continuity.get(editingId));
+        status("Referencia eliminada.");
+      });
+      row.append(img, label, remove);
+      root.append(row);
+    }
+  }
+  async function uploadCharacterReferences(files) {
+    if (!editingId)
+      throw new Error("Guarda o carga primero la ficha del personaje.");
+    const p = continuity.get(editingId),
+      refs = [...(p.referenceAssets || [])];
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) continue;
+      if (file.size > 15 * 1024 * 1024)
+        throw new Error("Cada imagen debe pesar menos de 15 MB.");
+      const saved = await assetStore.put(file, { name: file.name });
+      refs.push({
+        assetId: saved.id,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      });
+    }
+    continuity.update(editingId, { referenceAssets: refs });
+    await renderCharacterReferences(continuity.get(editingId));
+    status("Referencias guardadas para " + p.name + ".");
+  }
+  function refresh() {
+    const select = $("ncSelect"),
+      current = select.value;
+    select.innerHTML = '<option value="">Selecciona un personaje…</option>';
+    continuity.list().forEach((p) => {
+      const o = document.createElement("option");
+      o.value = p.id;
+      o.textContent = p.name;
+      select.append(o);
+    });
+    if (current && continuity.get(current)) select.value = current;
+    refreshSceneCharacters();
+  }
+  function formData() {
+    const p = {};
+    for (const [k, id] of Object.entries(fields)) p[k] = $(id).value;
+    p.voiceId = $("voiceSpeaker")?.value || "";
+    return p;
+  }
+  function fill(p) {
+    for (const [k, id] of Object.entries(fields)) $(id).value = p[k] || "";
+    if (p.voiceId && $("voiceSpeaker")) $("voiceSpeaker").value = p.voiceId;
+    editingId = p.id;
+    renderCharacterReferences(p);
+    $("ncSave").textContent = "Actualizar personaje";
+  }
+  function clear() {
+    Object.values(fields).forEach((id) => ($(id).value = ""));
+    editingId = null;
+    renderCharacterReferences(null);
+    $("ncSave").textContent = "Guardar personaje";
+  }
+  $("ncSave").addEventListener("click", () => {
+    try {
+      const data = formData();
+      if (!data.name.trim()) throw new Error("Escribe el nombre del personaje");
+      const saved = editingId
+        ? continuity.update(editingId, data)
+        : continuity.create(data);
+      refresh();
+      $("ncSelect").value = saved.id;
+      fill(saved);
+      status("Ficha maestra guardada en este navegador.");
+    } catch (e) {
+      status(e.message);
+    }
+  });
+  $("ncReset").addEventListener("click", clear);
+  $("ncReferenceFiles").addEventListener("change", async (e) => {
+    try {
+      await uploadCharacterReferences([...(e.target.files || [])]);
+    } catch (err) {
+      status(err.message);
+    }
+    e.target.value = "";
+  });
+  $("ncLoad").addEventListener("click", () => {
+    const p = continuity.get($("ncSelect").value);
+    if (!p) {
+      status("Selecciona un personaje.");
+      return;
+    }
+    fill(p);
+    status("Ficha cargada. Puedes editarla y actualizarla.");
+  });
+  $("ncCheck").addEventListener("click", () => {
+    const id = $("ncSelect").value;
+    if (!id) {
+      status("Selecciona un personaje para revisar.");
+      return;
+    }
+    const report = continuity.validate(id, formData());
+    status(
+      report.consistent
+        ? "Continuidad declarada: 100%."
+        : "Se detectaron " +
+            report.issues.length +
+            " diferencias: " +
+            report.issues.map((x) => x.field).join(", ") +
+            ".",
+    );
+  });
+  $("ncExport").addEventListener("click", async () => {
+    try {
+      const characters = [];
+      for (const p of continuity.list()) {
+        const refs = [];
+        for (const ref of p.referenceAssets || []) {
+          const asset = await assetStore.get(ref.assetId);
+          if (asset?.blob)
+            refs.push({ ...ref, dataUrl: await blobToDataURL(asset.blob) });
+        }
+        characters.push({ ...p, referenceAssets: refs });
+      }
+      const pack = {
+          format: "nexora-character-bible-package",
+          version: 1,
+          characters,
+        },
+        blob = new Blob([JSON.stringify(pack, null, 2)], {
+          type: "application/json",
+        }),
+        url = URL.createObjectURL(blob),
+        a = document.createElement("a");
+      a.href = url;
+      a.download = "nexora-biblia-personajes-completa.json";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      status("Biblia exportada con imágenes de referencia.");
+    } catch (err) {
+      status("No se pudo exportar: " + err.message);
+    }
+  });
+  $("ncImport").addEventListener("click", () => $("ncFile").click());
+  $("ncFile").addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const raw = JSON.parse(await file.text());
+      if (
+        raw.format === "nexora-character-bible-package" &&
+        Array.isArray(raw.characters)
+      ) {
+        const characters = [];
+        for (const p of raw.characters) {
+          const refs = [];
+          for (const ref of p.referenceAssets || []) {
+            if (ref.dataUrl) {
+              const saved = await assetStore.put(dataURLToBlob(ref.dataUrl), {
+                name: ref.name,
+              });
+              refs.push({ ...ref, assetId: saved.id, dataUrl: undefined });
+            } else refs.push(ref);
+          }
+          characters.push({ ...p, referenceAssets: refs });
+        }
+        continuity.importJSON({
+          format: "nexora-character-bible",
+          version: 1,
+          characters,
+        });
+      } else continuity.importJSON(raw);
+      refresh();
+      status("Biblia importada correctamente.");
+    } catch (err) {
+      status("No se pudo importar: " + err.message);
+    }
+    e.target.value = "";
+  });
+  refresh();
+  const engine = new window.NexoraVisualEngine.VisualEngine($("nvCanvas"));
+  const studioBackdrop = engine.addLayer({
+    name: "Fondo de estudio 2D",
+    type: "custom",
+    z: 0,
+    draw: (ctx) => {
+      const w = engine.width,
+        h = engine.height,
+        horizon = h * 0.76;
+      const sky = ctx.createLinearGradient(0, 0, 0, horizon);
+      sky.addColorStop(0, "#182838");
+      sky.addColorStop(1, "#0d1824");
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, horizon);
+      const floor = ctx.createLinearGradient(0, horizon, 0, h);
+      floor.addColorStop(0, "#24343d");
+      floor.addColorStop(1, "#0c141c");
+      ctx.fillStyle = floor;
+      ctx.fillRect(0, horizon, w, h - horizon);
+      const glow = ctx.createRadialGradient(
+        w * 0.5,
+        h * 0.52,
+        4,
+        w * 0.5,
+        h * 0.52,
+        w * 0.52,
+      );
+      glow.addColorStop(0, "rgba(100,184,188,.13)");
+      glow.addColorStop(1, "rgba(100,184,188,0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+      ctx.save();
+      ctx.strokeStyle = "rgba(178,211,220,.09)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, horizon);
+      ctx.lineTo(w, horizon);
+      ctx.stroke();
+      for (let row = 1; row <= 4; row++) {
+        const y = horizon + ((h - horizon) * row) / 5;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+      for (let col = -4; col <= 4; col++) {
+        ctx.beginPath();
+        ctx.moveTo(w * 0.5, horizon);
+        ctx.lineTo(w * 0.5 + col * w * 0.16, h);
+        ctx.stroke();
+      }
+      ctx.restore();
+    },
+  });
+  const compositor = new window.NexoraCompositor.SceneCompositor(engine);
+  const scene = new window.NexoraSceneProject.SceneProject();
+  const characterStage = new window.NexoraCharacterStage.CharacterStage(
+    window.NexoraCharacterArt.draw,
+  );
+  const audioTimeline = window.NexoraAudio
+    ? new window.NexoraAudio.AudioTimeline()
+    : null;
+  let spatialRenderer = null;
+  function drawAudioTracks() {
+    const root = $("naTracks");
+    root.innerHTML = "";
+    if (!audioTimeline.tracks.length) {
+      root.textContent = "No hay pistas añadidas.";
+      return;
+    }
+    for (const t of audioTimeline.tracks) {
+      const row = document.createElement("div");
+      row.style.cssText =
+        "padding:8px;margin:7px 0;border:1px solid var(--line);border-radius:8px";
+      const title = document.createElement("strong");
+      title.textContent = t.kind.toUpperCase() + " · " + t.name;
+      row.append(title);
+      for (const [label, key, min, max, step] of [
+        ["Entrada", "start", 0, 3600, 0.1],
+        ["Volumen", "volume", 0, 2, 0.05],
+        ["Paneo", "pan", -1, 1, 0.1],
+        ["Fundido entrada", "fadeIn", 0, 30, 0.1],
+        ["Fundido salida", "fadeOut", 0, 30, 0.1],
+      ]) {
+        const l = document.createElement("label");
+        l.textContent = label + " ";
+        l.style.cssText = "font-size:10px;color:var(--muted);margin:5px";
+        const i = document.createElement("input");
+        i.type = "number";
+        i.min = min;
+        i.max = max;
+        i.step = step;
+        i.value = t[key];
+        i.style.width = "75px";
+        i.addEventListener("change", () =>
+          audioTimeline.update(t.id, { [key]: Number(i.value) }),
+        );
+        l.append(i);
+        row.append(l);
+      }
+      const del = document.createElement("button");
+      del.className = "btn";
+      del.textContent = "Quitar";
+      del.addEventListener("click", () => {
+        audioTimeline.remove(t.id);
+        drawAudioTracks();
+      });
+      row.append(del);
+      root.append(row);
+    }
+  }
+  if (audioTimeline) {
+    $("naFiles").addEventListener("change", (e) => {
+      for (const file of e.target.files || [])
+        if (file.type.startsWith("audio/"))
+          audioTimeline.add(file, {
+            kind: $("naKind").value,
+            start: Number($("naStart").value),
+            name: file.name,
+          });
+      drawAudioTracks();
+      $("naStatus").textContent =
+        audioTimeline.tracks.length + " pistas preparadas.";
+      e.target.value = "";
+    });
+    $("naAddVoice").addEventListener("click", async () => {
+      const audio = $("audioTrack");
+      if (!audio?.src) {
+        $("naStatus").textContent =
+          "Primero genera una narración o carga una voz.";
+        return;
+      }
+      try {
+        const blob = await (await fetch(audio.src)).blob();
+        audioTimeline.add(blob, {
+          kind: "voice",
+          name: "Voz generada",
+          start: Number($("naStart").value),
+        });
+        drawAudioTracks();
+        $("naStatus").textContent = "Voz generada añadida a la mezcla.";
+      } catch (err) {
+        $("naStatus").textContent = "No se pudo añadir la voz: " + err.message;
+      }
+    });
+    $("naPreview").addEventListener("click", async () => {
+      try {
+        await audioTimeline.play();
+        $("naStatus").textContent = "Reproduciendo mezcla.";
+      } catch (err) {
+        $("naStatus").textContent = err.message;
+      }
+    });
+    $("naStop").addEventListener("click", () => {
+      audioTimeline.stop();
+      $("naStatus").textContent = "Audio detenido.";
+    });
+    $("naExport").addEventListener("click", () => {
+      const blob = new Blob(
+          [JSON.stringify(audioTimeline.serialize(), null, 2)],
+          { type: "application/json" },
+        ),
+        url = URL.createObjectURL(blob),
+        a = document.createElement("a");
+      a.href = url;
+      a.download = "nexora-audio-timeline.json";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    });
+    drawAudioTracks();
+  }
+  const ENABLE_3D_STUDIO = false;
+  if (ENABLE_3D_STUDIO) {
+    try {
+      spatialRenderer = new window.NexoraSpatialEngine.SpatialRenderer(
+        $("n3dCanvas"),
+      );
+      spatialRenderer.render();
+      $("n3dStatus").textContent = "WebGL activo · escena 3D renderizada.";
+    } catch (err) {
+      $("n3dStatus").textContent = "WebGL no disponible: " + err.message;
+    }
+  } else {
+    $("n3dStatus").textContent =
+      "Motor 3D conservado · inactivo para priorizar el estudio 2D.";
+  }
+  $("n3dFile").addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !spatialRenderer) return;
+    try {
+      stopGLBPlayback();
+      const result = spatialRenderer.importGLB(await file.arrayBuffer());
+      const morphMeshes = spatialRenderer.meshes.filter(
+          (m) => m.morphTargets?.length,
+        ),
+        list = $("n3dMorphList");
+      list.replaceChildren();
+      $("n3dMorphControls").hidden = !morphMeshes.length;
+      const facialNames =
+        /smile|frown|blink|eyeclose|jaw|mouth|viseme|brow|angry|surprise|fear/i;
+      const hasFacialMorphs = morphMeshes.some((mesh) =>
+        mesh.morphTargets.some((target) => facialNames.test(target.name || "")),
+      );
+      $("n3dFacialControls").hidden = !hasFacialMorphs;
+      for (const mesh of morphMeshes)
+        mesh.morphTargets.forEach((target, index) => {
+          const wrap = document.createElement("div"),
+            label = document.createElement("label"),
+            range = document.createElement("input"),
+            caption = document.createElement("small");
+          label.textContent =
+            mesh.name + " · " + (target.name || "Morph " + (index + 1));
+          range.type = "range";
+          range.min = "-1";
+          range.max = "1";
+          range.step = ".01";
+          range.value = mesh.morphWeights[index] || 0;
+          caption.className = "hint";
+          caption.textContent = Number(range.value).toFixed(2);
+          range.addEventListener("input", () => {
+            const weights = mesh.morphWeights.slice();
+            weights[index] = Number(range.value);
+            caption.textContent = Number(range.value).toFixed(2);
+            try {
+              spatialRenderer.setMorphWeights(mesh.id, weights);
+            } catch (err) {
+              $("n3dStatus").textContent = err.message;
+            }
+          });
+          wrap.append(label, range, caption);
+          list.append(wrap);
+        });
+      $("n3dStatus").textContent =
+        result.sceneName +
+        " · " +
+        result.meshCount +
+        " mallas · " +
+        result.vertexCount.toLocaleString() +
+        " vértices · " +
+        result.meshes.reduce((n, m) => n + (m.morphTargets?.length || 0), 0) +
+        " morph targets.";
+    } catch (err) {
+      $("n3dStatus").textContent = "No se pudo importar el GLB: " + err.message;
+    }
+    e.target.value = "";
+  });
+  let glbFrame = 0,
+    glbLast = 0,
+    proceduralPlayers = [],
+    sequencePlayers = [],
+    sequenceSegments = [],
+    facialTrack = [],
+    facialExpression = "",
+    facialTime = 0;
+  const readFacialTrack = () => {
+    const track = JSON.parse($("n3dVisemeTrack").value.trim() || "[]");
+    if (!Array.isArray(track))
+      throw Error("La pista facial debe ser una lista JSON.");
+    const keys = window.NexoraFacialAnimation?.phonemeVisemes || {};
+    const visemes = window.NexoraFacialAnimation?.visemes || {};
+    return track
+      .map((cue, index) => {
+        const start = Number(cue.start),
+          end = Number(cue.end),
+          phoneme = String(cue.phoneme || "").toUpperCase(),
+          viseme = String(cue.viseme || "").toUpperCase();
+        if (
+          !Number.isFinite(start) ||
+          !Number.isFinite(end) ||
+          start < 0 ||
+          end <= start
+        )
+          throw Error(
+            "La marca " +
+              (index + 1) +
+              " necesita tiempos válidos: start >= 0 y end > start.",
+          );
+        if (!phoneme && !viseme)
+          throw Error(
+            "La marca " + (index + 1) + " necesita phoneme o viseme.",
+          );
+        if (phoneme && !keys[phoneme])
+          throw Error(
+            "Fonema no compatible en la marca " + (index + 1) + ": " + phoneme,
+          );
+        if (viseme && !visemes[viseme])
+          throw Error(
+            "Visema no compatible en la marca " + (index + 1) + ": " + viseme,
+          );
+        return { ...cue, start, end, phoneme, viseme };
+      })
+      .sort((a, b) => a.start - b.start);
+  };
+  const applyFacialFrame = (time) =>
+    spatialRenderer?.applyFacialAnimation(time, facialTrack, {
+      expression: facialExpression,
+      expressionWeight: 0.7,
+      blinkInterval: 3.8,
+      blinkDuration: 0.14,
+    });
+  const stopGLBPlayback = () => {
+    if (glbFrame) cancelAnimationFrame(glbFrame);
+    glbFrame = 0;
+    glbLast = 0;
+    spatialRenderer?.pauseAnimation();
+    for (const player of proceduralPlayers) player.pause();
+    for (const player of sequencePlayers) player.pause();
+    proceduralPlayers = [];
+    sequencePlayers = [];
+  };
+  const tickGLB = (now) => {
+    if (!spatialRenderer) return;
+    const dt = glbLast ? Math.min(0.05, (now - glbLast) / 1000) : 0;
+    glbLast = now;
+    facialTime += dt;
+    if (sequencePlayers.length) {
+      for (const player of sequencePlayers) player.advance(dt);
+      spatialRenderer.updateSkinnedMeshes();
+      spatialRenderer.render();
+    } else if (proceduralPlayers.length) {
+      for (const player of proceduralPlayers) player.advance(dt);
+      spatialRenderer.updateSkinnedMeshes();
+      spatialRenderer.render();
+    } else spatialRenderer.advanceAnimation(dt);
+    applyFacialFrame(facialTime);
+    const active = sequencePlayers.length
+      ? sequencePlayers.some((p) => p.playing)
+      : proceduralPlayers.length
+        ? proceduralPlayers.some((p) => p.playing)
+        : spatialRenderer.animationPlayers?.some((p) => p.playing);
+    if (active) glbFrame = requestAnimationFrame(tickGLB);
+    else {
+      glbFrame = 0;
+      glbLast = 0;
+    }
+  };
+  $("n3dPlay").addEventListener("click", () => {
+    try {
+      stopGLBPlayback();
+      facialTrack = readFacialTrack();
+      facialExpression = $("n3dFaceExpression").value;
+      facialTime = 0;
+      const action = $("n3dAction").value;
+      if (action === "native") {
+        spatialRenderer.playAnimation();
+        $("n3dStatus").textContent = "Reproduciendo animación del GLB.";
+      } else {
+        if (!window.NexoraSpatialActions)
+          throw Error("La biblioteca de actuaciones 3D no está cargada.");
+        const rigs = (spatialRenderer.importedRigs || []).map(
+          (item) => item.rig,
+        );
+        if (!rigs.length)
+          throw Error(
+            "Importa primero un personaje GLB con esqueleto y articulaciones.",
+          );
+        proceduralPlayers = rigs.map((rig) =>
+          window.NexoraSpatialActions.createPlayer(rig, action, {
+            direction: $("n3dTurnDirection").value,
+            blendDuration: Number($("n3dBlend").value),
+          }),
+        );
+        for (const player of proceduralPlayers) player.play();
+        const label =
+          window.NexoraSpatialActions.actions.find((item) => item.id === action)
+            ?.label || action;
+        $("n3dStatus").textContent = "Actuación en curso: " + label + ".";
+      }
+      applyFacialFrame(facialTime);
+      glbLast = 0;
+      glbFrame = requestAnimationFrame(tickGLB);
+    } catch (err) {
+      $("n3dStatus").textContent = err.message;
+    }
+  });
+  $("n3dPause").addEventListener("click", () => {
+    stopGLBPlayback();
+    $("n3dStatus").textContent = "Actuación pausada.";
+  });
+  $("n3dFaceValidate").addEventListener("click", () => {
+    try {
+      facialTrack = readFacialTrack();
+      facialExpression = $("n3dFaceExpression").value;
+      facialTime = 0;
+      applyFacialFrame(facialTime);
+      $("n3dFaceStatus").textContent =
+        "Pista válida: " +
+        facialTrack.length +
+        " marcas fonéticas. Rostro actualizado.";
+    } catch (err) {
+      $("n3dFaceStatus").textContent = "Pista no válida: " + err.message;
+    }
+  });
 
-$("n3dBlend").addEventListener("input",()=>{$("n3dBlendValue").textContent=Number($("n3dBlend").value).toFixed(2)+" s"});
-const sequenceLabels=Object.fromEntries(window.NexoraSpatialActions.actions.map(item=>[item.id,item.label]));
-const sequenceSummary=()=>{const root=$("n3dSequenceList");root.replaceChildren();if(!sequenceSegments.length){root.textContent="Todavía no hay acciones en el guion.";return}let total=0;sequenceSegments.forEach((segment,index)=>{const row=document.createElement("div");row.style.cssText="display:flex;gap:8px;align-items:center;justify-content:space-between;padding:7px 5px;border-bottom:1px solid var(--line)";const info=document.createElement("span");info.textContent=(index+1)+". "+(sequenceLabels[segment.action]||segment.action)+" · "+segment.duration.toFixed(2)+" s · fundido "+segment.blendDuration.toFixed(2)+" s";const controls=document.createElement("span");const up=document.createElement("button");up.type="button";up.className="btn";up.textContent="↑";up.disabled=index===0;up.addEventListener("click",()=>{[sequenceSegments[index-1],sequenceSegments[index]]=[sequenceSegments[index],sequenceSegments[index-1]];sequenceSummary()});const down=document.createElement("button");down.type="button";down.className="btn";down.textContent="↓";down.disabled=index===sequenceSegments.length-1;down.addEventListener("click",()=>{[sequenceSegments[index+1],sequenceSegments[index]]=[sequenceSegments[index],sequenceSegments[index+1]];sequenceSummary()});const remove=document.createElement("button");remove.type="button";remove.className="btn";remove.textContent="×";remove.addEventListener("click",()=>{sequenceSegments.splice(index,1);sequenceSummary()});controls.append(up,down,remove);row.append(info,controls);root.append(row);total+=segment.duration});const footer=document.createElement("div");footer.style.cssText="padding:8px 5px;font-weight:600";footer.textContent="Duración total: "+total.toFixed(2)+" s · "+sequenceSegments.length+" acciones";root.append(footer)};
-const getSequenceRigs=()=>{const rigs=(spatialRenderer?.importedRigs||[]).map(item=>item.rig);if(!rigs.length)throw Error("Importa primero un modelo GLB con esqueleto para crear una secuencia.");return rigs};
-$("n3dSequenceAdd").addEventListener("click",()=>{try{const rigs=getSequenceRigs(),action=$("n3dSequenceAction").value,options={direction:$("n3dTurnDirection").value};const clip=window.NexoraSpatialActions.createClip(rigs[0],action,options);const typed=$("n3dSequenceDuration").value.trim(),duration=typed?Number(typed):clip.duration;if(!Number.isFinite(duration)||duration<.05||duration>120)throw Error("La duración debe estar entre 0.05 y 120 segundos.");sequenceSegments.push({action,options,duration,blendDuration:Number($("n3dBlend").value)});sequenceSummary();$("n3dSequenceStatus").textContent="Acción añadida al guion."}catch(err){$("n3dSequenceStatus").textContent=err.message}});
-$("n3dSequenceClear").addEventListener("click",()=>{stopGLBPlayback();sequenceSegments=[];sequenceSummary();$("n3dSequenceStatus").textContent="Guion vacío."});
-$("n3dSequencePlay").addEventListener("click",()=>{try{stopGLBPlayback();if(!sequenceSegments.length)throw Error("Añade movimientos al guion antes de reproducirlo.");facialTrack=readFacialTrack();facialExpression=$("n3dFaceExpression").value;facialTime=0;const rigs=getSequenceRigs();sequencePlayers=rigs.map(rig=>{const sequence=new window.NexoraSpatialActions.SpatialActionSequence(rig,{name:"Guion NEXORA",segments:sequenceSegments});return sequence.createPlayer().play()});applyFacialFrame(facialTime);glbLast=0;glbFrame=requestAnimationFrame(tickGLB);$("n3dSequenceStatus").textContent="Reproduciendo guion: "+sequenceSegments.length+" acciones."}catch(err){$("n3dSequenceStatus").textContent=err.message}});
-$("n3dSequenceExport").addEventListener("click",()=>{try{const data={format:"nexora-spatial-action-sequence",version:1,name:"Guion NEXORA",segments:sequenceSegments};const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nexora-secuencia-cinematografica.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);$("n3dSequenceStatus").textContent="Guion exportado."}catch(err){$("n3dSequenceStatus").textContent=err.message}});
-$("n3dSequenceImport").addEventListener("click",()=>$("n3dSequenceFile").click());
-$("n3dSequenceFile").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.format!=="nexora-spatial-action-sequence"||data.version!==1||!Array.isArray(data.segments))throw Error("El archivo no es un guion NEXORA compatible.");if(data.segments.length>100)throw Error("El guion supera el límite de 100 acciones.");const rigs=getSequenceRigs();for(const segment of data.segments){window.NexoraSpatialActions.createClip(rigs[0],segment.action,segment.options||{});if(!Number.isFinite(Number(segment.duration))||segment.duration<.05||segment.duration>120)throw Error("Una acción tiene una duración inválida.");}sequenceSegments=data.segments.map(s=>({action:s.action,options:s.options||{},duration:Number(s.duration),blendDuration:Number(s.blendDuration??.22)}));sequenceSummary();$("n3dSequenceStatus").textContent="Guion importado: "+sequenceSegments.length+" acciones."}catch(err){$("n3dSequenceStatus").textContent="No se pudo importar: "+err.message}e.target.value=""});
+  $("n3dBlend").addEventListener("input", () => {
+    $("n3dBlendValue").textContent =
+      Number($("n3dBlend").value).toFixed(2) + " s";
+  });
+  const sequenceLabels = Object.fromEntries(
+    window.NexoraSpatialActions.actions.map((item) => [item.id, item.label]),
+  );
+  const sequenceSummary = () => {
+    const root = $("n3dSequenceList");
+    root.replaceChildren();
+    if (!sequenceSegments.length) {
+      root.textContent = "Todavía no hay acciones en el guion.";
+      return;
+    }
+    let total = 0;
+    sequenceSegments.forEach((segment, index) => {
+      const row = document.createElement("div");
+      row.style.cssText =
+        "display:flex;gap:8px;align-items:center;justify-content:space-between;padding:7px 5px;border-bottom:1px solid var(--line)";
+      const info = document.createElement("span");
+      info.textContent =
+        index +
+        1 +
+        ". " +
+        (sequenceLabels[segment.action] || segment.action) +
+        " · " +
+        segment.duration.toFixed(2) +
+        " s · fundido " +
+        segment.blendDuration.toFixed(2) +
+        " s";
+      const controls = document.createElement("span");
+      const up = document.createElement("button");
+      up.type = "button";
+      up.className = "btn";
+      up.textContent = "↑";
+      up.disabled = index === 0;
+      up.addEventListener("click", () => {
+        [sequenceSegments[index - 1], sequenceSegments[index]] = [
+          sequenceSegments[index],
+          sequenceSegments[index - 1],
+        ];
+        sequenceSummary();
+      });
+      const down = document.createElement("button");
+      down.type = "button";
+      down.className = "btn";
+      down.textContent = "↓";
+      down.disabled = index === sequenceSegments.length - 1;
+      down.addEventListener("click", () => {
+        [sequenceSegments[index + 1], sequenceSegments[index]] = [
+          sequenceSegments[index],
+          sequenceSegments[index + 1],
+        ];
+        sequenceSummary();
+      });
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "btn";
+      remove.textContent = "×";
+      remove.addEventListener("click", () => {
+        sequenceSegments.splice(index, 1);
+        sequenceSummary();
+      });
+      controls.append(up, down, remove);
+      row.append(info, controls);
+      root.append(row);
+      total += segment.duration;
+    });
+    const footer = document.createElement("div");
+    footer.style.cssText = "padding:8px 5px;font-weight:600";
+    footer.textContent =
+      "Duración total: " +
+      total.toFixed(2) +
+      " s · " +
+      sequenceSegments.length +
+      " acciones";
+    root.append(footer);
+  };
+  const getSequenceRigs = () => {
+    const rigs = (spatialRenderer?.importedRigs || []).map((item) => item.rig);
+    if (!rigs.length)
+      throw Error(
+        "Importa primero un modelo GLB con esqueleto para crear una secuencia.",
+      );
+    return rigs;
+  };
+  $("n3dSequenceAdd").addEventListener("click", () => {
+    try {
+      const rigs = getSequenceRigs(),
+        action = $("n3dSequenceAction").value,
+        options = { direction: $("n3dTurnDirection").value };
+      const clip = window.NexoraSpatialActions.createClip(
+        rigs[0],
+        action,
+        options,
+      );
+      const typed = $("n3dSequenceDuration").value.trim(),
+        duration = typed ? Number(typed) : clip.duration;
+      if (!Number.isFinite(duration) || duration < 0.05 || duration > 120)
+        throw Error("La duración debe estar entre 0.05 y 120 segundos.");
+      sequenceSegments.push({
+        action,
+        options,
+        duration,
+        blendDuration: Number($("n3dBlend").value),
+      });
+      sequenceSummary();
+      $("n3dSequenceStatus").textContent = "Acción añadida al guion.";
+    } catch (err) {
+      $("n3dSequenceStatus").textContent = err.message;
+    }
+  });
+  $("n3dSequenceClear").addEventListener("click", () => {
+    stopGLBPlayback();
+    sequenceSegments = [];
+    sequenceSummary();
+    $("n3dSequenceStatus").textContent = "Guion vacío.";
+  });
+  $("n3dSequencePlay").addEventListener("click", () => {
+    try {
+      stopGLBPlayback();
+      if (!sequenceSegments.length)
+        throw Error("Añade movimientos al guion antes de reproducirlo.");
+      facialTrack = readFacialTrack();
+      facialExpression = $("n3dFaceExpression").value;
+      facialTime = 0;
+      const rigs = getSequenceRigs();
+      sequencePlayers = rigs.map((rig) => {
+        const sequence = new window.NexoraSpatialActions.SpatialActionSequence(
+          rig,
+          { name: "Guion NEXORA", segments: sequenceSegments },
+        );
+        return sequence.createPlayer().play();
+      });
+      applyFacialFrame(facialTime);
+      glbLast = 0;
+      glbFrame = requestAnimationFrame(tickGLB);
+      $("n3dSequenceStatus").textContent =
+        "Reproduciendo guion: " + sequenceSegments.length + " acciones.";
+    } catch (err) {
+      $("n3dSequenceStatus").textContent = err.message;
+    }
+  });
+  $("n3dSequenceExport").addEventListener("click", () => {
+    try {
+      const data = {
+        format: "nexora-spatial-action-sequence",
+        version: 1,
+        name: "Guion NEXORA",
+        segments: sequenceSegments,
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        }),
+        url = URL.createObjectURL(blob),
+        a = document.createElement("a");
+      a.href = url;
+      a.download = "nexora-secuencia-cinematografica.json";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      $("n3dSequenceStatus").textContent = "Guion exportado.";
+    } catch (err) {
+      $("n3dSequenceStatus").textContent = err.message;
+    }
+  });
+  $("n3dSequenceImport").addEventListener("click", () =>
+    $("n3dSequenceFile").click(),
+  );
+  $("n3dSequenceFile").addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const data = JSON.parse(await file.text());
+      if (
+        data.format !== "nexora-spatial-action-sequence" ||
+        data.version !== 1 ||
+        !Array.isArray(data.segments)
+      )
+        throw Error("El archivo no es un guion NEXORA compatible.");
+      if (data.segments.length > 100)
+        throw Error("El guion supera el límite de 100 acciones.");
+      const rigs = getSequenceRigs();
+      for (const segment of data.segments) {
+        window.NexoraSpatialActions.createClip(
+          rigs[0],
+          segment.action,
+          segment.options || {},
+        );
+        if (
+          !Number.isFinite(Number(segment.duration)) ||
+          segment.duration < 0.05 ||
+          segment.duration > 120
+        )
+          throw Error("Una acción tiene una duración inválida.");
+      }
+      sequenceSegments = data.segments.map((s) => ({
+        action: s.action,
+        options: s.options || {},
+        duration: Number(s.duration),
+        blendDuration: Number(s.blendDuration ?? 0.22),
+      }));
+      sequenceSummary();
+      $("n3dSequenceStatus").textContent =
+        "Guion importado: " + sequenceSegments.length + " acciones.";
+    } catch (err) {
+      $("n3dSequenceStatus").textContent =
+        "No se pudo importar: " + err.message;
+    }
+    e.target.value = "";
+  });
 
+  const viewCanvas = $("n3dCanvas");
+  let orbitPointer = null;
+  viewCanvas.style.touchAction = "none";
+  viewCanvas.addEventListener("pointerdown", (e) => {
+    orbitPointer = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    viewCanvas.setPointerCapture(e.pointerId);
+  });
+  viewCanvas.addEventListener("pointermove", (e) => {
+    if (!orbitPointer || orbitPointer.id !== e.pointerId || !spatialRenderer)
+      return;
+    const dx = e.clientX - orbitPointer.x,
+      dy = e.clientY - orbitPointer.y;
+    orbitPointer.x = e.clientX;
+    orbitPointer.y = e.clientY;
+    spatialRenderer.camera.orbit(-dx * 0.008, dy * 0.008);
+    spatialRenderer.render();
+  });
+  const endOrbit = (e) => {
+    if (orbitPointer?.id === e.pointerId) orbitPointer = null;
+  };
+  viewCanvas.addEventListener("pointerup", endOrbit);
+  viewCanvas.addEventListener("pointercancel", endOrbit);
+  viewCanvas.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      spatialRenderer?.camera.dolly(e.deltaY * 0.001);
+      spatialRenderer?.render();
+    },
+    { passive: false },
+  );
 
-const viewCanvas=$("n3dCanvas");let orbitPointer=null;viewCanvas.style.touchAction="none";viewCanvas.addEventListener("pointerdown",e=>{orbitPointer={id:e.pointerId,x:e.clientX,y:e.clientY};viewCanvas.setPointerCapture(e.pointerId)});viewCanvas.addEventListener("pointermove",e=>{if(!orbitPointer||orbitPointer.id!==e.pointerId||!spatialRenderer)return;const dx=e.clientX-orbitPointer.x,dy=e.clientY-orbitPointer.y;orbitPointer.x=e.clientX;orbitPointer.y=e.clientY;spatialRenderer.camera.orbit(-dx*.008,dy*.008);spatialRenderer.render()});const endOrbit=e=>{if(orbitPointer?.id===e.pointerId)orbitPointer=null};viewCanvas.addEventListener("pointerup",endOrbit);viewCanvas.addEventListener("pointercancel",endOrbit);viewCanvas.addEventListener("wheel",e=>{e.preventDefault();spatialRenderer?.camera.dolly(e.deltaY*.001);spatialRenderer?.render()},{passive:false});
+  $("n3dView").addEventListener("change", () => {
+    if (spatialRenderer) {
+      spatialRenderer.camera.setView($("n3dView").value);
+      spatialRenderer.render();
+    }
+  });
+  $("n3dZoom").addEventListener("input", () => {
+    if (spatialRenderer) {
+      spatialRenderer.camera.distance = Number($("n3dZoom").value);
+      spatialRenderer.render();
+    }
+  });
+  $("n3dRender").addEventListener("click", () => spatialRenderer?.render());
+  $("n3dOrbit").addEventListener("click", () => {
+    if (spatialRenderer) {
+      spatialRenderer.camera.orbit(0.45, 0.12);
+      spatialRenderer.render();
+    }
+  });
 
-$("n3dView").addEventListener("change",()=>{if(spatialRenderer){spatialRenderer.camera.setView($("n3dView").value);spatialRenderer.render()}});$("n3dZoom").addEventListener("input",()=>{if(spatialRenderer){spatialRenderer.camera.distance=Number($("n3dZoom").value);spatialRenderer.render()}});$("n3dRender").addEventListener("click",()=>spatialRenderer?.render());$("n3dOrbit").addEventListener("click",()=>{if(spatialRenderer){spatialRenderer.camera.orbit(.45,.12);spatialRenderer.render()}});
+  let engineImage = null,
+    raf = 0,
+    motionRaf = 0,
+    sceneRaf = 0,
+    rigEditing = false,
+    draggingRigPoint = null,
+    maskDrawing = false,
+    maskAuto = false,
+    maskDraft = [];
+  let maskRegions = [],
+    characterType = "worker",
+    activeAction = "worker-idle";
+  const rig = new window.NexoraAnimationTools.CharacterRig().createHumanoid();
+  const deformer = new window.NexoraMeshDeformer.MeshDeformer();
+  let meshActive = false;
+  const motion = new window.NexoraMotionSystem.MotionTimeline(rig.points);
+  let rigBase = { ...rig.points };
+  const characterLayer = engine.addLayer({
+    name: "Escenario de personajes 2D",
+    type: "custom",
+    z: 25,
+    draw: (ctx, t) =>
+      characterStage.render(ctx, engine.width, engine.height, t),
+  });
+  const mainImage = $("imageFile");
+  mainImage?.addEventListener("change", () => {
+    const file = mainImage.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file),
+      img = new Image();
+    img.onload = () => {
+      if (engineImage) engine.removeLayer(engineImage);
+      engine.updateLayer(characterLayer, { visible: false });
+      const iw = img.width * Math.min(1, 560 / img.width, 310 / img.height),
+        ih = img.height * Math.min(1, 560 / img.width, 310 / img.height);
+      meshActive = false;
+      engineImage = engine.addLayer({
+        name: "Personaje / imagen",
+        type: "custom",
+        asset: img,
+        width: iw,
+        height: ih,
+        z: 10,
+        draw: (ctx, t, l) => {
+          if (meshActive)
+            deformer.draw(ctx, img, {
+              x: -l.width / 2,
+              y: -l.height / 2,
+              width: l.width,
+              height: l.height,
+            });
+          else
+            ctx.drawImage(img, -l.width / 2, -l.height / 2, l.width, l.height);
+        },
+      });
+      ["nlX", "nlY", "nlScale", "nlRotation", "nlOpacity"].forEach(
+        (id) => ($(id).value = id === "nlScale" || id === "nlOpacity" ? 1 : 0),
+      );
+      engine.draw(0);
+      $("nvStatus").textContent = "IMAGEN CARGADA";
+      $("nvHelp").textContent =
+        "La imagen está en una capa independiente. Puedes añadir partículas y mover cámara.";
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => {
+      $("nvStatus").textContent = "ERROR DE IMAGEN";
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  });
+  function imagePointFromCanvas(px, py) {
+    const layer = engine.layers.find((x) => x.id === engineImage);
+    if (!layer) return null;
+    const zoom = engine.camera.zoom || 1,
+      rotation = engine.camera.rotation || 0,
+      cx = engine.width / 2,
+      cy = engine.height / 2,
+      dx = (px - cx) / zoom,
+      dy = (py - cy) / zoom,
+      cr = Math.cos(rotation),
+      sr = Math.sin(rotation),
+      wx = cx + (dx * cr + dy * sr) + (engine.camera.x || 0),
+      wy = cy + (-dx * sr + dy * cr) + (engine.camera.y || 0),
+      lx = wx - (cx + layer.x),
+      ly = wy - (cy + layer.y),
+      lr = layer.rotation || 0,
+      lc = Math.cos(lr),
+      ls = Math.sin(lr),
+      rx = (lx * lc + ly * ls) / (layer.scaleX || 1),
+      ry = (-lx * ls + ly * lc) / (layer.scaleY || 1);
+    return { x: rx / layer.width + 0.5, y: ry / layer.height + 0.5 };
+  }
+  function rigPointsInImage() {
+    if (!engineImage) return {};
+    return Object.fromEntries(
+      Object.entries(rig.points)
+        .map(([name, p]) => [
+          name,
+          imagePointFromCanvas(p.x * engine.width, p.y * engine.height),
+        ])
+        .filter(([, p]) => p && Number.isFinite(p.x) && Number.isFinite(p.y)),
+    );
+  }
+  function imageBounds() {
+    const layer = engine.layers.find((x) => x.id === engineImage);
+    if (!layer) return null;
+    return { layer };
+  }
+  function drawMaskOverlay() {
+    const bounds = imageBounds();
+    if (!bounds) return;
+    const l = bounds.layer,
+      ctx = engine.ctx;
+    ctx.save();
+    ctx.translate(engine.width / 2, engine.height / 2);
+    ctx.rotate(engine.camera.rotation || 0);
+    ctx.scale(engine.camera.zoom || 1, engine.camera.zoom || 1);
+    ctx.translate(
+      -(engine.width / 2) - (engine.camera.x || 0),
+      -(engine.height / 2) - (engine.camera.y || 0),
+    );
+    ctx.translate(engine.width / 2 + l.x, engine.height / 2 + l.y);
+    ctx.rotate(l.rotation || 0);
+    ctx.scale(l.scaleX || 1, l.scaleY || 1);
+    ctx.lineWidth = 2 / Math.max(0.01, engine.camera.zoom || 1);
+    ctx.setLineDash([6, 4]);
+    const draw = (points) => {
+      ctx.beginPath();
+      points.forEach((p, i) => {
+        const x = (p.x - 0.5) * l.width,
+          y = (p.y - 0.5) * l.height;
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      });
+      return ctx;
+    };
+    for (const region of maskRegions) {
+      draw(region.points).closePath();
+      ctx.fillStyle = "rgba(82,220,190,.12)";
+      ctx.strokeStyle = "#52dcbe";
+      ctx.fill();
+      ctx.stroke();
+    }
+    if (maskDraft.length) {
+      draw(maskDraft);
+      ctx.strokeStyle = "#ffd166";
+      ctx.stroke();
+      for (const p of maskDraft) {
+        ctx.beginPath();
+        ctx.arc(
+          (p.x - 0.5) * l.width,
+          (p.y - 0.5) * l.height,
+          4,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fillStyle = "#ffd166";
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+  function detectMaskAt(point) {
+    const layer = engine.layers.find((x) => x.id === engineImage),
+      img = layer?.asset;
+    if (!img) {
+      $("nmMaskStatus").textContent = "No se encontró la imagen de referencia.";
+      return;
+    }
+    const size = 256,
+      canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    try {
+      ctx.drawImage(img, 0, 0, size, size);
+      const pixels = ctx.getImageData(0, 0, size, size),
+        hull = window.NexoraMeshDeformer.colorRegionHull(
+          pixels.data,
+          size,
+          size,
+          point.x * (size - 1),
+          point.y * (size - 1),
+          Number($("nmMaskTolerance").value),
+        );
+      if (!hull) {
+        $("nmMaskStatus").textContent =
+          "No se aisló una zona clara. Prueba otra parte o ajusta la sensibilidad.";
+        return;
+      }
+      const bones = $("nmMaskBones").value.split(","),
+        name = $("nmMaskBones").selectedOptions[0].textContent;
+      maskRegions = maskRegions.filter((r) => r.name !== name);
+      maskRegions.push({
+        name,
+        boneNames: bones,
+        points: hull,
+        feather: 0.035,
+      });
+      deformer.setRegions(maskRegions);
+      maskAuto = false;
+      $("nvCanvas").style.cursor = "default";
+      $("nmMaskStatus").textContent =
+        "Contorno aproximado creado (" +
+        hull.length +
+        " vértices). Revisa el polígono y vuelve a dibujarlo si hace falta.";
+      render(0);
+    } catch (err) {
+      $("nmMaskStatus").textContent =
+        "No se pudo analizar el color de la imagen: " + err.message;
+    }
+  }
+  function render(t = 0) {
+    engine.setCamera({ zoom: Number($("nvZoom").value) });
+    if (meshActive) {
+      const points = rigPointsInImage();
+      deformer.updateTargets(points);
+      deformer.updateBoneTargets(points, rig.bones);
+    }
+    if (!sceneRaf)
+      characterStage.setActors([
+        {
+          id: "preview-primary",
+          type: characterType,
+          rig,
+          motion,
+          time: t,
+          action: activeAction,
+        },
+      ]);
+    engine.draw(t);
+    drawMaskOverlay();
+    if (rigEditing) rig.draw(engine.ctx, engine.width, engine.height);
+  }
+  function refreshSceneCharacters() {
+    const select = $("nsCharacter");
+    if (!select) return;
+    const current = select.value;
+    select.innerHTML = '<option value="">Selecciona personaje…</option>';
+    continuity.list().forEach((p) => {
+      const o = document.createElement("option");
+      o.value = p.id;
+      o.textContent = p.name;
+      select.append(o);
+    });
+    if (current && continuity.get(current)) select.value = current;
+    else
+      select.value =
+        continuity.list().find((p) => p.name === "Trabajador 2D")?.id || "";
+  }
+  function makeShotActor(type, preset, duration, id, fromPose = null) {
+    const actorType = type === "dinosaur" ? "dinosaur" : "worker",
+      shotRig = new window.NexoraAnimationTools.CharacterRig();
+    actorType === "dinosaur"
+      ? shotRig.createDinosaur()
+      : shotRig.createHumanoid();
+    const fallback = actorType === "dinosaur" ? "dino-idle" : "worker-idle",
+      motionName = (
+        window.NexoraMotionSystem.profiles[actorType] || []
+      ).includes(preset)
+        ? preset
+        : fallback,
+      shotMotion = new window.NexoraMotionSystem.MotionTimeline(shotRig.points);
+    if (fromPose) shotMotion.transitionTo(motionName, duration, 0.28, fromPose);
+    else shotMotion.usePreset(motionName, duration);
+    return {
+      id,
+      type: actorType,
+      rig: shotRig,
+      motion: shotMotion,
+      action: motionName,
+      time: 0,
+    };
+  }
+  function syncSceneCompositor() {
+    compositor.tracks = [];
+    compositor.duration = 0;
+    let previousPrimary = null;
+    for (const shot of scene.data.shots) {
+      const actorType = shot.actorType === "dinosaur" ? "dinosaur" : "worker",
+        sameCharacter =
+          previousPrimary &&
+          previousPrimary.characterId === shot.characterId &&
+          previousPrimary.type === actorType,
+        fromPose = sameCharacter
+          ? previousPrimary.motion.sample(previousPrimary.motion.duration)
+          : null,
+        primary = makeShotActor(
+          actorType,
+          shot.motionPreset,
+          shot.duration,
+          shot.id + ":primary",
+          fromPose,
+        ),
+        cast = [primary];
+      if (
+        shot.secondaryActorType === "worker" ||
+        shot.secondaryActorType === "dinosaur"
+      )
+        cast.push(
+          makeShotActor(
+            shot.secondaryActorType,
+            shot.secondaryMotionPreset,
+            shot.duration,
+            shot.id + ":secondary",
+          ),
+        );
+      previousPrimary = {
+        characterId: shot.characterId,
+        type: actorType,
+        motion: primary.motion,
+      };
+      compositor.addTrack({
+        id: shot.id,
+        name: shot.name,
+        start: shot.start,
+        duration: shot.duration,
+        render: (visual, local) => {
+          if (characterType !== primary.type || rig.kind !== primary.type) {
+            rig.load(primary.rig.save());
+            characterType = primary.type;
+            $("nvCharacterType").value = primary.type;
+            $("ns2DCharacterType").value = primary.type;
+            engine.updateLayer(characterLayer, { visible: !engineImage });
+            updateActorPointOptions();
+            updateActorPresets();
+          }
+          cast.forEach((actor) => (actor.time = local));
+          characterStage.setActors(cast);
+          activeAction = primary.action;
+          $("ns2DAction").value = primary.action;
+          $("ns2DSecondType").value = shot.secondaryActorType || "none";
+          updateSecondaryActions();
+          if (cast[1]) $("ns2DSecondAction").value = cast[1].action;
+          const p = local / shot.duration;
+          let zoom =
+            shot.camera === "wide"
+              ? 0.9
+              : shot.camera === "close"
+                ? 1.2
+                : shot.camera === "push"
+                  ? 1 + 0.16 * p
+                  : shot.camera === "pull"
+                    ? 1.16 - 0.16 * p
+                    : 1;
+          let x =
+            shot.camera === "pan-left"
+              ? -34 * p
+              : shot.camera === "pan-right"
+                ? 34 * p
+                : 0;
+          visual.setCamera({ zoom, x, y: 0, rotation: 0 });
+        },
+      });
+    }
+  }
+  function renderShotList() {
+    const root = $("nsShots");
+    root.innerHTML = "";
+    if (!scene.data.shots.length) {
+      root.textContent = "Todavía no hay planos.";
+      return;
+    }
+    scene.data.shots.forEach((shot, i) => {
+      const row = document.createElement("div");
+      row.style.cssText =
+        "display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)";
+      const info = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = i + 1 + ". " + shot.name;
+      const meta = document.createElement("div");
+      meta.className = "hint";
+      const person = continuity.get(shot.characterId);
+      const second =
+        shot.secondaryActorType && shot.secondaryActorType !== "none"
+          ? " + " +
+            (shot.secondaryActorType === "dinosaur"
+              ? "Dinosaurio"
+              : "Trabajador") +
+            " (" +
+            (shot.secondaryMotionPreset || "reposo") +
+            ")"
+          : "";
+      meta.textContent =
+        (person?.name || "Sin personaje") +
+        " · " +
+        (shot.actorType === "dinosaur" ? "Dinosaurio" : "Trabajador") +
+        " (" +
+        (shot.motionPreset || "sin movimiento") +
+        ")" +
+        second +
+        " · " +
+        shot.camera +
+        " · " +
+        shot.duration +
+        " s · " +
+        shot.action;
+      info.append(title, meta);
+      const del = document.createElement("button");
+      del.className = "btn";
+      del.textContent = "Quitar";
+      del.addEventListener("click", () => {
+        scene.removeShot(shot.id);
+        syncSceneCompositor();
+        renderShotList();
+        $("nsStatus").textContent = "Plano eliminado.";
+      });
+      row.append(info, del);
+      root.append(row);
+    });
+    $("nsTitle").value = scene.data.title;
+  }
+  function addSceneShot() {
+    const actorType = $("ns2DCharacterType").value,
+      defaultName =
+        actorType === "dinosaur" ? "Dinosaurio 2D" : "Trabajador 2D";
+    let char = continuity.get($("nsCharacter").value);
+    if (!char || char.name === "Trabajador 2D" || char.name === "Dinosaurio 2D")
+      char = continuity.list().find((p) => p.name === defaultName) || char;
+    if (!char) throw new Error("Selecciona un personaje de la biblia");
+    if (
+      !char.face ||
+      !char.eyes ||
+      !char.hair ||
+      !char.body ||
+      !char.palette ||
+      !char.outfit
+    )
+      throw new Error(
+        "Completa rostro, ojos, cabello, cuerpo, paleta y vestuario en la ficha maestra",
+      );
+    const secondaryActorType = $("ns2DSecondType").value;
+    scene.setTitle($("nsTitle").value);
+    const shot = scene.addShot({
+      name: $("nsName").value || "Plano " + (scene.data.shots.length + 1),
+      characterId: char.id,
+      actorType,
+      motionPreset: $("ns2DAction").value,
+      secondaryActorType,
+      secondaryMotionPreset:
+        secondaryActorType === "none" ? "" : $("ns2DSecondAction").value,
+      action: $("nsAction").value,
+      dialogue: $("nsDialogue").value,
+      location: $("nsLocation").value,
+      camera: $("nsCamera").value,
+      duration: $("nsDuration").value,
+      voiceId: char.voiceId,
+    });
+    syncSceneCompositor();
+    renderShotList();
+    $("nsStatus").textContent =
+      "Plano añadido con " +
+      (secondaryActorType === "none" ? "un actor" : "dos actores") +
+      ". Voz vinculada a " +
+      char.name +
+      ".";
+    return shot;
+  }
 
-let engineImage=null,raf=0,motionRaf=0,sceneRaf=0,rigEditing=false,draggingRigPoint=null,maskDrawing=false,maskAuto=false,maskDraft=[];let maskRegions=[],characterType="worker",activeAction="worker-idle";const rig=new window.NexoraAnimationTools.CharacterRig().createHumanoid();const deformer=new window.NexoraMeshDeformer.MeshDeformer();let meshActive=false;const motion=new window.NexoraMotionSystem.MotionTimeline(rig.points);let rigBase={...rig.points};const characterLayer=engine.addLayer({name:"Escenario de personajes 2D",type:"custom",z:25,draw:(ctx,t)=>characterStage.render(ctx,engine.width,engine.height,t)});
-const mainImage=$("imageFile");
-mainImage?.addEventListener("change",()=>{const file=mainImage.files?.[0];if(!file)return;const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{if(engineImage)engine.removeLayer(engineImage);engine.updateLayer(characterLayer,{visible:false});const iw=img.width*Math.min(1,560/img.width,310/img.height),ih=img.height*Math.min(1,560/img.width,310/img.height);meshActive=false;engineImage=engine.addLayer({name:"Personaje / imagen",type:"custom",asset:img,width:iw,height:ih,z:10,draw:(ctx,t,l)=>{if(meshActive)deformer.draw(ctx,img,{x:-l.width/2,y:-l.height/2,width:l.width,height:l.height});else ctx.drawImage(img,-l.width/2,-l.height/2,l.width,l.height)}});["nlX","nlY","nlScale","nlRotation","nlOpacity"].forEach(id=>$(id).value=id==="nlScale"||id==="nlOpacity"?1:0);engine.draw(0);$("nvStatus").textContent="IMAGEN CARGADA";$("nvHelp").textContent="La imagen está en una capa independiente. Puedes añadir partículas y mover cámara.";URL.revokeObjectURL(url)};img.onerror=()=>{$("nvStatus").textContent="ERROR DE IMAGEN";URL.revokeObjectURL(url)};img.src=url});
-function imagePointFromCanvas(px,py){const layer=engine.layers.find(x=>x.id===engineImage);if(!layer)return null;const zoom=engine.camera.zoom||1,rotation=engine.camera.rotation||0,cx=engine.width/2,cy=engine.height/2,dx=(px-cx)/zoom,dy=(py-cy)/zoom,cr=Math.cos(rotation),sr=Math.sin(rotation),wx=cx+(dx*cr+dy*sr)+(engine.camera.x||0),wy=cy+(-dx*sr+dy*cr)+(engine.camera.y||0),lx=wx-(cx+layer.x),ly=wy-(cy+layer.y),lr=layer.rotation||0,lc=Math.cos(lr),ls=Math.sin(lr),rx=(lx*lc+ly*ls)/(layer.scaleX||1),ry=(-lx*ls+ly*lc)/(layer.scaleY||1);return{x:rx/layer.width+.5,y:ry/layer.height+.5}}function rigPointsInImage(){if(!engineImage)return{};return Object.fromEntries(Object.entries(rig.points).map(([name,p])=>[name,imagePointFromCanvas(p.x*engine.width,p.y*engine.height)]).filter(([,p])=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)))}
-function imageBounds(){const layer=engine.layers.find(x=>x.id===engineImage);if(!layer)return null;return{layer}}
- function drawMaskOverlay(){const bounds=imageBounds();if(!bounds)return;const l=bounds.layer,ctx=engine.ctx;ctx.save();ctx.translate(engine.width/2,engine.height/2);ctx.rotate(engine.camera.rotation||0);ctx.scale(engine.camera.zoom||1,engine.camera.zoom||1);ctx.translate(-(engine.width/2)-(engine.camera.x||0),-(engine.height/2)-(engine.camera.y||0));ctx.translate(engine.width/2+l.x,engine.height/2+l.y);ctx.rotate(l.rotation||0);ctx.scale(l.scaleX||1,l.scaleY||1);ctx.lineWidth=2/Math.max(.01,engine.camera.zoom||1);ctx.setLineDash([6,4]);const draw=(points)=>{ctx.beginPath();points.forEach((p,i)=>{const x=(p.x-.5)*l.width,y=(p.y-.5)*l.height;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});return ctx};for(const region of maskRegions){draw(region.points).closePath();ctx.fillStyle="rgba(82,220,190,.12)";ctx.strokeStyle="#52dcbe";ctx.fill();ctx.stroke()}if(maskDraft.length){draw(maskDraft);ctx.strokeStyle="#ffd166";ctx.stroke();for(const p of maskDraft){ctx.beginPath();ctx.arc((p.x-.5)*l.width,(p.y-.5)*l.height,4,0,Math.PI*2);ctx.fillStyle="#ffd166";ctx.fill()}}ctx.restore()}
- function detectMaskAt(point){
-  const layer=engine.layers.find(x=>x.id===engineImage),img=layer?.asset;if(!img){$("nmMaskStatus").textContent="No se encontró la imagen de referencia.";return}
-  const size=256,canvas=document.createElement("canvas");canvas.width=size;canvas.height=size;const ctx=canvas.getContext("2d",{willReadFrequently:true});
-  try{ctx.drawImage(img,0,0,size,size);const pixels=ctx.getImageData(0,0,size,size),hull=window.NexoraMeshDeformer.colorRegionHull(pixels.data,size,size,point.x*(size-1),point.y*(size-1),Number($("nmMaskTolerance").value));
-   if(!hull){$("nmMaskStatus").textContent="No se aisló una zona clara. Prueba otra parte o ajusta la sensibilidad.";return}
-   const bones=$("nmMaskBones").value.split(","),name=$("nmMaskBones").selectedOptions[0].textContent;
-   maskRegions=maskRegions.filter(r=>r.name!==name);maskRegions.push({name,boneNames:bones,points:hull,feather:.035});deformer.setRegions(maskRegions);maskAuto=false;$("nvCanvas").style.cursor="default";$("nmMaskStatus").textContent="Contorno aproximado creado ("+hull.length+" vértices). Revisa el polígono y vuelve a dibujarlo si hace falta.";render(0);
-  }catch(err){$("nmMaskStatus").textContent="No se pudo analizar el color de la imagen: "+err.message}
- }
- function render(t=0){engine.setCamera({zoom:Number($("nvZoom").value)});if(meshActive){const points=rigPointsInImage();deformer.updateTargets(points);deformer.updateBoneTargets(points,rig.bones)}if(!sceneRaf)characterStage.setActors([{id:"preview-primary",type:characterType,rig,motion,time:t,action:activeAction}]);engine.draw(t);drawMaskOverlay();if(rigEditing)rig.draw(engine.ctx,engine.width,engine.height)}
-function refreshSceneCharacters(){const select=$("nsCharacter");if(!select)return;const current=select.value;select.innerHTML='<option value="">Selecciona personaje…</option>';continuity.list().forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name;select.append(o)});if(current&&continuity.get(current))select.value=current;else select.value=continuity.list().find(p=>p.name==="Trabajador 2D")?.id||""}
-function makeShotActor(type,preset,duration,id,fromPose=null){const actorType=type==="dinosaur"?"dinosaur":"worker",shotRig=new window.NexoraAnimationTools.CharacterRig();actorType==="dinosaur"?shotRig.createDinosaur():shotRig.createHumanoid();const fallback=actorType==="dinosaur"?"dino-idle":"worker-idle",motionName=(window.NexoraMotionSystem.profiles[actorType]||[]).includes(preset)?preset:fallback,shotMotion=new window.NexoraMotionSystem.MotionTimeline(shotRig.points);if(fromPose)shotMotion.transitionTo(motionName,duration,.28,fromPose);else shotMotion.usePreset(motionName,duration);return{id,type:actorType,rig:shotRig,motion:shotMotion,action:motionName,time:0}}
-function syncSceneCompositor(){compositor.tracks=[];compositor.duration=0;let previousPrimary=null;for(const shot of scene.data.shots){const actorType=shot.actorType==="dinosaur"?"dinosaur":"worker",sameCharacter=previousPrimary&&previousPrimary.characterId===shot.characterId&&previousPrimary.type===actorType,fromPose=sameCharacter?previousPrimary.motion.sample(previousPrimary.motion.duration):null,primary=makeShotActor(actorType,shot.motionPreset,shot.duration,shot.id+":primary",fromPose),cast=[primary];if(shot.secondaryActorType==="worker"||shot.secondaryActorType==="dinosaur")cast.push(makeShotActor(shot.secondaryActorType,shot.secondaryMotionPreset,shot.duration,shot.id+":secondary"));previousPrimary={characterId:shot.characterId,type:actorType,motion:primary.motion};compositor.addTrack({id:shot.id,name:shot.name,start:shot.start,duration:shot.duration,render:(visual,local)=>{if(characterType!==primary.type||rig.kind!==primary.type){rig.load(primary.rig.save());characterType=primary.type;$("nvCharacterType").value=primary.type;$("ns2DCharacterType").value=primary.type;engine.updateLayer(characterLayer,{visible:!engineImage});updateActorPointOptions();updateActorPresets()}cast.forEach(actor=>actor.time=local);characterStage.setActors(cast);activeAction=primary.action;$("ns2DAction").value=primary.action;$("ns2DSecondType").value=shot.secondaryActorType||"none";updateSecondaryActions();if(cast[1])$("ns2DSecondAction").value=cast[1].action;const p=local/shot.duration;let zoom=shot.camera==="wide"?.9:shot.camera==="close"?1.2:shot.camera==="push"?1+.16*p:shot.camera==="pull"?1.16-.16*p:1;let x=shot.camera==="pan-left"?-34*p:shot.camera==="pan-right"?34*p:0;visual.setCamera({zoom,x,y:0,rotation:0})}})}}
-function renderShotList(){const root=$("nsShots");root.innerHTML="";if(!scene.data.shots.length){root.textContent="Todavía no hay planos.";return}scene.data.shots.forEach((shot,i)=>{const row=document.createElement("div");row.style.cssText="display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)";const info=document.createElement("div");const title=document.createElement("strong");title.textContent=(i+1)+". "+shot.name;const meta=document.createElement("div");meta.className="hint";const person=continuity.get(shot.characterId);const second=shot.secondaryActorType&&shot.secondaryActorType!=="none"?" + "+(shot.secondaryActorType==="dinosaur"?"Dinosaurio":"Trabajador")+" ("+(shot.secondaryMotionPreset||"reposo")+")":"";meta.textContent=(person?.name||"Sin personaje")+" · "+(shot.actorType==="dinosaur"?"Dinosaurio":"Trabajador")+" ("+(shot.motionPreset||"sin movimiento")+")"+second+" · "+shot.camera+" · "+shot.duration+" s · "+shot.action;info.append(title,meta);const del=document.createElement("button");del.className="btn";del.textContent="Quitar";del.addEventListener("click",()=>{scene.removeShot(shot.id);syncSceneCompositor();renderShotList();$("nsStatus").textContent="Plano eliminado."});row.append(info,del);root.append(row)});$("nsTitle").value=scene.data.title}
-function addSceneShot(){const actorType=$("ns2DCharacterType").value,defaultName=actorType==="dinosaur"?"Dinosaurio 2D":"Trabajador 2D";let char=continuity.get($("nsCharacter").value);if(!char||char.name==="Trabajador 2D"||char.name==="Dinosaurio 2D")char=continuity.list().find(p=>p.name===defaultName)||char;if(!char)throw new Error("Selecciona un personaje de la biblia");if(!char.face||!char.eyes||!char.hair||!char.body||!char.palette||!char.outfit)throw new Error("Completa rostro, ojos, cabello, cuerpo, paleta y vestuario en la ficha maestra");const secondaryActorType=$("ns2DSecondType").value;scene.setTitle($("nsTitle").value);const shot=scene.addShot({name:$("nsName").value||"Plano "+(scene.data.shots.length+1),characterId:char.id,actorType,motionPreset:$("ns2DAction").value,secondaryActorType,secondaryMotionPreset:secondaryActorType==="none"?"":$("ns2DSecondAction").value,action:$("nsAction").value,dialogue:$("nsDialogue").value,location:$("nsLocation").value,camera:$("nsCamera").value,duration:$("nsDuration").value,voiceId:char.voiceId});syncSceneCompositor();renderShotList();$("nsStatus").textContent="Plano añadido con "+(secondaryActorType==="none"?"un actor":"dos actores")+". Voz vinculada a "+char.name+".";return shot}
-
-function syncMotionBase(reset=false){rigBase=Object.fromEntries(Object.entries(rig.points).map(([k,p])=>[k,{x:p.x,y:p.y}]));motion.setBase(rigBase);if(reset)motion.keyframes=[];$("nmTime").value="0";$("nmTimeLabel").textContent="0.00 s"}
-function updateActorPointOptions(){const select=$("nvPoint"),labels={head:"Cabeza",jaw:"Mandíbula",neck:"Cuello",chest:"Pecho",shoulderL:"Hombro izquierdo",elbowL:"Codo izquierdo",handL:"Mano izquierda",shoulderR:"Hombro derecho",elbowR:"Codo derecho",handR:"Mano derecha",hip:"Cadera",kneeL:"Rodilla izquierda",footL:"Pie izquierdo",kneeR:"Rodilla derecha",footR:"Pie derecho",tail1:"Cola · base",tail2:"Cola · medio",tail3:"Cola · punta media",tail4:"Cola · punta"};const current=select.value;select.replaceChildren();for(const name of Object.keys(rig.points)){const o=document.createElement("option");o.value=name;o.textContent=labels[name]||name;select.append(o)}select.value=rig.points[current]?current:"head"}
-const actorActionLabels={"worker-idle":"Respirar / reposo","worker-walk":"Caminar","worker-run":"Correr","worker-work":"Trabajar","worker-lift":"Levantar objeto","worker-carry":"Cargar objeto","worker-hammer":"Martillar","worker-dig":"Excavar","worker-wave":"Saludar","worker-talk":"Hablar / gesticular","worker-push":"Empujar","worker-pull":"Tirar","worker-kneel":"Arrodillarse","worker-point":"Señalar","dino-idle":"Respirar / reposo","dino-walk":"Caminar","dino-run":"Correr","dino-roar":"Rugir","dino-bite":"Morder","dino-tail-swipe":"Golpe de cola","dino-hit":"Recibir impacto","dino-crouch":"Agacharse","dino-sniff":"Olfatear","dino-stomp":"Pisotear","dino-pounce":"Abalanzarse","dino-threat":"Mostrar amenaza"};
-function fillActorActions(select,type){const names=type==="dinosaur"?window.NexoraMotionSystem.profiles.dinosaur:window.NexoraMotionSystem.profiles.worker;select.replaceChildren();for(const name of names){const o=document.createElement("option");o.value=name;o.textContent=actorActionLabels[name]||name;select.append(o)}select.value=names[0]||"idle"}
-function updateSecondaryActions(){const type=$("ns2DSecondType").value,select=$("ns2DSecondAction");if(type==="none"){select.replaceChildren();const option=document.createElement("option");option.value="";option.textContent="Sin actor secundario";select.append(option);select.disabled=true;return}select.disabled=false;fillActorActions(select,type)}
-function updateActorPresets(){$("ns2DCharacterType").value=characterType;fillActorActions($("nmPreset"),characterType);fillActorActions($("ns2DAction"),characterType);updateSecondaryActions()}
-function setActorType(type){characterType=type==="dinosaur"?"dinosaur":"worker";if(characterType==="dinosaur")rig.createDinosaur();else rig.createHumanoid();activeAction=characterType==="dinosaur"?"dino-idle":"worker-idle";engine.updateLayer(characterLayer,{visible:!engineImage});meshActive=false;deformer.reset();updateActorPointOptions();updateActorPresets();syncMotionBase(true);showMotion(0);render(0);$("nvStatus").textContent=characterType==="dinosaur"?"DINOSAURIO 2D · RIG ARTICULADO · COLA POR SEGMENTOS":"TRABAJADOR 2D · RIG ARTICULADO · ACTUACIÓN DE OFICIO";$("nvCharacterType").value=characterType;$("ns2DCharacterType").value=characterType}
-updateActorPointOptions();updateActorPresets();render(0);
-function commitRigEdit(){const t=Number($("nmTime").value),points=Object.fromEntries(Object.entries(rig.points).map(([k,p])=>[k,{x:p.x,y:p.y}]));if(t<=.001){motion.setBase(points);rigBase=points;const zero=motion.keyframes.find(k=>Math.abs(k.time)<.001);if(zero)motion.addKeyframe(0,points,zero.ease||"smooth")}else{motion.addKeyframe(t,points,$("nmEase").value)}$("nmStatus").textContent=t<=.001?"Pose base actualizada. Las demás poses se conservaron.":"Pose actualizada en "+t.toFixed(2)+" s; se conservaron las otras claves."}
-function showMotion(t){motion.apply(rig,t);render(t);$("nmTime").value=String(t);$("nmTimeLabel").textContent=t.toFixed(2)+" s"}
-function setMotion(){if(motionRaf){cancelAnimationFrame(motionRaf);motionRaf=0}const from=Object.fromEntries(Object.entries(rig.points).map(([k,p])=>[k,{x:p.x,y:p.y}])),duration=Number($("nmDuration").value),preset=$("nmPreset").value;motion.setBase(rigBase);motion.transitionTo(preset,duration,.24,from);$("nmTime").max=String(duration);activeAction=preset;showMotion(0);$("nmStatus").textContent="Movimiento "+$("nmPreset").selectedOptions[0].textContent+" preparado con transición suave."}
-$("nvRender").addEventListener("click",()=>{render(0);$("nvStatus").textContent="FOTOGRAMA RENDERIZADO"});
-$("nvParticles").addEventListener("change",e=>{const kind=e.target.value;engine.setParticles(kind==="none"?{count:0}:{kind,count:kind==="snow"?60:42,seed:412});render(0)});
-$("nvZoom").addEventListener("input",()=>render(0));
-function updateImageLayer(){if(!engineImage)return;$("nvStatus").textContent=engine.updateLayer(engineImage,{x:Number($("nlX").value),y:Number($("nlY").value),scaleX:Number($("nlScale").value),scaleY:Number($("nlScale").value),rotation:Number($("nlRotation").value)*Math.PI/180,opacity:Number($("nlOpacity").value)})?"CAPA ACTUALIZADA":"No hay imagen cargada";render(0)}
-["nlX","nlY","nlScale","nlRotation","nlOpacity"].forEach(id=>$(id).addEventListener("input",updateImageLayer));
-$("nvCharacterType").addEventListener("change",()=>setActorType($("nvCharacterType").value));
-$("ns2DCharacterType").addEventListener("change",()=>fillActorActions($("ns2DAction"),$("ns2DCharacterType").value));
-$("ns2DSecondType").addEventListener("change",updateSecondaryActions);
-$("nvRigHuman").addEventListener("click",()=>setActorType("worker"));
-$("nvRigDino").addEventListener("click",()=>setActorType("dinosaur"));
-$("nvRigMirror").addEventListener("click",()=>{const mirrored=rig.mirrorPoint($("nvPoint").value);if(!mirrored){$("nvStatus").textContent="Selecciona una articulación lateral (izquierda/derecha).";return}commitRigEdit();render(0);$("nvStatus").textContent="Articulación espejada: "+mirrored});
-$("nvRigToggle").addEventListener("click",()=>{rigEditing=!rigEditing;$("nvRigToggle").textContent=rigEditing?"Terminar edición":"Editar esqueleto";$("nvCanvas").style.cursor=rigEditing?"crosshair":"default";render(0)});
-$("nvCanvas").addEventListener("pointerdown",e=>{const r=e.currentTarget.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;if(maskDrawing||maskAuto){const bounds=imageBounds();if(!bounds){$("nmMaskStatus").textContent="Carga primero una ilustración.";return}const point=imagePointFromCanvas(x*engine.width,y*engine.height);if(!point||point.x<0||point.x>1||point.y<0||point.y>1)return;if(maskAuto){detectMaskAt(point);return}maskDraft.push(point);$("nmMaskStatus").textContent="Puntos del contorno: "+maskDraft.length+". Pulsa Terminar polígono al completar al menos 3.";render(0);return}if(!rigEditing)return;const nearest=Object.entries(rig.points).map(([name,p])=>({name,d:Math.hypot((p.x-x)*r.width,(p.y-y)*r.height)})).sort((a,b)=>a.d-b.d)[0];if(nearest&&nearest.d<22){draggingRigPoint=nearest.name}else{rig.setPoint($("nvPoint").value,x,y);draggingRigPoint=$("nvPoint").value}rig.selected=draggingRigPoint;if(motionRaf){cancelAnimationFrame(motionRaf);motionRaf=0;$("nmPlay").textContent="▶ Previsualizar movimiento"}e.currentTarget.setPointerCapture(e.pointerId);render(0)});
-$("nvCanvas").addEventListener("pointermove",e=>{if(maskDrawing||!rigEditing||!draggingRigPoint)return;const r=e.currentTarget.getBoundingClientRect();const px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/r.height;if(!rig.applyIK(draggingRigPoint,px,py))rig.setPoint(draggingRigPoint,px,py);render(0)});
-const finishRigDrag=()=>{if(draggingRigPoint)commitRigEdit();draggingRigPoint=null};$("nvCanvas").addEventListener("pointerup",finishRigDrag);$("nvCanvas").addEventListener("pointercancel",finishRigDrag);$("nvPoint").addEventListener("change",()=>{rig.selected=$("nvPoint").value;render(0)});
-$("nmPreset").addEventListener("change",setMotion);$("nmDuration").addEventListener("change",setMotion);
-$("nmTime").addEventListener("input",()=>showMotion(Number($("nmTime").value)));
-$("nmPlay").addEventListener("click",()=>{if(motionRaf){cancelAnimationFrame(motionRaf);motionRaf=0;$("nmPlay").textContent="▶ Previsualizar movimiento";return}const start=performance.now(),duration=motion.duration;$("nmPlay").textContent="Ⅱ Detener";const tick=now=>{const elapsed=(now-start)/1000;if(elapsed>=duration){showMotion(duration);motionRaf=0;$("nmPlay").textContent="▶ Previsualizar movimiento";return}showMotion(elapsed);motionRaf=requestAnimationFrame(tick)};motionRaf=requestAnimationFrame(tick)});
-$("nmKey").addEventListener("click",()=>{const t=Number($("nmTime").value);motion.addKeyframe(t,rig.points,$("nmEase").value);$("nmStatus").textContent="Pose clave guardada en "+t.toFixed(2)+" s."});
-$("nmExport").addEventListener("click",()=>{motion.setBase(rigBase);const blob=new Blob([motion.exportJSON()],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nexora-movimiento.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)});
-$("nmImport").addEventListener("click",()=>$("nmFile").click());$("nmFile").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{motion.importJSON(await file.text());rigBase=motion.base;rig.points=motion.sample(0);$("nmPreset").value=motion.preset;$("nmDuration").value=motion.duration;$("nmTime").max=motion.duration;showMotion(0);$("nmStatus").textContent="Movimiento importado."}catch(err){$("nmStatus").textContent="No se pudo importar: "+err.message}e.target.value=""});
-$("nvRigSave").addEventListener("click",()=>{const blob=new Blob([JSON.stringify(rig.save(),null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nexora-character-rig.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)});
-$("nvRigLoad").addEventListener("click",()=>$("nvRigFile").click());$("nvRigFile").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{rig.load(JSON.parse(await file.text()));render(0);$("nvStatus").textContent="RIG CARGADO"}catch(err){$("nvStatus").textContent="RIG INVÁLIDO: "+err.message}e.target.value=""});
-$("nvAnimate").addEventListener("click",()=>{if(raf){cancelAnimationFrame(raf);raf=0;$("nvAnimate").textContent="Vista animada";return}$("nvAnimate").textContent="Detener vista";const start=performance.now();const tick=now=>{render((now-start)/1000);raf=requestAnimationFrame(tick)};raf=requestAnimationFrame(tick)});
-$("nsCharacter").addEventListener("change",()=>{const p=continuity.get($("nsCharacter").value);if(p?.voiceId&&$("voiceSpeaker"))$("voiceSpeaker").value=p.voiceId});
-$("nsAdd").addEventListener("click",()=>{try{addSceneShot()}catch(e){$("nsStatus").textContent=e.message}});
-$("nsTitle").addEventListener("change",()=>scene.setTitle($("nsTitle").value));
-$("nsValidate").addEventListener("click",()=>{const report=scene.validate(continuity);$("nsStatus").textContent=report.valid?"Continuidad de escena correcta: "+report.shotCount+" planos, "+report.duration.toFixed(1)+" segundos.":report.issues.map(x=>x.shot+": "+x.message).join(" · ")});
-$("nsPlay").addEventListener("click",()=>{if(sceneRaf){cancelAnimationFrame(sceneRaf);sceneRaf=0;$("nsPlay").textContent="▶ Previsualizar escena";return}if(!scene.data.shots.length){$("nsStatus").textContent="Añade al menos un plano.";return}syncSceneCompositor();const total=compositor.duration,start=performance.now();$("nsPlay").textContent="Ⅱ Detener escena";const tick=now=>{const t=(now-start)/1000;if(t>=total){compositor.frame(total);sceneRaf=0;$("nsPlay").textContent="▶ Previsualizar escena";return}compositor.frame(t);sceneRaf=requestAnimationFrame(tick)};sceneRaf=requestAnimationFrame(tick)});
-$("nsVideo").addEventListener("click",async()=>{if(!scene.data.shots.length){$("nsStatus").textContent="Añade al menos un plano antes de exportar.";return}const report=scene.validate(continuity);if(!report.valid){$("nsStatus").textContent="Corrige la continuidad antes de exportar: "+report.issues.map(x=>x.message).join(" · ");return}syncSceneCompositor();const audio=$("audioTrack");compositor.audio=[];if(audioTimeline?.tracks.length){for(const track of audioTimeline.exportTracks())compositor.addAudio(track)}else if(audio?.src)compositor.addAudio({src:audio.src,start:0,volume:1});$("nsVideo").disabled=true;$("nsStatus").textContent="Renderizando vídeo… no cierres el estudio.";try{const result=await compositor.export({fps:30,filename:"nexora-escena.webm",onProgress:p=>$("nsStatus").textContent="Renderizando escena: "+Math.round(p*100)+"%"});$("nsStatus").textContent="Vídeo WebM listo ("+Math.round(result.size/1024/1024*10)/10+" MB)."}catch(err){$("nsStatus").textContent="No se pudo exportar: "+err.message}finally{$("nsVideo").disabled=false}});
-$("nsExport").addEventListener("click",()=>{scene.setTitle($("nsTitle").value);const blob=new Blob([scene.exportJSON()],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nexora-proyecto-escena.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)});
-$("nsImport").addEventListener("click",()=>$("nsFile").click());$("nsFile").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{scene.importJSON(await file.text());syncSceneCompositor();renderShotList();$("nsStatus").textContent="Proyecto de escena importado."}catch(err){$("nsStatus").textContent="No se pudo importar: "+err.message}e.target.value=""});
-scene.setTitle(scene.data.title);refreshSceneCharacters();renderShotList();syncSceneCompositor();
-$("nmMeshToggle").addEventListener("click",()=>{if(!engineImage){$("nmMeshStatus").textContent="Carga primero una imagen.";return}const points=rigPointsInImage();if(Object.keys(points).length<3){$("nmMeshStatus").textContent="Coloca al menos tres puntos del esqueleto sobre la imagen.";return}deformer.columns=Number($("nmMeshCols").value);deformer.rows=Number($("nmMeshRows").value);deformer.strength=Number($("nmMeshStrength").value);deformer.capture(points);deformer.influenceRadius=Number($("nmBoneRadius").value);deformer.captureBones(points,rig.bones.map(b=>({...b,radius:deformer.influenceRadius})));meshActive=!meshActive;$("nmMeshToggle").textContent=meshActive?"Desactivar deformación":"Activar deformación";$("nmMeshStatus").textContent=meshActive?"Malla activa: mueve los puntos del esqueleto para deformar la imagen.":"Deformación desactivada.";render(0)});
-$("nmMaskStart").addEventListener("click",()=>{if(!engineImage){$("nmMaskStatus").textContent="Carga primero una ilustración.";return}maskAuto=false;maskDraft=[];maskDrawing=true;rigEditing=false;$("nvCanvas").style.cursor="crosshair";$("nmMaskStatus").textContent="Toca la ilustración para marcar los vértices del contorno. Mínimo 3 puntos.";render(0)});$("nmMaskAuto").addEventListener("click",()=>{if(!engineImage){$("nmMaskStatus").textContent="Carga primero una ilustración.";return}maskDrawing=false;maskAuto=true;rigEditing=false;$("nvCanvas").style.cursor="crosshair";$("nmMaskStatus").textContent="Toca el centro de la zona que quieres aislar. Funciona mejor con colores planos y contrastados.";});
- $("nmMaskFinish").addEventListener("click",()=>{if(maskDraft.length<3){$("nmMaskStatus").textContent="Necesitas al menos 3 puntos para cerrar la máscara.";return}const bones=$("nmMaskBones").value.split(",");const name=$("nmMaskBones").selectedOptions[0].textContent;maskRegions=maskRegions.filter(r=>r.name!==name);maskRegions.push({name,boneNames:bones,points:maskDraft.map(p=>({...p})),feather:.045});deformer.setRegions(maskRegions);maskDraft=[];maskDrawing=false;maskAuto=false;$("nvCanvas").style.cursor="default";$("nmMaskStatus").textContent="Máscara guardada: "+name+". Se incluirá al exportar la malla.";render(0)});
- $("nmMaskClear").addEventListener("click",()=>{const name=$("nmMaskBones").selectedOptions[0].textContent;maskRegions=maskRegions.filter(r=>r.name!==name);deformer.setRegions(maskRegions);maskDraft=[];maskDrawing=false;maskAuto=false;$("nvCanvas").style.cursor="default";$("nmMaskStatus").textContent="Máscara eliminada: "+name+".";render(0)});
- $("nmMeshReset").addEventListener("click",()=>{deformer.reset();maskRegions=[];deformer.setRegions([]);maskDraft=[];render(0);$("nmMeshStatus").textContent="Malla y máscaras restablecidas a su forma original."});
-$("nmMeshStrength").addEventListener("input",()=>{deformer.strength=Number($("nmMeshStrength").value);render(0)});
-$("nmMeshExport").addEventListener("click",()=>{const blob=new Blob([deformer.exportJSON()],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nexora-malla-personaje.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)});
-$("nmMeshImport").addEventListener("click",()=>$("nmMeshFile").click());$("nmMeshFile").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{deformer.importJSON(await file.text());maskRegions=deformer.regions.map(r=>({...r,points:r.points.map(p=>({...p})),boneNames:[...r.boneNames]}));$("nmMeshCols").value=deformer.columns;$("nmMeshRows").value=deformer.rows;$("nmMeshStrength").value=deformer.strength;meshActive=true;$("nmMeshToggle").textContent="Desactivar deformación";render(0);$("nmMeshStatus").textContent="Malla importada."}catch(err){$("nmMeshStatus").textContent="No se pudo importar: "+err.message}e.target.value=""});
-window.NEXORA_ANIMATE_ENGINE={visual:engine,continuity,assets:assetStore,compositor,scene,animation:window.NexoraAnimationTools,skeleton:window.NexoraCharacterSkeleton,spatial:window.NexoraSpatialEngine,rig3d:window.NexoraSpatialRig3D,motion3d:window.NexoraSpatialMotion,audio:audioTimeline,motion:window.NexoraMotionSystem,mesh:deformer,version:"2.4.0"};
-window.addEventListener("beforeunload",()=>{audioTimeline?.clear();if(raf)cancelAnimationFrame(raf);if(motionRaf)cancelAnimationFrame(motionRaf);if(sceneRaf)cancelAnimationFrame(sceneRaf)});
+  function syncMotionBase(reset = false) {
+    rigBase = Object.fromEntries(
+      Object.entries(rig.points).map(([k, p]) => [k, { x: p.x, y: p.y }]),
+    );
+    motion.setBase(rigBase);
+    if (reset) motion.keyframes = [];
+    $("nmTime").value = "0";
+    $("nmTimeLabel").textContent = "0.00 s";
+  }
+  function updateActorPointOptions() {
+    const select = $("nvPoint"),
+      labels = {
+        head: "Cabeza",
+        jaw: "Mandíbula",
+        neck: "Cuello",
+        chest: "Pecho",
+        shoulderL: "Hombro izquierdo",
+        elbowL: "Codo izquierdo",
+        handL: "Mano izquierda",
+        shoulderR: "Hombro derecho",
+        elbowR: "Codo derecho",
+        handR: "Mano derecha",
+        hip: "Cadera",
+        kneeL: "Rodilla izquierda",
+        footL: "Pie izquierdo",
+        kneeR: "Rodilla derecha",
+        footR: "Pie derecho",
+        tail1: "Cola · base",
+        tail2: "Cola · medio",
+        tail3: "Cola · punta media",
+        tail4: "Cola · punta",
+      };
+    const current = select.value;
+    select.replaceChildren();
+    for (const name of Object.keys(rig.points)) {
+      const o = document.createElement("option");
+      o.value = name;
+      o.textContent = labels[name] || name;
+      select.append(o);
+    }
+    select.value = rig.points[current] ? current : "head";
+  }
+  const actorActionLabels = {
+    "worker-idle": "Respirar / reposo",
+    "worker-walk": "Caminar",
+    "worker-run": "Correr",
+    "worker-work": "Trabajar",
+    "worker-lift": "Levantar objeto",
+    "worker-carry": "Cargar objeto",
+    "worker-hammer": "Martillar",
+    "worker-dig": "Excavar",
+    "worker-wave": "Saludar",
+    "worker-talk": "Hablar / gesticular",
+    "worker-push": "Empujar",
+    "worker-pull": "Tirar",
+    "worker-kneel": "Arrodillarse",
+    "worker-point": "Señalar",
+    "dino-idle": "Respirar / reposo",
+    "dino-walk": "Caminar",
+    "dino-run": "Correr",
+    "dino-roar": "Rugir",
+    "dino-bite": "Morder",
+    "dino-tail-swipe": "Golpe de cola",
+    "dino-hit": "Recibir impacto",
+    "dino-crouch": "Agacharse",
+    "dino-sniff": "Olfatear",
+    "dino-stomp": "Pisotear",
+    "dino-pounce": "Abalanzarse",
+    "dino-threat": "Mostrar amenaza",
+  };
+  function fillActorActions(select, type) {
+    const names =
+      type === "dinosaur"
+        ? window.NexoraMotionSystem.profiles.dinosaur
+        : window.NexoraMotionSystem.profiles.worker;
+    select.replaceChildren();
+    for (const name of names) {
+      const o = document.createElement("option");
+      o.value = name;
+      o.textContent = actorActionLabels[name] || name;
+      select.append(o);
+    }
+    select.value = names[0] || "idle";
+  }
+  function updateSecondaryActions() {
+    const type = $("ns2DSecondType").value,
+      select = $("ns2DSecondAction");
+    if (type === "none") {
+      select.replaceChildren();
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "Sin actor secundario";
+      select.append(option);
+      select.disabled = true;
+      return;
+    }
+    select.disabled = false;
+    fillActorActions(select, type);
+  }
+  function updateActorPresets() {
+    $("ns2DCharacterType").value = characterType;
+    fillActorActions($("nmPreset"), characterType);
+    fillActorActions($("ns2DAction"), characterType);
+    updateSecondaryActions();
+  }
+  function setActorType(type) {
+    characterType = type === "dinosaur" ? "dinosaur" : "worker";
+    if (characterType === "dinosaur") rig.createDinosaur();
+    else rig.createHumanoid();
+    activeAction = characterType === "dinosaur" ? "dino-idle" : "worker-idle";
+    engine.updateLayer(characterLayer, { visible: !engineImage });
+    meshActive = false;
+    deformer.reset();
+    updateActorPointOptions();
+    updateActorPresets();
+    syncMotionBase(true);
+    showMotion(0);
+    render(0);
+    $("nvStatus").textContent =
+      characterType === "dinosaur"
+        ? "DINOSAURIO 2D · RIG ARTICULADO · COLA POR SEGMENTOS"
+        : "TRABAJADOR 2D · RIG ARTICULADO · ACTUACIÓN DE OFICIO";
+    $("nvCharacterType").value = characterType;
+    $("ns2DCharacterType").value = characterType;
+  }
+  updateActorPointOptions();
+  updateActorPresets();
+  render(0);
+  function commitRigEdit() {
+    const t = Number($("nmTime").value),
+      points = Object.fromEntries(
+        Object.entries(rig.points).map(([k, p]) => [k, { x: p.x, y: p.y }]),
+      );
+    if (t <= 0.001) {
+      motion.setBase(points);
+      rigBase = points;
+      const zero = motion.keyframes.find((k) => Math.abs(k.time) < 0.001);
+      if (zero) motion.addKeyframe(0, points, zero.ease || "smooth");
+    } else {
+      motion.addKeyframe(t, points, $("nmEase").value);
+    }
+    $("nmStatus").textContent =
+      t <= 0.001
+        ? "Pose base actualizada. Las demás poses se conservaron."
+        : "Pose actualizada en " +
+          t.toFixed(2) +
+          " s; se conservaron las otras claves.";
+  }
+  function showMotion(t) {
+    motion.apply(rig, t);
+    render(t);
+    $("nmTime").value = String(t);
+    $("nmTimeLabel").textContent = t.toFixed(2) + " s";
+  }
+  function setMotion() {
+    if (motionRaf) {
+      cancelAnimationFrame(motionRaf);
+      motionRaf = 0;
+    }
+    const from = Object.fromEntries(
+        Object.entries(rig.points).map(([k, p]) => [k, { x: p.x, y: p.y }]),
+      ),
+      duration = Number($("nmDuration").value),
+      preset = $("nmPreset").value;
+    motion.setBase(rigBase);
+    motion.transitionTo(preset, duration, 0.24, from);
+    $("nmTime").max = String(duration);
+    activeAction = preset;
+    showMotion(0);
+    $("nmStatus").textContent =
+      "Movimiento " +
+      $("nmPreset").selectedOptions[0].textContent +
+      " preparado con transición suave.";
+  }
+  $("nvRender").addEventListener("click", () => {
+    render(0);
+    $("nvStatus").textContent = "FOTOGRAMA RENDERIZADO";
+  });
+  $("nvParticles").addEventListener("change", (e) => {
+    const kind = e.target.value;
+    engine.setParticles(
+      kind === "none"
+        ? { count: 0 }
+        : { kind, count: kind === "snow" ? 60 : 42, seed: 412 },
+    );
+    render(0);
+  });
+  $("nvZoom").addEventListener("input", () => render(0));
+  function updateImageLayer() {
+    if (!engineImage) return;
+    $("nvStatus").textContent = engine.updateLayer(engineImage, {
+      x: Number($("nlX").value),
+      y: Number($("nlY").value),
+      scaleX: Number($("nlScale").value),
+      scaleY: Number($("nlScale").value),
+      rotation: (Number($("nlRotation").value) * Math.PI) / 180,
+      opacity: Number($("nlOpacity").value),
+    })
+      ? "CAPA ACTUALIZADA"
+      : "No hay imagen cargada";
+    render(0);
+  }
+  ["nlX", "nlY", "nlScale", "nlRotation", "nlOpacity"].forEach((id) =>
+    $(id).addEventListener("input", updateImageLayer),
+  );
+  $("nvCharacterType").addEventListener("change", () =>
+    setActorType($("nvCharacterType").value),
+  );
+  $("ns2DCharacterType").addEventListener("change", () =>
+    fillActorActions($("ns2DAction"), $("ns2DCharacterType").value),
+  );
+  $("ns2DSecondType").addEventListener("change", updateSecondaryActions);
+  $("nvRigHuman").addEventListener("click", () => setActorType("worker"));
+  $("nvRigDino").addEventListener("click", () => setActorType("dinosaur"));
+  $("nvRigMirror").addEventListener("click", () => {
+    const mirrored = rig.mirrorPoint($("nvPoint").value);
+    if (!mirrored) {
+      $("nvStatus").textContent =
+        "Selecciona una articulación lateral (izquierda/derecha).";
+      return;
+    }
+    commitRigEdit();
+    render(0);
+    $("nvStatus").textContent = "Articulación espejada: " + mirrored;
+  });
+  $("nvRigToggle").addEventListener("click", () => {
+    rigEditing = !rigEditing;
+    $("nvRigToggle").textContent = rigEditing
+      ? "Terminar edición"
+      : "Editar esqueleto";
+    $("nvCanvas").style.cursor = rigEditing ? "crosshair" : "default";
+    render(0);
+  });
+  $("nvCanvas").addEventListener("pointerdown", (e) => {
+    const r = e.currentTarget.getBoundingClientRect(),
+      x = (e.clientX - r.left) / r.width,
+      y = (e.clientY - r.top) / r.height;
+    if (maskDrawing || maskAuto) {
+      const bounds = imageBounds();
+      if (!bounds) {
+        $("nmMaskStatus").textContent = "Carga primero una ilustración.";
+        return;
+      }
+      const point = imagePointFromCanvas(x * engine.width, y * engine.height);
+      if (!point || point.x < 0 || point.x > 1 || point.y < 0 || point.y > 1)
+        return;
+      if (maskAuto) {
+        detectMaskAt(point);
+        return;
+      }
+      maskDraft.push(point);
+      $("nmMaskStatus").textContent =
+        "Puntos del contorno: " +
+        maskDraft.length +
+        ". Pulsa Terminar polígono al completar al menos 3.";
+      render(0);
+      return;
+    }
+    if (!rigEditing) return;
+    const nearest = Object.entries(rig.points)
+      .map(([name, p]) => ({
+        name,
+        d: Math.hypot((p.x - x) * r.width, (p.y - y) * r.height),
+      }))
+      .sort((a, b) => a.d - b.d)[0];
+    if (nearest && nearest.d < 22) {
+      draggingRigPoint = nearest.name;
+    } else {
+      rig.setPoint($("nvPoint").value, x, y);
+      draggingRigPoint = $("nvPoint").value;
+    }
+    rig.selected = draggingRigPoint;
+    if (motionRaf) {
+      cancelAnimationFrame(motionRaf);
+      motionRaf = 0;
+      $("nmPlay").textContent = "▶ Previsualizar movimiento";
+    }
+    e.currentTarget.setPointerCapture(e.pointerId);
+    render(0);
+  });
+  $("nvCanvas").addEventListener("pointermove", (e) => {
+    if (maskDrawing || !rigEditing || !draggingRigPoint) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width,
+      py = (e.clientY - r.top) / r.height;
+    if (!rig.applyIK(draggingRigPoint, px, py))
+      rig.setPoint(draggingRigPoint, px, py);
+    render(0);
+  });
+  const finishRigDrag = () => {
+    if (draggingRigPoint) commitRigEdit();
+    draggingRigPoint = null;
+  };
+  $("nvCanvas").addEventListener("pointerup", finishRigDrag);
+  $("nvCanvas").addEventListener("pointercancel", finishRigDrag);
+  $("nvPoint").addEventListener("change", () => {
+    rig.selected = $("nvPoint").value;
+    render(0);
+  });
+  $("nmPreset").addEventListener("change", setMotion);
+  $("nmDuration").addEventListener("change", setMotion);
+  $("nmTime").addEventListener("input", () =>
+    showMotion(Number($("nmTime").value)),
+  );
+  $("nmPlay").addEventListener("click", () => {
+    if (motionRaf) {
+      cancelAnimationFrame(motionRaf);
+      motionRaf = 0;
+      $("nmPlay").textContent = "▶ Previsualizar movimiento";
+      return;
+    }
+    const start = performance.now(),
+      duration = motion.duration;
+    $("nmPlay").textContent = "Ⅱ Detener";
+    const tick = (now) => {
+      const elapsed = (now - start) / 1000;
+      if (elapsed >= duration) {
+        showMotion(duration);
+        motionRaf = 0;
+        $("nmPlay").textContent = "▶ Previsualizar movimiento";
+        return;
+      }
+      showMotion(elapsed);
+      motionRaf = requestAnimationFrame(tick);
+    };
+    motionRaf = requestAnimationFrame(tick);
+  });
+  $("nmKey").addEventListener("click", () => {
+    const t = Number($("nmTime").value);
+    motion.addKeyframe(t, rig.points, $("nmEase").value);
+    $("nmStatus").textContent =
+      "Pose clave guardada en " + t.toFixed(2) + " s.";
+  });
+  $("nmExport").addEventListener("click", () => {
+    motion.setBase(rigBase);
+    const blob = new Blob([motion.exportJSON()], { type: "application/json" }),
+      url = URL.createObjectURL(blob),
+      a = document.createElement("a");
+    a.href = url;
+    a.download = "nexora-movimiento.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  });
+  $("nmImport").addEventListener("click", () => $("nmFile").click());
+  $("nmFile").addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      motion.importJSON(await file.text());
+      rigBase = motion.base;
+      rig.points = motion.sample(0);
+      $("nmPreset").value = motion.preset;
+      $("nmDuration").value = motion.duration;
+      $("nmTime").max = motion.duration;
+      showMotion(0);
+      $("nmStatus").textContent = "Movimiento importado.";
+    } catch (err) {
+      $("nmStatus").textContent = "No se pudo importar: " + err.message;
+    }
+    e.target.value = "";
+  });
+  $("nvRigSave").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(rig.save(), null, 2)], {
+        type: "application/json",
+      }),
+      url = URL.createObjectURL(blob),
+      a = document.createElement("a");
+    a.href = url;
+    a.download = "nexora-character-rig.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  });
+  $("nvRigLoad").addEventListener("click", () => $("nvRigFile").click());
+  $("nvRigFile").addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      rig.load(JSON.parse(await file.text()));
+      render(0);
+      $("nvStatus").textContent = "RIG CARGADO";
+    } catch (err) {
+      $("nvStatus").textContent = "RIG INVÁLIDO: " + err.message;
+    }
+    e.target.value = "";
+  });
+  $("nvAnimate").addEventListener("click", () => {
+    if (raf) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      $("nvAnimate").textContent = "Vista animada";
+      return;
+    }
+    $("nvAnimate").textContent = "Detener vista";
+    const start = performance.now();
+    const tick = (now) => {
+      render((now - start) / 1000);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  });
+  $("nsCharacter").addEventListener("change", () => {
+    const p = continuity.get($("nsCharacter").value);
+    if (p?.voiceId && $("voiceSpeaker")) $("voiceSpeaker").value = p.voiceId;
+  });
+  $("nsAdd").addEventListener("click", () => {
+    try {
+      addSceneShot();
+    } catch (e) {
+      $("nsStatus").textContent = e.message;
+    }
+  });
+  $("nsTitle").addEventListener("change", () =>
+    scene.setTitle($("nsTitle").value),
+  );
+  $("nsValidate").addEventListener("click", () => {
+    const report = scene.validate(continuity);
+    $("nsStatus").textContent = report.valid
+      ? "Continuidad de escena correcta: " +
+        report.shotCount +
+        " planos, " +
+        report.duration.toFixed(1) +
+        " segundos."
+      : report.issues.map((x) => x.shot + ": " + x.message).join(" · ");
+  });
+  $("nsPlay").addEventListener("click", () => {
+    if (sceneRaf) {
+      cancelAnimationFrame(sceneRaf);
+      sceneRaf = 0;
+      $("nsPlay").textContent = "▶ Previsualizar escena";
+      return;
+    }
+    if (!scene.data.shots.length) {
+      $("nsStatus").textContent = "Añade al menos un plano.";
+      return;
+    }
+    syncSceneCompositor();
+    const total = compositor.duration,
+      start = performance.now();
+    $("nsPlay").textContent = "Ⅱ Detener escena";
+    const tick = (now) => {
+      const t = (now - start) / 1000;
+      if (t >= total) {
+        compositor.frame(total);
+        sceneRaf = 0;
+        $("nsPlay").textContent = "▶ Previsualizar escena";
+        return;
+      }
+      compositor.frame(t);
+      sceneRaf = requestAnimationFrame(tick);
+    };
+    sceneRaf = requestAnimationFrame(tick);
+  });
+  $("nsVideo").addEventListener("click", async () => {
+    if (!scene.data.shots.length) {
+      $("nsStatus").textContent = "Añade al menos un plano antes de exportar.";
+      return;
+    }
+    const report = scene.validate(continuity);
+    if (!report.valid) {
+      $("nsStatus").textContent =
+        "Corrige la continuidad antes de exportar: " +
+        report.issues.map((x) => x.message).join(" · ");
+      return;
+    }
+    syncSceneCompositor();
+    const audio = $("audioTrack");
+    compositor.audio = [];
+    if (audioTimeline?.tracks.length) {
+      for (const track of audioTimeline.exportTracks())
+        compositor.addAudio(track);
+    } else if (audio?.src)
+      compositor.addAudio({ src: audio.src, start: 0, volume: 1 });
+    $("nsVideo").disabled = true;
+    $("nsStatus").textContent =
+      "Renderizando vídeo… si cambias de pestaña, la grabación se pausa sola y continúa al volver.";
+    try {
+      const result = await compositor.export({
+        fps: 30,
+        filename: "nexora-escena.webm",
+        onProgress: (p) =>
+          ($("nsStatus").textContent =
+            "Renderizando escena: " + Math.round(p * 100) + "%"),
+      });
+      $("nsStatus").textContent =
+        "Vídeo WebM listo (" +
+        Math.round((result.size / 1024 / 1024) * 10) / 10 +
+        " MB).";
+    } catch (err) {
+      $("nsStatus").textContent = "No se pudo exportar: " + err.message;
+    } finally {
+      $("nsVideo").disabled = false;
+    }
+  });
+  $("nsFrames").addEventListener("click", async () => {
+    if (!scene.data.shots.length) {
+      $("nsStatus").textContent = "Añade al menos un plano antes de exportar.";
+      return;
+    }
+    syncSceneCompositor();
+    $("nsFrames").disabled = true;
+    $("nsStatus").textContent =
+      "Renderizando fotogramas… no depende del tiempo real, puedes seguir en esta pestaña.";
+    try {
+      const result = await compositor.exportFrames({
+        fps: 30,
+        onProgress: (p) =>
+          ($("nsStatus").textContent =
+            "Renderizando fotogramas: " + Math.round(p * 100) + "%"),
+      });
+      // Descarga secuencial: algunos navegadores piden permiso para
+      // varias descargas seguidas.
+      for (const frame of result.frames) {
+        const url = URL.createObjectURL(frame.blob),
+          a = document.createElement("a");
+        a.href = url;
+        a.download =
+          "nexora-fotograma-" +
+          String(frame.index + 1).padStart(4, "0") +
+          ".png";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        await new Promise((resolve) => setTimeout(resolve, 150));
+      }
+      $("nsStatus").textContent =
+        result.count +
+        " fotogramas PNG listos a 30 fps. Si el navegador bloqueó algunas descargas, permite varias descargas para este sitio y vuelve a intentarlo.";
+    } catch (err) {
+      $("nsStatus").textContent = "No se pudo exportar: " + err.message;
+    } finally {
+      $("nsFrames").disabled = false;
+    }
+  });
+  $("nsExport").addEventListener("click", () => {
+    scene.setTitle($("nsTitle").value);
+    const blob = new Blob([scene.exportJSON()], { type: "application/json" }),
+      url = URL.createObjectURL(blob),
+      a = document.createElement("a");
+    a.href = url;
+    a.download = "nexora-proyecto-escena.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  });
+  $("nsImport").addEventListener("click", () => $("nsFile").click());
+  $("nsFile").addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      scene.importJSON(await file.text());
+      syncSceneCompositor();
+      renderShotList();
+      $("nsStatus").textContent = "Proyecto de escena importado.";
+    } catch (err) {
+      $("nsStatus").textContent = "No se pudo importar: " + err.message;
+    }
+    e.target.value = "";
+  });
+  scene.setTitle(scene.data.title);
+  refreshSceneCharacters();
+  renderShotList();
+  syncSceneCompositor();
+  $("nmMeshToggle").addEventListener("click", () => {
+    if (!engineImage) {
+      $("nmMeshStatus").textContent = "Carga primero una imagen.";
+      return;
+    }
+    const points = rigPointsInImage();
+    if (Object.keys(points).length < 3) {
+      $("nmMeshStatus").textContent =
+        "Coloca al menos tres puntos del esqueleto sobre la imagen.";
+      return;
+    }
+    deformer.columns = Number($("nmMeshCols").value);
+    deformer.rows = Number($("nmMeshRows").value);
+    deformer.strength = Number($("nmMeshStrength").value);
+    deformer.capture(points);
+    deformer.influenceRadius = Number($("nmBoneRadius").value);
+    deformer.captureBones(
+      points,
+      rig.bones.map((b) => ({ ...b, radius: deformer.influenceRadius })),
+    );
+    meshActive = !meshActive;
+    $("nmMeshToggle").textContent = meshActive
+      ? "Desactivar deformación"
+      : "Activar deformación";
+    $("nmMeshStatus").textContent = meshActive
+      ? "Malla activa: mueve los puntos del esqueleto para deformar la imagen."
+      : "Deformación desactivada.";
+    render(0);
+  });
+  $("nmMaskStart").addEventListener("click", () => {
+    if (!engineImage) {
+      $("nmMaskStatus").textContent = "Carga primero una ilustración.";
+      return;
+    }
+    maskAuto = false;
+    maskDraft = [];
+    maskDrawing = true;
+    rigEditing = false;
+    $("nvCanvas").style.cursor = "crosshair";
+    $("nmMaskStatus").textContent =
+      "Toca la ilustración para marcar los vértices del contorno. Mínimo 3 puntos.";
+    render(0);
+  });
+  $("nmMaskAuto").addEventListener("click", () => {
+    if (!engineImage) {
+      $("nmMaskStatus").textContent = "Carga primero una ilustración.";
+      return;
+    }
+    maskDrawing = false;
+    maskAuto = true;
+    rigEditing = false;
+    $("nvCanvas").style.cursor = "crosshair";
+    $("nmMaskStatus").textContent =
+      "Toca el centro de la zona que quieres aislar. Funciona mejor con colores planos y contrastados.";
+  });
+  $("nmMaskFinish").addEventListener("click", () => {
+    if (maskDraft.length < 3) {
+      $("nmMaskStatus").textContent =
+        "Necesitas al menos 3 puntos para cerrar la máscara.";
+      return;
+    }
+    const bones = $("nmMaskBones").value.split(",");
+    const name = $("nmMaskBones").selectedOptions[0].textContent;
+    maskRegions = maskRegions.filter((r) => r.name !== name);
+    maskRegions.push({
+      name,
+      boneNames: bones,
+      points: maskDraft.map((p) => ({ ...p })),
+      feather: 0.045,
+    });
+    deformer.setRegions(maskRegions);
+    maskDraft = [];
+    maskDrawing = false;
+    maskAuto = false;
+    $("nvCanvas").style.cursor = "default";
+    $("nmMaskStatus").textContent =
+      "Máscara guardada: " + name + ". Se incluirá al exportar la malla.";
+    render(0);
+  });
+  $("nmMaskClear").addEventListener("click", () => {
+    const name = $("nmMaskBones").selectedOptions[0].textContent;
+    maskRegions = maskRegions.filter((r) => r.name !== name);
+    deformer.setRegions(maskRegions);
+    maskDraft = [];
+    maskDrawing = false;
+    maskAuto = false;
+    $("nvCanvas").style.cursor = "default";
+    $("nmMaskStatus").textContent = "Máscara eliminada: " + name + ".";
+    render(0);
+  });
+  $("nmMeshReset").addEventListener("click", () => {
+    deformer.reset();
+    maskRegions = [];
+    deformer.setRegions([]);
+    maskDraft = [];
+    render(0);
+    $("nmMeshStatus").textContent =
+      "Malla y máscaras restablecidas a su forma original.";
+  });
+  $("nmMeshStrength").addEventListener("input", () => {
+    deformer.strength = Number($("nmMeshStrength").value);
+    render(0);
+  });
+  $("nmMeshExport").addEventListener("click", () => {
+    const blob = new Blob([deformer.exportJSON()], {
+        type: "application/json",
+      }),
+      url = URL.createObjectURL(blob),
+      a = document.createElement("a");
+    a.href = url;
+    a.download = "nexora-malla-personaje.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  });
+  $("nmMeshImport").addEventListener("click", () => $("nmMeshFile").click());
+  $("nmMeshFile").addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      deformer.importJSON(await file.text());
+      maskRegions = deformer.regions.map((r) => ({
+        ...r,
+        points: r.points.map((p) => ({ ...p })),
+        boneNames: [...r.boneNames],
+      }));
+      $("nmMeshCols").value = deformer.columns;
+      $("nmMeshRows").value = deformer.rows;
+      $("nmMeshStrength").value = deformer.strength;
+      meshActive = true;
+      $("nmMeshToggle").textContent = "Desactivar deformación";
+      render(0);
+      $("nmMeshStatus").textContent = "Malla importada.";
+    } catch (err) {
+      $("nmMeshStatus").textContent = "No se pudo importar: " + err.message;
+    }
+    e.target.value = "";
+  });
+  window.NEXORA_ANIMATE_ENGINE = {
+    visual: engine,
+    continuity,
+    assets: assetStore,
+    compositor,
+    scene,
+    animation: window.NexoraAnimationTools,
+    skeleton: window.NexoraCharacterSkeleton,
+    spatial: window.NexoraSpatialEngine,
+    rig3d: window.NexoraSpatialRig3D,
+    motion3d: window.NexoraSpatialMotion,
+    audio: audioTimeline,
+    motion: window.NexoraMotionSystem,
+    mesh: deformer,
+    version: "2.4.0",
+  };
+  window.addEventListener("beforeunload", () => {
+    audioTimeline?.clear();
+    if (raf) cancelAnimationFrame(raf);
+    if (motionRaf) cancelAnimationFrame(motionRaf);
+    if (sceneRaf) cancelAnimationFrame(sceneRaf);
+  });
 })();

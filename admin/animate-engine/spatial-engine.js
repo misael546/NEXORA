@@ -1,50 +1,1003 @@
 /* NEXORA ANIMATE — WebGL 3D viewport, camera controls and GLB static-mesh importer. */
-(()=>{"use strict";
-const V=(x=0,y=0,z=0)=>({x,y,z}),sub=(a,b)=>V(a.x-b.x,a.y-b.y,a.z-b.z),add=(a,b)=>V(a.x+b.x,a.y+b.y,a.z+b.z),scale=(a,s)=>V(a.x*s,a.y*s,a.z*s),dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z,cross=(a,b)=>V(a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x),norm=a=>{const n=Math.hypot(a.x,a.y,a.z)||1;return scale(a,1/n)};
-const presets={front:{yaw:0,pitch:0},back:{yaw:Math.PI,pitch:0},left:{yaw:-Math.PI/2,pitch:0},right:{yaw:Math.PI/2,pitch:0},top:{yaw:0,pitch:-Math.PI/2+.001},bottom:{yaw:0,pitch:Math.PI/2-.001},"three-quarter":{yaw:Math.PI/4,pitch:-.12}};
-class SpatialCamera{
- constructor(o={}){this.target=o.target||V();this.yaw=o.yaw??Math.PI/4;this.pitch=o.pitch??-.12;this.distance=o.distance??5;this.fov=o.fov??50;this.projection=o.projection||"perspective";this.orthoScale=o.orthoScale??4;this.near=o.near??.01;this.far=o.far??10000}
- setView(n){if(!presets[n])throw Error("Perspectiva desconocida: "+n);Object.assign(this,presets[n]);return this}
- orbit(y,p){this.yaw+=y;this.pitch=Math.max(-Math.PI/2+.001,Math.min(Math.PI/2-.001,this.pitch+p));return this}
- dolly(a){this.distance=Math.max(.05,Math.min(1e5,this.distance*Math.exp(a)));return this}
- getBasis(){const cp=Math.cos(this.pitch),sp=Math.sin(this.pitch),sy=Math.sin(this.yaw),cy=Math.cos(this.yaw),position=add(this.target,V(this.distance*cp*sy,-this.distance*sp,this.distance*cp*cy)),forward=norm(sub(this.target,position)),worldUp=Math.abs(dot(forward,V(0,1,0)))>.98?V(0,0,1):V(0,1,0),right=norm(cross(forward,worldUp)),up=norm(cross(right,forward));return{position,forward,right,up}}
- project(p,w,h){const b=this.getBasis(),r=sub(p,b.position),x=dot(r,b.right),y=dot(r,b.up),z=dot(r,b.forward);if(z<this.near||z>this.far)return{visible:false,x:NaN,y:NaN,depth:z};if(this.projection==="orthographic"){const s=h/this.orthoScale;return{visible:true,x:w/2+x*s,y:h/2-y*s,depth:z}}const f=h/(2*Math.tan(this.fov*Math.PI/360));return{visible:true,x:w/2+x*f/z,y:h/2-y*f/z,depth:z}}
-}
-const identity=()=>[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
-const transform=(t=[0,0,0],q=[0,0,0,1],s=[1,1,1])=>{const[x,y,z,w]=q;return[(1-2*(y*y+z*z))*s[0],2*(x*y+z*w)*s[0],2*(x*z-y*w)*s[0],0,2*(x*y-z*w)*s[1],(1-2*(x*x+z*z))*s[1],2*(y*z+x*w)*s[1],0,2*(x*z+y*w)*s[2],2*(y*z-x*w)*s[2],(1-2*(x*x+y*y))*s[2],0,t[0],t[1],t[2],1]};
-const sphere=(color=[.35,.72,.95,1],segments=18,rings=12)=>{const positions=[],colors=[];for(let y=0;y<rings;y++){const v0=y/rings*Math.PI,v1=(y+1)/rings*Math.PI;for(let x=0;x<segments;x++){const u0=x/segments*Math.PI*2,u1=(x+1)/segments*Math.PI*2;const p=(u,v)=>[Math.sin(v)*Math.cos(u),Math.cos(v),Math.sin(v)*Math.sin(u)];const a=p(u0,v0),b=p(u1,v0),c=p(u1,v1),d=p(u0,v1);for(const q of [a,b,d,b,c,d]){positions.push(...q);colors.push(...color)}}}return{positions,colors}};
-const cube=(size=1,color=[.35,.72,.95,1])=>{const h=size/2,p=[[-h,-h,h],[h,-h,h],[h,h,h],[-h,h,h],[-h,-h,-h],[h,-h,-h],[h,h,-h],[-h,h,-h]],faces=[[0,1,2,0,2,3],[5,4,7,5,7,6],[4,0,3,4,3,7],[1,5,6,1,6,2],[3,2,6,3,6,7],[4,5,1,4,1,0]],positions=[],colors=[];for(let fi=0;fi<faces.length;fi++)for(const idx of faces[fi]){positions.push(...p[idx]);const shade=1-fi*.055;colors.push(color[0]*shade,color[1]*shade,color[2]*shade,color[3])}return{positions,colors}};
-const components={5120:{size:1,get:"getInt8"},5121:{size:1,get:"getUint8"},5122:{size:2,get:"getInt16"},5123:{size:2,get:"getUint16"},5125:{size:4,get:"getUint32"},5126:{size:4,get:"getFloat32"}};
-const flatNormals=positions=>{const normals=new Array(positions.length).fill(0);for(let i=0;i+8<positions.length;i+=9){const ax=positions[i+3]-positions[i],ay=positions[i+4]-positions[i+1],az=positions[i+5]-positions[i+2],bx=positions[i+6]-positions[i],by=positions[i+7]-positions[i+1],bz=positions[i+8]-positions[i+2],nx=ay*bz-az*by,ny=az*bx-ax*bz,nz=ax*by-ay*bx,len=Math.hypot(nx,ny,nz)||1;for(let j=0;j<3;j++){normals[i+j*3]=nx/len;normals[i+j*3+1]=ny/len;normals[i+j*3+2]=nz/len}}return normals};
-function parseGLB(buffer){
- const view=new DataView(buffer);if(view.byteLength<20||view.getUint32(0,true)!==0x46546c67)throw Error("El archivo no tiene cabecera GLB válida");if(view.getUint32(4,true)!==2)throw Error("Solo se admite GLB versión 2");let offset=12,json=null,bin=null;
- while(offset+8<=view.byteLength){const length=view.getUint32(offset,true),type=view.getUint32(offset+4,true),start=offset+8;if(start+length>view.byteLength)throw Error("Chunk GLB truncado");if(type===0x4e4f534a)json=JSON.parse(new TextDecoder().decode(new Uint8Array(buffer,start,length)).replace(/\0+\s*$/,""));if(type===0x004e4942)bin=buffer.slice(start,start+length);offset=start+length}
- if(!json||!bin)throw Error("GLB debe incluir JSON y BIN embebido");const readAccessor=index=>{const a=json.accessors?.[index],bv=json.bufferViews?.[a?.bufferView],c=components[a?.componentType],count={"SCALAR":1,"VEC2":2,"VEC3":3,"VEC4":4,"MAT4":16}[a?.type];if(!a||!bv||!c||!count)throw Error("Accessor GLB no compatible");const stride=bv.byteStride||c.size*count,base=(bv.byteOffset||0)+(a.byteOffset||0),dv=new DataView(bin),out=[];for(let i=0;i<a.count;i++){const row=[];for(let j=0;j<count;j++){let value=dv[c.get](base+i*stride+j*c.size,true);if(a.normalized){const signed=a.componentType===5120||a.componentType===5122,max=a.componentType===5120?127:a.componentType===5122?32767:a.componentType===5121?255:a.componentType===5123?65535:4294967295;value=signed?Math.max(-1,value/max):value/max}row.push(value)}out.push(row)}return out};
- const mul=(a,b)=>{const o=new Array(16).fill(0);for(let c=0;c<4;c++)for(let r=0;r<4;r++)for(let k=0;k<4;k++)o[c*4+r]+=a[k*4+r]*b[c*4+k];return o},identity=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
- const local=n=>{if(n.matrix)return n.matrix.slice();const t=n.translation||[0,0,0],s=n.scale||[1,1,1],q=n.rotation||[0,0,0,1],[x,y,z,w]=q;return[(1-2*(y*y+z*z))*s[0],2*(x*y+z*w)*s[0],2*(x*z-y*w)*s[0],0,2*(x*y-z*w)*s[1],(1-2*(x*x+z*z))*s[1],2*(y*z+x*w)*s[1],0,2*(x*z+y*w)*s[2],2*(y*z-x*w)*s[2],(1-2*(x*x+y*y))*s[2],0,t[0],t[1],t[2],1]};
- const images=(json.images||[]).map((image,index)=>{if(image.bufferView!==undefined){const bv=json.bufferViews?.[image.bufferView];if(!bv)throw Error("Imagen GLB sin bufferView válido");const start=bv.byteOffset||0,end=start+bv.byteLength;return{name:image.name||"Image "+index,mimeType:image.mimeType||bv.mimeType||"image/png",data:bin.slice(start,end)}}if(typeof image.uri==="string"&&image.uri.startsWith("data:")){const match=image.uri.match(/^data:([^;,]+);base64,(.*)$/);if(!match)throw Error("URI de imagen GLB no compatible");const raw=atob(match[2]),data=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)data[i]=raw.charCodeAt(i);return{name:image.name||"Image "+index,mimeType:match[1],data:data.buffer}}return null}).filter(Boolean),textures=(json.textures||[]).map((texture,index)=>({index,source:texture.source??null,sampler:texture.sampler??null}));
- const result=[],skins=(json.skins||[]).map((skin,index)=>({index,name:skin.name||"Skin "+index,joints:(skin.joints||[]).map(node=>({node,name:json.nodes?.[node]?.name||"Joint "+node})),skeleton:skin.skeleton??null,inverseBindMatrices:skin.inverseBindMatrices===undefined?(skin.joints||[]).map(()=>identity):readAccessor(skin.inverseBindMatrices)})),animations=(json.animations||[]).map((animation,index)=>({name:animation.name||"Animation "+index,channels:(animation.channels||[]).map(channel=>{const sampler=animation.samplers?.[channel.sampler];if(!sampler)throw Error("Canal de animación GLB sin sampler");return{node:channel.target?.node,path:channel.target?.path,interpolation:sampler.interpolation||"LINEAR",times:readAccessor(sampler.input).map(v=>v[0]),values:readAccessor(sampler.output)}})}));
- const addMesh=(meshIndex,world,nodeName,nodeIndex=null)=>{const mesh=json.meshes[meshIndex],node=nodeIndex===null?{}:json.nodes[nodeIndex];for(let pi=0;pi<mesh.primitives.length;pi++){const p=mesh.primitives[pi];if((p.mode??4)!==4)continue;const raw=readAccessor(p.attributes.POSITION),idx=p.indices===undefined?raw.map((_,i)=>i):readAccessor(p.indices).map(x=>x[0]),positions=[];for(const id of idx){const v=raw[id];if(!v)continue;const x=v[0],y=v[1],z=v[2],w=world[3]*x+world[7]*y+world[11]*z+world[15]||1;positions.push((world[0]*x+world[4]*y+world[8]*z+world[12])/w,(world[1]*x+world[5]*y+world[9]*z+world[13])/w,(world[2]*x+world[6]*y+world[10]*z+world[14])/w)}const material=json.materials?.[p.material]||{},pbr=material.pbrMetallicRoughness||{},factor=pbr.baseColorFactor||[.72,.78,.9,1],colors=[];for(let i=0;i<positions.length/3;i++)colors.push(...factor);const uvRaw=p.attributes.TEXCOORD_0===undefined?null:readAccessor(p.attributes.TEXCOORD_0),uvs=uvRaw?idx.flatMap(id=>uvRaw[id]||[0,0]):null,textureIndex=pbr.baseColorTexture?textures[pbr.baseColorTexture.index]?.index??null:null;const morphTargets=(p.targets||[]).map((target,ti)=>({name:mesh.extras?.targetNames?.[ti]||"Morph "+(ti+1),positions:idx.flatMap(id=>target.POSITION===undefined?[0,0,0]:readAccessor(target.POSITION)[id])})),morphWeights=(node.weights||mesh.weights||morphTargets.map(()=>0)).slice();let skin=null;if(node.skin!==undefined){const skinDef=json.skins?.[node.skin];if(!skinDef)throw Error("La malla referencia un skin GLB inexistente");const joints0=p.attributes.JOINTS_0===undefined?null:readAccessor(p.attributes.JOINTS_0),weights0=p.attributes.WEIGHTS_0===undefined?null:readAccessor(p.attributes.WEIGHTS_0),joints1=p.attributes.JOINTS_1===undefined?null:readAccessor(p.attributes.JOINTS_1),weights1=p.attributes.WEIGHTS_1===undefined?null:readAccessor(p.attributes.WEIGHTS_1);if(!joints0||!weights0||!!joints1!==!!weights1)throw Error("La malla skinned requiere pares JOINTS_0/WEIGHTS_0 y JOINTS_1/WEIGHTS_1 opcionales");skin={skinIndex:node.skin,sourcePositions:idx.flatMap(id=>raw[id]),joints:idx.map(id=>[...joints0[id],...(joints1?.[id]||[])]),weights:idx.map(id=>{const v=[...weights0[id],...(weights1?.[id]||[])],sum=v.reduce((a,b)=>a+b,0);return sum>0?v.map(x=>x/sum):[1,0,0,0,...(joints1?[0,0,0,0]:[])]}),jointNodeIndices:skinDef.joints.slice(),jointNames:skinDef.joints.map(j=>json.nodes?.[j]?.name||"Joint "+j),inverseBindMatrices:skins[node.skin].inverseBindMatrices.map(m=>m.slice()),meshNode:nodeIndex,nodeWorld:world.slice()}}if(positions.length)result.push({name:nodeName||mesh.name||"Modelo",positions,colors,uvs,textureIndex,skin,morphTargets,morphWeights})}};
- const scene=json.scenes?.[json.scene??0],walk=(nodeIndex,parent)=>{const n=json.nodes[nodeIndex],world=mul(parent,local(n));if(n.mesh!==undefined)addMesh(n.mesh,world,n.name,nodeIndex);for(const child of n.children||[])walk(child,world)};if(scene?.nodes?.length)for(const n of scene.nodes)walk(n,identity);else for(let i=0;i<(json.meshes||[]).length;i++)addMesh(i,identity,json.meshes[i].name);if(!result.length)throw Error("No se encontraron mallas triangulares con posiciones en el GLB");return{meshes:result,meshCount:result.length,vertexCount:result.reduce((n,m)=>n+m.positions.length/3,0),skins,animations,images,textures,nodes:(json.nodes||[]).map((n,index)=>({index,name:n.name||"Node "+index,parent:(json.nodes||[]).findIndex(x=>(x.children||[]).includes(index)),matrix:n.matrix?.slice()||null,translation:(n.translation||[0,0,0]).slice(),rotation:(n.rotation||[0,0,0,1]).slice(),scale:(n.scale||[1,1,1]).slice()})),sceneName:json.scenes?.[json.scene??0]?.name||"Escena GLB"}
-}
-class SpatialRenderer{
- constructor(canvas){this.canvas=canvas;this.gl=canvas.getContext("webgl",{antialias:true,alpha:false});if(!this.gl)throw Error("WebGL no está disponible en este navegador");this.camera=new SpatialCamera();this.meshes=[];this.gpuImages=[];this.gltfTextures=[];this.assetGeneration=0;const gl=this.gl,vs='attribute vec3 aPosition;attribute vec4 aColor;attribute vec3 aNormal;attribute vec2 aUV;uniform mat4 uViewProjection;uniform mat4 uModel;varying vec4 vColor;varying float vLight;varying vec2 vUv;void main(){gl_Position=uViewProjection*uModel*vec4(aPosition,1.0);vec3 n=normalize(mat3(uModel)*aNormal);vLight=.34+.66*max(dot(n,normalize(vec3(-.45,.82,.55))),0.0);vColor=aColor;vUv=aUV;}',fs='precision mediump float;varying vec4 vColor;varying float vLight;varying vec2 vUv;uniform sampler2D uTexture;uniform bool uUseTexture;void main(){vec4 base=vColor;if(uUseTexture)base*=texture2D(uTexture,vUv);gl_FragColor=vec4(base.rgb*vLight,base.a);}';const compile=(type,src)=>{const sh=gl.createShader(type);gl.shaderSource(sh,src);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh};this.program=gl.createProgram();gl.attachShader(this.program,compile(gl.VERTEX_SHADER,vs));gl.attachShader(this.program,compile(gl.FRAGMENT_SHADER,fs));gl.linkProgram(this.program);if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));this.locations={position:gl.getAttribLocation(this.program,"aPosition"),color:gl.getAttribLocation(this.program,"aColor"),normal:gl.getAttribLocation(this.program,"aNormal"),uv:gl.getAttribLocation(this.program,"aUV"),matrix:gl.getUniformLocation(this.program,"uViewProjection"),model:gl.getUniformLocation(this.program,"uModel"),texture:gl.getUniformLocation(this.program,"uTexture"),useTexture:gl.getUniformLocation(this.program,"uUseTexture")};gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);this.addMesh(cube(1),{id:"cube"})}
- addMesh(data,options={}){if(!data?.positions||data.positions.length%3)throw Error("Malla 3D inválida");const gl=this.gl,p=gl.createBuffer(),c=gl.createBuffer(),n=gl.createBuffer(),uv=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,p);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data.positions),gl.STATIC_DRAW);const colors=data.colors||Array.from({length:data.positions.length/3},()=>[.7,.8,1,1]).flat();gl.bindBuffer(gl.ARRAY_BUFFER,c);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(colors),gl.STATIC_DRAW);const normals=[];for(let i=0;i<data.positions.length;i+=3){const x=data.positions[i],y=data.positions[i+1],z=data.positions[i+2],d=Math.hypot(x,y,z)||1;normals.push(x/d,y/d,z/d)}gl.bindBuffer(gl.ARRAY_BUFFER,n);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(normals),gl.STATIC_DRAW);const uvs=data.uvs&&data.uvs.length===data.positions.length/3*2?data.uvs:Array.from({length:data.positions.length/3},()=>[0,0]).flat();gl.bindBuffer(gl.ARRAY_BUFFER,uv);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(uvs),gl.STATIC_DRAW);const m={id:options.id||"mesh-"+this.meshes.length,p,c,n,uv,count:data.positions.length/3,name:options.name||"Malla",model:options.transform||identity(),basePositions:new Float32Array(data.positions),morphTargets:data.morphTargets||[],morphWeights:(data.morphWeights||[]).slice(),textureIndex:data.textureIndex??null};this.meshes.push(m);return m.id}
- setTransform(id,matrix){const mesh=this.meshes.find(m=>m.id===id);if(!mesh)throw Error("Malla no encontrada: "+id);mesh.model=matrix;return this}
- updatePositions(id,positions){const mesh=this.meshes.find(m=>m.id===id);if(!mesh)throw Error("Malla no encontrada: "+id);if(positions.length!==mesh.count*3)throw Error("La cantidad de vértices deformados no coincide");const gl=this.gl;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.p);gl.bufferSubData(gl.ARRAY_BUFFER,0,new Float32Array(positions));gl.bindBuffer(gl.ARRAY_BUFFER,mesh.n);gl.bufferSubData(gl.ARRAY_BUFFER,0,new Float32Array(flatNormals(positions)));return this}
- uploadGLBImages(parsed){const generation=this.assetGeneration,gl=this.gl;this.gpuImages=(parsed.images||[]).map(image=>{const texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([220,220,220,255]));gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);if(typeof Image==="undefined"||typeof Blob==="undefined"||typeof URL==="undefined")return texture;const url=URL.createObjectURL(new Blob([image.data],{type:image.mimeType||"image/png"})),bitmap=new Image();bitmap.onload=()=>{URL.revokeObjectURL(url);if(this.assetGeneration!==generation)return;gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,bitmap);this.render()};bitmap.onerror=()=>URL.revokeObjectURL(url);bitmap.src=url;return texture});this.gltfTextures=(parsed.textures||[]).map(texture=>this.gpuImages[texture.source]||null);return this}
- clearMeshes(){const gl=this.gl;for(const m of this.meshes){gl.deleteBuffer(m.p);gl.deleteBuffer(m.c);gl.deleteBuffer(m.n);gl.deleteBuffer(m.uv)}for(const texture of this.gpuImages||[])if(texture)gl.deleteTexture(texture);this.meshes=[];this.gpuImages=[];this.gltfTextures=[];this.assetGeneration=(this.assetGeneration||0)+1}
- importGLB(buffer){const parsed=parseGLB(buffer);this.clearMeshes();this.uploadGLBImages(parsed);this.importedRigs=[];this.animationPlayers=[];for(let i=0;i<parsed.skins.length;i++){if(!window.NexoraSpatialRig3D)throw Error("Carga spatial-rig.js antes de importar un GLB con esqueleto");this.importedRigs.push(window.NexoraSpatialRig3D.createFromGLB(parsed,i))}if(parsed.animations.length&&this.importedRigs.length)this.animationPlayers=this.importedRigs.map(imported=>window.NexoraSpatialRig3D.createAnimationPlayer(parsed,imported,0));for(let i=0;i<parsed.meshes.length;i++){const data=parsed.meshes[i],id="glb-"+i;this.addMesh(data,{id,name:data.name,transform:data.skin?.nodeWorld||identity()});const mesh=this.meshes[this.meshes.length-1];if(data.morphTargets?.length){mesh.morphTargets=data.morphTargets;mesh.morphWeights=data.morphWeights||data.morphTargets.map(()=>0);if(window.NexoraFacialAnimation)mesh.facialAnimator=new window.NexoraFacialAnimation.FacialAnimator([mesh])}if(data.skin){const imported=this.importedRigs[data.skin.skinIndex];if(!imported)throw Error("No se encontró el rig de la malla");mesh.skin={...data.skin,rig:imported.rig,jointBoneIndices:imported.jointBoneIndices,inverseBindMatrices:imported.inverseBindMatrices}}if(mesh.skin||mesh.morphTargets.length)this.updateSkinnedMesh(mesh)}const all=parsed.meshes.flatMap(m=>m.positions);let min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];for(let i=0;i<all.length;i+=3)for(let a=0;a<3;a++){min[a]=Math.min(min[a],all[i+a]);max[a]=Math.max(max[a],all[i+a])}this.camera.target=V((min[0]+max[0])/2,(min[1]+max[1])/2,(min[2]+max[2])/2);this.camera.distance=Math.max(.5,Math.max(max[0]-min[0],max[1]-min[1],max[2]-min[2])*2.6);this.camera.orthoScale=Math.max(1,Math.max(max[0]-min[0],max[1]-min[1],max[2]-min[2])*1.6);this.render();return parsed}
- setFacialState(id,state){const mesh=this.meshes.find(m=>m.id===id);if(!mesh)throw Error("Malla no encontrada: "+id);if(!mesh.facialAnimator)throw Error("La malla no tiene morph targets faciales compatibles");mesh.facialAnimator.apply(state);this.updateSkinnedMesh(mesh);this.render();return this}
- applyFacialAnimation(time,visemeTrack=[],state={}){let changed=0;for(const mesh of this.meshes){if(!mesh.facialAnimator)continue;mesh.facialAnimator.applyAt(time,{...state,visemeTrack});this.updateSkinnedMesh(mesh);changed++}if(changed)this.render();return changed}
- setMorphWeights(id,weights){const mesh=this.meshes.find(m=>m.id===id);if(!mesh)throw Error("Malla no encontrada: "+id);if(weights.length!==mesh.morphTargets.length)throw Error("Cantidad de pesos morph incorrecta");mesh.morphWeights=weights.map(v=>Number.isFinite(Number(v))?Number(v):0);this.updateSkinnedMesh(mesh);this.render();return this}
- updateSkinnedMesh(mesh){const s=mesh.skin;let positions=window.NexoraSpatialRig3D.applyMorphTargets(s?s.sourcePositions:mesh.basePositions,mesh.morphTargets,mesh.morphWeights);if(s){const rig=s.rig,meshBoneIndex=s.meshNode===null||s.meshNode===undefined?null:rig.nodeBoneIndices.get(s.meshNode),meshWorld=meshBoneIndex===null?identity():rig.bones[meshBoneIndex].world,meshInverse=window.NexoraSpatialRig3D.math.inverse(meshWorld);positions=rig.skinVertices(positions,s.joints.flat(),s.weights.flat(),s.inverseBindMatrices,s.jointBoneIndices,meshInverse)}this.updatePositions(mesh.id,positions)}
- updateSkinnedMeshes(){for(const mesh of this.meshes)if(mesh.skin||mesh.morphTargets.length)this.updateSkinnedMesh(mesh);return this}
- playAnimation(name){if(!this.animationPlayers.length)throw Error("El GLB no contiene un rig animable");for(const player of this.animationPlayers){if(name!==undefined)player.select(name);player.play()}return this}
- pauseAnimation(){for(const player of this.animationPlayers)player.pause();return this}
- advanceAnimation(delta){if(!this.animationPlayers.some(p=>p.playing))return this;for(const player of this.animationPlayers)player.advance(delta);this.updateSkinnedMeshes();this.render();return this}
- matrix(){const b=this.camera.getBasis(),eye=b.position,r=b.right,u=b.up,f=b.forward;const view=[r.x,u.x,-f.x,0,r.y,u.y,-f.y,0,r.z,u.z,-f.z,0,-dot(r,eye),-dot(u,eye),dot(f,eye),1],aspect=this.canvas.width/this.canvas.height,near=this.camera.near,far=this.camera.far;let proj;if(this.camera.projection==="orthographic"){const hh=this.camera.orthoScale/2,ww=hh*aspect;proj=[1/ww,0,0,0,0,1/hh,0,0,0,0,-2/(far-near),0,0,0,-(far+near)/(far-near),1]}else{const q=1/Math.tan(this.camera.fov*Math.PI/360);proj=[q/aspect,0,0,0,0,q,0,0,0,0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0]}const out=new Array(16);for(let c=0;c<4;c++)for(let row=0;row<4;row++)out[c*4+row]=proj[row]*view[c*4]+proj[4+row]*view[c*4+1]+proj[8+row]*view[c*4+2]+proj[12+row]*view[c*4+3];return out}
- render(){const gl=this.gl,w=this.canvas.clientWidth||640,h=this.canvas.clientHeight||360;if(this.canvas.width!==w||this.canvas.height!==h){this.canvas.width=w;this.canvas.height=h}gl.viewport(0,0,w,h);gl.clearColor(.035,.055,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(this.program);gl.uniformMatrix4fv(this.locations.matrix,false,new Float32Array(this.matrix()));for(const m of this.meshes){gl.bindBuffer(gl.ARRAY_BUFFER,m.p);gl.enableVertexAttribArray(this.locations.position);gl.vertexAttribPointer(this.locations.position,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,m.c);gl.enableVertexAttribArray(this.locations.color);gl.vertexAttribPointer(this.locations.color,4,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,m.n);gl.enableVertexAttribArray(this.locations.normal);gl.vertexAttribPointer(this.locations.normal,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,m.uv);gl.enableVertexAttribArray(this.locations.uv);gl.vertexAttribPointer(this.locations.uv,2,gl.FLOAT,false,0,0);const texture=m.textureIndex===null?null:this.gltfTextures[m.textureIndex];gl.uniform1i(this.locations.useTexture,texture?1:0);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,texture||null);gl.uniform1i(this.locations.texture,0);gl.uniformMatrix4fv(this.locations.model,false,new Float32Array(m.model));gl.drawArrays(gl.TRIANGLES,0,m.count)}return this}
-}
-window.NexoraSpatialEngine={SpatialCamera,SpatialRenderer,parseGLB,flatNormals,geometry:{cube,sphere},transform,identity,views:Object.keys(presets)};
+(() => {
+  "use strict";
+  const V = (x = 0, y = 0, z = 0) => ({ x, y, z }),
+    sub = (a, b) => V(a.x - b.x, a.y - b.y, a.z - b.z),
+    add = (a, b) => V(a.x + b.x, a.y + b.y, a.z + b.z),
+    scale = (a, s) => V(a.x * s, a.y * s, a.z * s),
+    dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z,
+    cross = (a, b) =>
+      V(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x),
+    norm = (a) => {
+      const n = Math.hypot(a.x, a.y, a.z) || 1;
+      return scale(a, 1 / n);
+    };
+  const presets = {
+    front: { yaw: 0, pitch: 0 },
+    back: { yaw: Math.PI, pitch: 0 },
+    left: { yaw: -Math.PI / 2, pitch: 0 },
+    right: { yaw: Math.PI / 2, pitch: 0 },
+    top: { yaw: 0, pitch: -Math.PI / 2 + 0.001 },
+    bottom: { yaw: 0, pitch: Math.PI / 2 - 0.001 },
+    "three-quarter": { yaw: Math.PI / 4, pitch: -0.12 },
+  };
+  class SpatialCamera {
+    constructor(o = {}) {
+      this.target = o.target || V();
+      this.yaw = o.yaw ?? Math.PI / 4;
+      this.pitch = o.pitch ?? -0.12;
+      this.distance = o.distance ?? 5;
+      this.fov = o.fov ?? 50;
+      this.projection = o.projection || "perspective";
+      this.orthoScale = o.orthoScale ?? 4;
+      this.near = o.near ?? 0.01;
+      this.far = o.far ?? 10000;
+    }
+    setView(n) {
+      if (!presets[n]) throw Error("Perspectiva desconocida: " + n);
+      Object.assign(this, presets[n]);
+      return this;
+    }
+    orbit(y, p) {
+      this.yaw += y;
+      this.pitch = Math.max(
+        -Math.PI / 2 + 0.001,
+        Math.min(Math.PI / 2 - 0.001, this.pitch + p),
+      );
+      return this;
+    }
+    dolly(a) {
+      this.distance = Math.max(
+        0.05,
+        Math.min(1e5, this.distance * Math.exp(a)),
+      );
+      return this;
+    }
+    getBasis() {
+      const cp = Math.cos(this.pitch),
+        sp = Math.sin(this.pitch),
+        sy = Math.sin(this.yaw),
+        cy = Math.cos(this.yaw),
+        position = add(
+          this.target,
+          V(
+            this.distance * cp * sy,
+            -this.distance * sp,
+            this.distance * cp * cy,
+          ),
+        ),
+        forward = norm(sub(this.target, position)),
+        worldUp =
+          Math.abs(dot(forward, V(0, 1, 0))) > 0.98 ? V(0, 0, 1) : V(0, 1, 0),
+        right = norm(cross(forward, worldUp)),
+        up = norm(cross(right, forward));
+      return { position, forward, right, up };
+    }
+    project(p, w, h) {
+      const b = this.getBasis(),
+        r = sub(p, b.position),
+        x = dot(r, b.right),
+        y = dot(r, b.up),
+        z = dot(r, b.forward);
+      if (z < this.near || z > this.far)
+        return { visible: false, x: NaN, y: NaN, depth: z };
+      if (this.projection === "orthographic") {
+        const s = h / this.orthoScale;
+        return { visible: true, x: w / 2 + x * s, y: h / 2 - y * s, depth: z };
+      }
+      const f = h / (2 * Math.tan((this.fov * Math.PI) / 360));
+      return {
+        visible: true,
+        x: w / 2 + (x * f) / z,
+        y: h / 2 - (y * f) / z,
+        depth: z,
+      };
+    }
+  }
+  const identity = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  const transform = (t = [0, 0, 0], q = [0, 0, 0, 1], s = [1, 1, 1]) => {
+    const [x, y, z, w] = q;
+    return [
+      (1 - 2 * (y * y + z * z)) * s[0],
+      2 * (x * y + z * w) * s[0],
+      2 * (x * z - y * w) * s[0],
+      0,
+      2 * (x * y - z * w) * s[1],
+      (1 - 2 * (x * x + z * z)) * s[1],
+      2 * (y * z + x * w) * s[1],
+      0,
+      2 * (x * z + y * w) * s[2],
+      2 * (y * z - x * w) * s[2],
+      (1 - 2 * (x * x + y * y)) * s[2],
+      0,
+      t[0],
+      t[1],
+      t[2],
+      1,
+    ];
+  };
+  const sphere = (color = [0.35, 0.72, 0.95, 1], segments = 18, rings = 12) => {
+    const positions = [],
+      colors = [];
+    for (let y = 0; y < rings; y++) {
+      const v0 = (y / rings) * Math.PI,
+        v1 = ((y + 1) / rings) * Math.PI;
+      for (let x = 0; x < segments; x++) {
+        const u0 = (x / segments) * Math.PI * 2,
+          u1 = ((x + 1) / segments) * Math.PI * 2;
+        const p = (u, v) => [
+          Math.sin(v) * Math.cos(u),
+          Math.cos(v),
+          Math.sin(v) * Math.sin(u),
+        ];
+        const a = p(u0, v0),
+          b = p(u1, v0),
+          c = p(u1, v1),
+          d = p(u0, v1);
+        for (const q of [a, b, d, b, c, d]) {
+          positions.push(...q);
+          colors.push(...color);
+        }
+      }
+    }
+    return { positions, colors };
+  };
+  const cube = (size = 1, color = [0.35, 0.72, 0.95, 1]) => {
+    const h = size / 2,
+      p = [
+        [-h, -h, h],
+        [h, -h, h],
+        [h, h, h],
+        [-h, h, h],
+        [-h, -h, -h],
+        [h, -h, -h],
+        [h, h, -h],
+        [-h, h, -h],
+      ],
+      faces = [
+        [0, 1, 2, 0, 2, 3],
+        [5, 4, 7, 5, 7, 6],
+        [4, 0, 3, 4, 3, 7],
+        [1, 5, 6, 1, 6, 2],
+        [3, 2, 6, 3, 6, 7],
+        [4, 5, 1, 4, 1, 0],
+      ],
+      positions = [],
+      colors = [];
+    for (let fi = 0; fi < faces.length; fi++)
+      for (const idx of faces[fi]) {
+        positions.push(...p[idx]);
+        const shade = 1 - fi * 0.055;
+        colors.push(
+          color[0] * shade,
+          color[1] * shade,
+          color[2] * shade,
+          color[3],
+        );
+      }
+    return { positions, colors };
+  };
+  const components = {
+    5120: { size: 1, get: "getInt8" },
+    5121: { size: 1, get: "getUint8" },
+    5122: { size: 2, get: "getInt16" },
+    5123: { size: 2, get: "getUint16" },
+    5125: { size: 4, get: "getUint32" },
+    5126: { size: 4, get: "getFloat32" },
+  };
+  const flatNormals = (positions) => {
+    const normals = new Array(positions.length).fill(0);
+    for (let i = 0; i + 8 < positions.length; i += 9) {
+      const ax = positions[i + 3] - positions[i],
+        ay = positions[i + 4] - positions[i + 1],
+        az = positions[i + 5] - positions[i + 2],
+        bx = positions[i + 6] - positions[i],
+        by = positions[i + 7] - positions[i + 1],
+        bz = positions[i + 8] - positions[i + 2],
+        nx = ay * bz - az * by,
+        ny = az * bx - ax * bz,
+        nz = ax * by - ay * bx,
+        len = Math.hypot(nx, ny, nz) || 1;
+      for (let j = 0; j < 3; j++) {
+        normals[i + j * 3] = nx / len;
+        normals[i + j * 3 + 1] = ny / len;
+        normals[i + j * 3 + 2] = nz / len;
+      }
+    }
+    return normals;
+  };
+  function parseGLB(buffer) {
+    const view = new DataView(buffer);
+    if (view.byteLength < 20 || view.getUint32(0, true) !== 0x46546c67)
+      throw Error("El archivo no tiene cabecera GLB válida");
+    if (view.getUint32(4, true) !== 2)
+      throw Error("Solo se admite GLB versión 2");
+    let offset = 12,
+      json = null,
+      bin = null;
+    while (offset + 8 <= view.byteLength) {
+      const length = view.getUint32(offset, true),
+        type = view.getUint32(offset + 4, true),
+        start = offset + 8;
+      if (start + length > view.byteLength) throw Error("Chunk GLB truncado");
+      if (type === 0x4e4f534a)
+        json = JSON.parse(
+          new TextDecoder()
+            .decode(new Uint8Array(buffer, start, length))
+            .replace(/\0+\s*$/, ""),
+        );
+      if (type === 0x004e4942) bin = buffer.slice(start, start + length);
+      offset = start + length;
+    }
+    if (!json || !bin) throw Error("GLB debe incluir JSON y BIN embebido");
+    const readAccessor = (index) => {
+      const a = json.accessors?.[index],
+        bv = json.bufferViews?.[a?.bufferView],
+        c = components[a?.componentType],
+        count = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT4: 16 }[a?.type];
+      if (!a || !bv || !c || !count) throw Error("Accessor GLB no compatible");
+      const stride = bv.byteStride || c.size * count,
+        base = (bv.byteOffset || 0) + (a.byteOffset || 0),
+        dv = new DataView(bin),
+        out = [];
+      for (let i = 0; i < a.count; i++) {
+        const row = [];
+        for (let j = 0; j < count; j++) {
+          let value = dv[c.get](base + i * stride + j * c.size, true);
+          if (a.normalized) {
+            const signed = a.componentType === 5120 || a.componentType === 5122,
+              max =
+                a.componentType === 5120
+                  ? 127
+                  : a.componentType === 5122
+                    ? 32767
+                    : a.componentType === 5121
+                      ? 255
+                      : a.componentType === 5123
+                        ? 65535
+                        : 4294967295;
+            value = signed ? Math.max(-1, value / max) : value / max;
+          }
+          row.push(value);
+        }
+        out.push(row);
+      }
+      return out;
+    };
+    const mul = (a, b) => {
+        const o = new Array(16).fill(0);
+        for (let c = 0; c < 4; c++)
+          for (let r = 0; r < 4; r++)
+            for (let k = 0; k < 4; k++)
+              o[c * 4 + r] += a[k * 4 + r] * b[c * 4 + k];
+        return o;
+      },
+      identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    const local = (n) => {
+      if (n.matrix) return n.matrix.slice();
+      const t = n.translation || [0, 0, 0],
+        s = n.scale || [1, 1, 1],
+        q = n.rotation || [0, 0, 0, 1],
+        [x, y, z, w] = q;
+      return [
+        (1 - 2 * (y * y + z * z)) * s[0],
+        2 * (x * y + z * w) * s[0],
+        2 * (x * z - y * w) * s[0],
+        0,
+        2 * (x * y - z * w) * s[1],
+        (1 - 2 * (x * x + z * z)) * s[1],
+        2 * (y * z + x * w) * s[1],
+        0,
+        2 * (x * z + y * w) * s[2],
+        2 * (y * z - x * w) * s[2],
+        (1 - 2 * (x * x + y * y)) * s[2],
+        0,
+        t[0],
+        t[1],
+        t[2],
+        1,
+      ];
+    };
+    const images = (json.images || [])
+        .map((image, index) => {
+          if (image.bufferView !== undefined) {
+            const bv = json.bufferViews?.[image.bufferView];
+            if (!bv) throw Error("Imagen GLB sin bufferView válido");
+            const start = bv.byteOffset || 0,
+              end = start + bv.byteLength;
+            return {
+              name: image.name || "Image " + index,
+              mimeType: image.mimeType || bv.mimeType || "image/png",
+              data: bin.slice(start, end),
+            };
+          }
+          if (typeof image.uri === "string" && image.uri.startsWith("data:")) {
+            const match = image.uri.match(/^data:([^;,]+);base64,(.*)$/);
+            if (!match) throw Error("URI de imagen GLB no compatible");
+            const raw = atob(match[2]),
+              data = new Uint8Array(raw.length);
+            for (let i = 0; i < raw.length; i++) data[i] = raw.charCodeAt(i);
+            return {
+              name: image.name || "Image " + index,
+              mimeType: match[1],
+              data: data.buffer,
+            };
+          }
+          return null;
+        })
+        .filter(Boolean),
+      textures = (json.textures || []).map((texture, index) => ({
+        index,
+        source: texture.source ?? null,
+        sampler: texture.sampler ?? null,
+      }));
+    const result = [],
+      skins = (json.skins || []).map((skin, index) => ({
+        index,
+        name: skin.name || "Skin " + index,
+        joints: (skin.joints || []).map((node) => ({
+          node,
+          name: json.nodes?.[node]?.name || "Joint " + node,
+        })),
+        skeleton: skin.skeleton ?? null,
+        inverseBindMatrices:
+          skin.inverseBindMatrices === undefined
+            ? (skin.joints || []).map(() => identity)
+            : readAccessor(skin.inverseBindMatrices),
+      })),
+      animations = (json.animations || []).map((animation, index) => ({
+        name: animation.name || "Animation " + index,
+        channels: (animation.channels || []).map((channel) => {
+          const sampler = animation.samplers?.[channel.sampler];
+          if (!sampler) throw Error("Canal de animación GLB sin sampler");
+          return {
+            node: channel.target?.node,
+            path: channel.target?.path,
+            interpolation: sampler.interpolation || "LINEAR",
+            times: readAccessor(sampler.input).map((v) => v[0]),
+            values: readAccessor(sampler.output),
+          };
+        }),
+      }));
+    const addMesh = (meshIndex, world, nodeName, nodeIndex = null) => {
+      const mesh = json.meshes[meshIndex],
+        node = nodeIndex === null ? {} : json.nodes[nodeIndex];
+      for (let pi = 0; pi < mesh.primitives.length; pi++) {
+        const p = mesh.primitives[pi];
+        if ((p.mode ?? 4) !== 4) continue;
+        const raw = readAccessor(p.attributes.POSITION),
+          idx =
+            p.indices === undefined
+              ? raw.map((_, i) => i)
+              : readAccessor(p.indices).map((x) => x[0]),
+          positions = [];
+        for (const id of idx) {
+          const v = raw[id];
+          if (!v) continue;
+          const x = v[0],
+            y = v[1],
+            z = v[2],
+            w = world[3] * x + world[7] * y + world[11] * z + world[15] || 1;
+          positions.push(
+            (world[0] * x + world[4] * y + world[8] * z + world[12]) / w,
+            (world[1] * x + world[5] * y + world[9] * z + world[13]) / w,
+            (world[2] * x + world[6] * y + world[10] * z + world[14]) / w,
+          );
+        }
+        const material = json.materials?.[p.material] || {},
+          pbr = material.pbrMetallicRoughness || {},
+          factor = pbr.baseColorFactor || [0.72, 0.78, 0.9, 1],
+          colors = [];
+        for (let i = 0; i < positions.length / 3; i++) colors.push(...factor);
+        const uvRaw =
+            p.attributes.TEXCOORD_0 === undefined
+              ? null
+              : readAccessor(p.attributes.TEXCOORD_0),
+          uvs = uvRaw ? idx.flatMap((id) => uvRaw[id] || [0, 0]) : null,
+          textureIndex = pbr.baseColorTexture
+            ? (textures[pbr.baseColorTexture.index]?.index ?? null)
+            : null;
+        const morphTargets = (p.targets || []).map((target, ti) => ({
+            name: mesh.extras?.targetNames?.[ti] || "Morph " + (ti + 1),
+            positions: idx.flatMap((id) =>
+              target.POSITION === undefined
+                ? [0, 0, 0]
+                : readAccessor(target.POSITION)[id],
+            ),
+          })),
+          morphWeights = (
+            node.weights ||
+            mesh.weights ||
+            morphTargets.map(() => 0)
+          ).slice();
+        let skin = null;
+        if (node.skin !== undefined) {
+          const skinDef = json.skins?.[node.skin];
+          if (!skinDef)
+            throw Error("La malla referencia un skin GLB inexistente");
+          const joints0 =
+              p.attributes.JOINTS_0 === undefined
+                ? null
+                : readAccessor(p.attributes.JOINTS_0),
+            weights0 =
+              p.attributes.WEIGHTS_0 === undefined
+                ? null
+                : readAccessor(p.attributes.WEIGHTS_0),
+            joints1 =
+              p.attributes.JOINTS_1 === undefined
+                ? null
+                : readAccessor(p.attributes.JOINTS_1),
+            weights1 =
+              p.attributes.WEIGHTS_1 === undefined
+                ? null
+                : readAccessor(p.attributes.WEIGHTS_1);
+          if (!joints0 || !weights0 || !!joints1 !== !!weights1)
+            throw Error(
+              "La malla skinned requiere pares JOINTS_0/WEIGHTS_0 y JOINTS_1/WEIGHTS_1 opcionales",
+            );
+          skin = {
+            skinIndex: node.skin,
+            sourcePositions: idx.flatMap((id) => raw[id]),
+            joints: idx.map((id) => [...joints0[id], ...(joints1?.[id] || [])]),
+            weights: idx.map((id) => {
+              const v = [...weights0[id], ...(weights1?.[id] || [])],
+                sum = v.reduce((a, b) => a + b, 0);
+              return sum > 0
+                ? v.map((x) => x / sum)
+                : [1, 0, 0, 0, ...(joints1 ? [0, 0, 0, 0] : [])];
+            }),
+            jointNodeIndices: skinDef.joints.slice(),
+            jointNames: skinDef.joints.map(
+              (j) => json.nodes?.[j]?.name || "Joint " + j,
+            ),
+            inverseBindMatrices: skins[node.skin].inverseBindMatrices.map((m) =>
+              m.slice(),
+            ),
+            meshNode: nodeIndex,
+            nodeWorld: world.slice(),
+          };
+        }
+        if (positions.length)
+          result.push({
+            name: nodeName || mesh.name || "Modelo",
+            positions,
+            colors,
+            uvs,
+            textureIndex,
+            skin,
+            morphTargets,
+            morphWeights,
+          });
+      }
+    };
+    const scene = json.scenes?.[json.scene ?? 0],
+      walk = (nodeIndex, parent) => {
+        const n = json.nodes[nodeIndex],
+          world = mul(parent, local(n));
+        if (n.mesh !== undefined) addMesh(n.mesh, world, n.name, nodeIndex);
+        for (const child of n.children || []) walk(child, world);
+      };
+    if (scene?.nodes?.length) for (const n of scene.nodes) walk(n, identity);
+    else
+      for (let i = 0; i < (json.meshes || []).length; i++)
+        addMesh(i, identity, json.meshes[i].name);
+    if (!result.length)
+      throw Error(
+        "No se encontraron mallas triangulares con posiciones en el GLB",
+      );
+    return {
+      meshes: result,
+      meshCount: result.length,
+      vertexCount: result.reduce((n, m) => n + m.positions.length / 3, 0),
+      skins,
+      animations,
+      images,
+      textures,
+      nodes: (json.nodes || []).map((n, index) => ({
+        index,
+        name: n.name || "Node " + index,
+        parent: (json.nodes || []).findIndex((x) =>
+          (x.children || []).includes(index),
+        ),
+        matrix: n.matrix?.slice() || null,
+        translation: (n.translation || [0, 0, 0]).slice(),
+        rotation: (n.rotation || [0, 0, 0, 1]).slice(),
+        scale: (n.scale || [1, 1, 1]).slice(),
+      })),
+      sceneName: json.scenes?.[json.scene ?? 0]?.name || "Escena GLB",
+    };
+  }
+  class SpatialRenderer {
+    constructor(canvas) {
+      this.canvas = canvas;
+      this.gl = canvas.getContext("webgl", { antialias: true, alpha: false });
+      if (!this.gl) throw Error("WebGL no está disponible en este navegador");
+      this.camera = new SpatialCamera();
+      this.meshes = [];
+      this.gpuImages = [];
+      this.gltfTextures = [];
+      this.assetGeneration = 0;
+      const gl = this.gl,
+        vs =
+          "attribute vec3 aPosition;attribute vec4 aColor;attribute vec3 aNormal;attribute vec2 aUV;uniform mat4 uViewProjection;uniform mat4 uModel;varying vec4 vColor;varying float vLight;varying vec2 vUv;void main(){gl_Position=uViewProjection*uModel*vec4(aPosition,1.0);vec3 n=normalize(mat3(uModel)*aNormal);vLight=.34+.66*max(dot(n,normalize(vec3(-.45,.82,.55))),0.0);vColor=aColor;vUv=aUV;}",
+        fs =
+          "precision mediump float;varying vec4 vColor;varying float vLight;varying vec2 vUv;uniform sampler2D uTexture;uniform bool uUseTexture;void main(){vec4 base=vColor;if(uUseTexture)base*=texture2D(uTexture,vUv);gl_FragColor=vec4(base.rgb*vLight,base.a);}";
+      const compile = (type, src) => {
+        const sh = gl.createShader(type);
+        gl.shaderSource(sh, src);
+        gl.compileShader(sh);
+        if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS))
+          throw Error(gl.getShaderInfoLog(sh));
+        return sh;
+      };
+      this.program = gl.createProgram();
+      gl.attachShader(this.program, compile(gl.VERTEX_SHADER, vs));
+      gl.attachShader(this.program, compile(gl.FRAGMENT_SHADER, fs));
+      gl.linkProgram(this.program);
+      if (!gl.getProgramParameter(this.program, gl.LINK_STATUS))
+        throw Error(gl.getProgramInfoLog(this.program));
+      this.locations = {
+        position: gl.getAttribLocation(this.program, "aPosition"),
+        color: gl.getAttribLocation(this.program, "aColor"),
+        normal: gl.getAttribLocation(this.program, "aNormal"),
+        uv: gl.getAttribLocation(this.program, "aUV"),
+        matrix: gl.getUniformLocation(this.program, "uViewProjection"),
+        model: gl.getUniformLocation(this.program, "uModel"),
+        texture: gl.getUniformLocation(this.program, "uTexture"),
+        useTexture: gl.getUniformLocation(this.program, "uUseTexture"),
+      };
+      gl.enable(gl.DEPTH_TEST);
+      gl.enable(gl.CULL_FACE);
+      this.addMesh(cube(1), { id: "cube" });
+    }
+    addMesh(data, options = {}) {
+      if (!data?.positions || data.positions.length % 3)
+        throw Error("Malla 3D inválida");
+      const gl = this.gl,
+        p = gl.createBuffer(),
+        c = gl.createBuffer(),
+        n = gl.createBuffer(),
+        uv = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, p);
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(data.positions),
+        gl.STATIC_DRAW,
+      );
+      const colors =
+        data.colors ||
+        Array.from({ length: data.positions.length / 3 }, () => [
+          0.7, 0.8, 1, 1,
+        ]).flat();
+      gl.bindBuffer(gl.ARRAY_BUFFER, c);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+      const normals = [];
+      for (let i = 0; i < data.positions.length; i += 3) {
+        const x = data.positions[i],
+          y = data.positions[i + 1],
+          z = data.positions[i + 2],
+          d = Math.hypot(x, y, z) || 1;
+        normals.push(x / d, y / d, z / d);
+      }
+      gl.bindBuffer(gl.ARRAY_BUFFER, n);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+      const uvs =
+        data.uvs && data.uvs.length === (data.positions.length / 3) * 2
+          ? data.uvs
+          : Array.from({ length: data.positions.length / 3 }, () => [
+              0, 0,
+            ]).flat();
+      gl.bindBuffer(gl.ARRAY_BUFFER, uv);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvs), gl.STATIC_DRAW);
+      const m = {
+        id: options.id || "mesh-" + this.meshes.length,
+        p,
+        c,
+        n,
+        uv,
+        count: data.positions.length / 3,
+        name: options.name || "Malla",
+        model: options.transform || identity(),
+        basePositions: new Float32Array(data.positions),
+        morphTargets: data.morphTargets || [],
+        morphWeights: (data.morphWeights || []).slice(),
+        textureIndex: data.textureIndex ?? null,
+      };
+      this.meshes.push(m);
+      return m.id;
+    }
+    setTransform(id, matrix) {
+      const mesh = this.meshes.find((m) => m.id === id);
+      if (!mesh) throw Error("Malla no encontrada: " + id);
+      mesh.model = matrix;
+      return this;
+    }
+    updatePositions(id, positions) {
+      const mesh = this.meshes.find((m) => m.id === id);
+      if (!mesh) throw Error("Malla no encontrada: " + id);
+      if (positions.length !== mesh.count * 3)
+        throw Error("La cantidad de vértices deformados no coincide");
+      const gl = this.gl;
+      gl.bindBuffer(gl.ARRAY_BUFFER, mesh.p);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(positions));
+      gl.bindBuffer(gl.ARRAY_BUFFER, mesh.n);
+      gl.bufferSubData(
+        gl.ARRAY_BUFFER,
+        0,
+        new Float32Array(flatNormals(positions)),
+      );
+      return this;
+    }
+    uploadGLBImages(parsed) {
+      const generation = this.assetGeneration,
+        gl = this.gl;
+      this.gpuImages = (parsed.images || []).map((image) => {
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          1,
+          1,
+          0,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          new Uint8Array([220, 220, 220, 255]),
+        );
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        if (
+          typeof Image === "undefined" ||
+          typeof Blob === "undefined" ||
+          typeof URL === "undefined"
+        )
+          return texture;
+        const url = URL.createObjectURL(
+            new Blob([image.data], { type: image.mimeType || "image/png" }),
+          ),
+          bitmap = new Image();
+        bitmap.onload = () => {
+          URL.revokeObjectURL(url);
+          if (this.assetGeneration !== generation) return;
+          gl.bindTexture(gl.TEXTURE_2D, texture);
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+          gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            bitmap,
+          );
+          this.render();
+        };
+        bitmap.onerror = () => URL.revokeObjectURL(url);
+        bitmap.src = url;
+        return texture;
+      });
+      this.gltfTextures = (parsed.textures || []).map(
+        (texture) => this.gpuImages[texture.source] || null,
+      );
+      return this;
+    }
+    clearMeshes() {
+      const gl = this.gl;
+      for (const m of this.meshes) {
+        gl.deleteBuffer(m.p);
+        gl.deleteBuffer(m.c);
+        gl.deleteBuffer(m.n);
+        gl.deleteBuffer(m.uv);
+      }
+      for (const texture of this.gpuImages || [])
+        if (texture) gl.deleteTexture(texture);
+      this.meshes = [];
+      this.gpuImages = [];
+      this.gltfTextures = [];
+      this.assetGeneration = (this.assetGeneration || 0) + 1;
+    }
+    importGLB(buffer) {
+      const parsed = parseGLB(buffer);
+      this.clearMeshes();
+      this.uploadGLBImages(parsed);
+      this.importedRigs = [];
+      this.animationPlayers = [];
+      for (let i = 0; i < parsed.skins.length; i++) {
+        if (!window.NexoraSpatialRig3D)
+          throw Error(
+            "Carga spatial-rig.js antes de importar un GLB con esqueleto",
+          );
+        this.importedRigs.push(
+          window.NexoraSpatialRig3D.createFromGLB(parsed, i),
+        );
+      }
+      if (parsed.animations.length && this.importedRigs.length)
+        this.animationPlayers = this.importedRigs.map((imported) =>
+          window.NexoraSpatialRig3D.createAnimationPlayer(parsed, imported, 0),
+        );
+      for (let i = 0; i < parsed.meshes.length; i++) {
+        const data = parsed.meshes[i],
+          id = "glb-" + i;
+        this.addMesh(data, {
+          id,
+          name: data.name,
+          transform: data.skin?.nodeWorld || identity(),
+        });
+        const mesh = this.meshes[this.meshes.length - 1];
+        if (data.morphTargets?.length) {
+          mesh.morphTargets = data.morphTargets;
+          mesh.morphWeights =
+            data.morphWeights || data.morphTargets.map(() => 0);
+          if (window.NexoraFacialAnimation)
+            mesh.facialAnimator =
+              new window.NexoraFacialAnimation.FacialAnimator([mesh]);
+        }
+        if (data.skin) {
+          const imported = this.importedRigs[data.skin.skinIndex];
+          if (!imported) throw Error("No se encontró el rig de la malla");
+          mesh.skin = {
+            ...data.skin,
+            rig: imported.rig,
+            jointBoneIndices: imported.jointBoneIndices,
+            inverseBindMatrices: imported.inverseBindMatrices,
+          };
+        }
+        if (mesh.skin || mesh.morphTargets.length) this.updateSkinnedMesh(mesh);
+      }
+      const all = parsed.meshes.flatMap((m) => m.positions);
+      let min = [Infinity, Infinity, Infinity],
+        max = [-Infinity, -Infinity, -Infinity];
+      for (let i = 0; i < all.length; i += 3)
+        for (let a = 0; a < 3; a++) {
+          min[a] = Math.min(min[a], all[i + a]);
+          max[a] = Math.max(max[a], all[i + a]);
+        }
+      this.camera.target = V(
+        (min[0] + max[0]) / 2,
+        (min[1] + max[1]) / 2,
+        (min[2] + max[2]) / 2,
+      );
+      this.camera.distance = Math.max(
+        0.5,
+        Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]) * 2.6,
+      );
+      this.camera.orthoScale = Math.max(
+        1,
+        Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]) * 1.6,
+      );
+      this.render();
+      return parsed;
+    }
+    setFacialState(id, state) {
+      const mesh = this.meshes.find((m) => m.id === id);
+      if (!mesh) throw Error("Malla no encontrada: " + id);
+      if (!mesh.facialAnimator)
+        throw Error("La malla no tiene morph targets faciales compatibles");
+      mesh.facialAnimator.apply(state);
+      this.updateSkinnedMesh(mesh);
+      this.render();
+      return this;
+    }
+    applyFacialAnimation(time, visemeTrack = [], state = {}) {
+      let changed = 0;
+      for (const mesh of this.meshes) {
+        if (!mesh.facialAnimator) continue;
+        mesh.facialAnimator.applyAt(time, { ...state, visemeTrack });
+        this.updateSkinnedMesh(mesh);
+        changed++;
+      }
+      if (changed) this.render();
+      return changed;
+    }
+    setMorphWeights(id, weights) {
+      const mesh = this.meshes.find((m) => m.id === id);
+      if (!mesh) throw Error("Malla no encontrada: " + id);
+      if (weights.length !== mesh.morphTargets.length)
+        throw Error("Cantidad de pesos morph incorrecta");
+      mesh.morphWeights = weights.map((v) =>
+        Number.isFinite(Number(v)) ? Number(v) : 0,
+      );
+      this.updateSkinnedMesh(mesh);
+      this.render();
+      return this;
+    }
+    updateSkinnedMesh(mesh) {
+      const s = mesh.skin;
+      let positions = window.NexoraSpatialRig3D.applyMorphTargets(
+        s ? s.sourcePositions : mesh.basePositions,
+        mesh.morphTargets,
+        mesh.morphWeights,
+      );
+      if (s) {
+        const rig = s.rig,
+          meshBoneIndex =
+            s.meshNode === null || s.meshNode === undefined
+              ? null
+              : rig.nodeBoneIndices.get(s.meshNode),
+          meshWorld =
+            meshBoneIndex === null
+              ? identity()
+              : rig.bones[meshBoneIndex].world,
+          meshInverse = window.NexoraSpatialRig3D.math.inverse(meshWorld);
+        positions = rig.skinVertices(
+          positions,
+          s.joints.flat(),
+          s.weights.flat(),
+          s.inverseBindMatrices,
+          s.jointBoneIndices,
+          meshInverse,
+        );
+      }
+      this.updatePositions(mesh.id, positions);
+    }
+    updateSkinnedMeshes() {
+      for (const mesh of this.meshes)
+        if (mesh.skin || mesh.morphTargets.length) this.updateSkinnedMesh(mesh);
+      return this;
+    }
+    playAnimation(name) {
+      if (!this.animationPlayers.length)
+        throw Error("El GLB no contiene un rig animable");
+      for (const player of this.animationPlayers) {
+        if (name !== undefined) player.select(name);
+        player.play();
+      }
+      return this;
+    }
+    pauseAnimation() {
+      for (const player of this.animationPlayers) player.pause();
+      return this;
+    }
+    advanceAnimation(delta) {
+      if (!this.animationPlayers.some((p) => p.playing)) return this;
+      for (const player of this.animationPlayers) player.advance(delta);
+      this.updateSkinnedMeshes();
+      this.render();
+      return this;
+    }
+    matrix() {
+      const b = this.camera.getBasis(),
+        eye = b.position,
+        r = b.right,
+        u = b.up,
+        f = b.forward;
+      const view = [
+          r.x,
+          u.x,
+          -f.x,
+          0,
+          r.y,
+          u.y,
+          -f.y,
+          0,
+          r.z,
+          u.z,
+          -f.z,
+          0,
+          -dot(r, eye),
+          -dot(u, eye),
+          dot(f, eye),
+          1,
+        ],
+        aspect = this.canvas.width / this.canvas.height,
+        near = this.camera.near,
+        far = this.camera.far;
+      let proj;
+      if (this.camera.projection === "orthographic") {
+        const hh = this.camera.orthoScale / 2,
+          ww = hh * aspect;
+        proj = [
+          1 / ww,
+          0,
+          0,
+          0,
+          0,
+          1 / hh,
+          0,
+          0,
+          0,
+          0,
+          -2 / (far - near),
+          0,
+          0,
+          0,
+          -(far + near) / (far - near),
+          1,
+        ];
+      } else {
+        const q = 1 / Math.tan((this.camera.fov * Math.PI) / 360);
+        proj = [
+          q / aspect,
+          0,
+          0,
+          0,
+          0,
+          q,
+          0,
+          0,
+          0,
+          0,
+          (far + near) / (near - far),
+          -1,
+          0,
+          0,
+          (2 * far * near) / (near - far),
+          0,
+        ];
+      }
+      const out = new Array(16);
+      for (let c = 0; c < 4; c++)
+        for (let row = 0; row < 4; row++)
+          out[c * 4 + row] =
+            proj[row] * view[c * 4] +
+            proj[4 + row] * view[c * 4 + 1] +
+            proj[8 + row] * view[c * 4 + 2] +
+            proj[12 + row] * view[c * 4 + 3];
+      return out;
+    }
+    render() {
+      const gl = this.gl,
+        w = this.canvas.clientWidth || 640,
+        h = this.canvas.clientHeight || 360;
+      if (this.canvas.width !== w || this.canvas.height !== h) {
+        this.canvas.width = w;
+        this.canvas.height = h;
+      }
+      gl.viewport(0, 0, w, h);
+      gl.clearColor(0.035, 0.055, 0.09, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.useProgram(this.program);
+      gl.uniformMatrix4fv(
+        this.locations.matrix,
+        false,
+        new Float32Array(this.matrix()),
+      );
+      for (const m of this.meshes) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, m.p);
+        gl.enableVertexAttribArray(this.locations.position);
+        gl.vertexAttribPointer(
+          this.locations.position,
+          3,
+          gl.FLOAT,
+          false,
+          0,
+          0,
+        );
+        gl.bindBuffer(gl.ARRAY_BUFFER, m.c);
+        gl.enableVertexAttribArray(this.locations.color);
+        gl.vertexAttribPointer(this.locations.color, 4, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, m.n);
+        gl.enableVertexAttribArray(this.locations.normal);
+        gl.vertexAttribPointer(this.locations.normal, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, m.uv);
+        gl.enableVertexAttribArray(this.locations.uv);
+        gl.vertexAttribPointer(this.locations.uv, 2, gl.FLOAT, false, 0, 0);
+        const texture =
+          m.textureIndex === null ? null : this.gltfTextures[m.textureIndex];
+        gl.uniform1i(this.locations.useTexture, texture ? 1 : 0);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture || null);
+        gl.uniform1i(this.locations.texture, 0);
+        gl.uniformMatrix4fv(
+          this.locations.model,
+          false,
+          new Float32Array(m.model),
+        );
+        gl.drawArrays(gl.TRIANGLES, 0, m.count);
+      }
+      return this;
+    }
+  }
+  window.NexoraSpatialEngine = {
+    SpatialCamera,
+    SpatialRenderer,
+    parseGLB,
+    flatNormals,
+    geometry: { cube, sphere },
+    transform,
+    identity,
+    views: Object.keys(presets),
+  };
 })();

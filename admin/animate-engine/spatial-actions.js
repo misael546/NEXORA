@@ -1,151 +1,663 @@
 /* NEXORA ANIMATE — reusable cinematic body acting for imported 3D rigs. */
-(()=>{"use strict";
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const q=(axis,angle)=>{const n=Math.hypot(...axis)||1,s=Math.sin(angle/2)/n;return[axis[0]*s,axis[1]*s,axis[2]*s,Math.cos(angle/2)]};
-const qmul=(a,b)=>[a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]];
-const qnorm=a=>{const n=Math.hypot(...a)||1;return a.map(v=>v/n)};
-const clean=s=>String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
-const patterns={
- root:/^(root|armature|skeleton|masterroot)$/,
- pelvis:/(pelvis|hips|hiproot)/,
- spine:/(spine|torso|back)/,
- chest:/(chest|upperbody|ribcage)/,
- neck:/neck/,
- head:/head/,
- jaw:/(jaw|mandible)/,
- tail:/tail/,
- thigh:/(thigh|upleg|upperleg|femur)/,
- shin:/(shin|calf|lowerleg)/,
- foot:/(foot|ankle|toe)/,
- arm:/(upperarm|arm|forearm|hand|wrist)/
-};
-function findBone(rig,role,side){
- const names=rig.bones.map(b=>b.name);
- if(side){
-  const suffix=side==="L"?/(left|l)$/:/(right|r)$/;
-  const prefix=side==="L"?/^(left|l)/:/^(right|r)/;
-  const candidates=names.filter(n=>{const s=clean(n);return patterns[role]?.test(s)&& (suffix.test(s)||prefix.test(s)||s.includes(role.toLowerCase()+side.toLowerCase()))});
-  return candidates[0]||null;
- }
- if(role==="root"){const exact=names.find(n=>patterns.root.test(clean(n)));if(exact)return exact;return rig.bones.find(b=>b.parent===null)?.name||null}
- const candidates=names.filter(n=>patterns[role]?.test(clean(n)));
- if(role==="spine")return candidates.find(n=>!/(chest|neck)/i.test(n))||candidates[0]||null;
- if(role==="arm")return candidates.find(n=>/(upperarm|arm)/i.test(n))||candidates[0]||null;
- if(role==="thigh")return candidates.find(n=>/(thigh|upleg|upperleg|femur)/i.test(n))||candidates[0]||null;
- if(role==="shin")return candidates.find(n=>/(shin|calf|lowerleg)/i.test(n))||candidates[0]||null;
- if(role==="foot")return candidates.find(n=>/(foot|ankle|toe)/i.test(n))||null;
- return candidates[0]||null;
-}
-function roleMap(rig){
- const map={};for(const role of Object.keys(patterns)){if(["thigh","shin","foot","arm"].includes(role))continue;map[role]=findBone(rig,role)}
- for(const role of ["thigh","shin","foot","arm"]){map[role+"L"]=findBone(rig,role,"L");map[role+"R"]=findBone(rig,role,"R")}
- map.spineBones=rig.bones.filter(b=>patterns.spine.test(clean(b.name))&&!/(chest|neck)/i.test(clean(b.name))).map(b=>b.name);
- map.neckBones=rig.bones.filter(b=>patterns.neck.test(clean(b.name))).map(b=>b.name);
- map.tailBones=rig.bones.filter(b=>patterns.tail.test(clean(b.name))).map(b=>b.name);
- return map;
-}
-function makeTrack(rig,bone,frames,axis=[0,0,1]){
- if(!bone)return null;
- const source=rig.byName.get(bone),index=rig.bones.indexOf(source),base=rig.restPose?.[index]||source;
- return{bone,keyframes:frames.map(f=>{const key={time:f[0],rotation:qnorm(qmul(base.rotation||[0,0,0,1],q(f[2]||axis,f[1]||0)))};if(f[3])key.translation=f[3].map((v,i)=>v+(base.translation?.[i]||0));return key})};
-}
-function createClip(rig,action,options={}){
- const map=roleMap(rig),dino=!!map.tail,duration=({idle:2.4,walk:1.2,run:.72,jump:.95,land:.55,turn:.8,talk:1.4,hit:.68,crouch:.7})[action];
- if(!duration)throw Error("Acción cinematográfica desconocida: "+action);
- const loop=["idle","walk","run","talk"].includes(action),tracks=[];
- const add=(role,frames,axis)=>{const name=map[role];const t=makeTrack(rig,name,frames,axis);if(t)tracks.push(t)};
- const addChain=(key,frames,axis=[0,0,1],baseGain=.55,tipGain=1.3)=>{const names=map[key]||[];names.forEach((name,index)=>{const gain=names.length===1?1:baseGain+(tipGain-baseGain)*index/(names.length-1),scaled=frames.map(frame=>[frame[0],(Number(frame[1])||0)*gain,frame[2]||axis,frame[3]]);const track=makeTrack(rig,name,scaled,axis);if(track)tracks.push(track)})};
- const cyc=(angles,axis=[0,0,1],translations=null)=>angles.map((a,i)=>[duration*i/(angles.length-1),a,axis,translations?.[i]]);
- if(action==="idle"){
-  add("pelvis",cyc([0,.012,0,-.012,0],[0,0,1],[[0,0,0],[0,.012,0],[0,0,0],[0,.012,0],[0,0,0]]));
-  add("chest",cyc([0,.018,0,-.018,0]));
-  addChain("neckBones",cyc([0,-.025,0,.025,0]));
-  add("head",cyc([0,.018,0,-.018,0]));
-  addChain("tailBones",cyc([-.035,.035,-.035,.035,-.035],[0,1,0]));
-  add("jaw",cyc([0,.015,0,.01,0]));
- }else if(action==="walk"||action==="run"){
-  const fast=action==="run",s=fast?1.35:1,leg=[0,.62*s,0,-.62*s,0],legR=leg.map(v=>-v),shin=[0,-.32*s,0,.32*s,0],shinR=shin.map(v=>-v),arm=[0,-.28*s,0,.28*s,0],armR=arm.map(v=>-v);
-  const bob=fast?[0,.08,0,.08,0]:[0,.035,0,.035,0];
-  add("root",cyc([0,0,0,0,0],[0,0,1],bob.map(v=>[0,v,0])));
-  add("pelvis",cyc([-.025,.035,-.025,.035,-.025]));
-  addChain("spineBones",cyc([.02,-.025,.02,-.025,.02]));
-  add("thighL",cyc(leg));add("thighR",cyc(legR));
-  add("shinL",cyc(shin));add("shinR",cyc(shinR));
-  add("footL",cyc(shin.map(v=>-v*.55)));add("footR",cyc(shinR.map(v=>-v*.55)));
-  add("armL",cyc(arm));add("armR",cyc(armR));
-  addChain("neckBones",cyc([.025,-.035,.025,-.035,.025]));
-  add("head",cyc([-.018,.025,-.018,.025,-.018]));
-  addChain("tailBones",cyc([-.13,.13,-.13,.13,-.13],[0,1,0]));
- }else if(action==="jump"){
-  add("root",[[0,0,[0,0,1],[0,0,0]],[.16,0,[0,0,1],[0,-.16,0]],[.42,0,[0,0,1],[0,.48,0]],[.58,0,[0,0,1],[0,.52,0]],[.8,0,[0,0,1],[0,.08,0]],[.95,0,[0,0,1],[0,0,0]]]);
-  add("pelvis",cyc([-.06,.08,.02,-.04,0]));
-  add("thighL",cyc([-.15,.8,.62,.4,0]));add("thighR",cyc([-.15,.8,.62,.4,0]));
-  add("shinL",cyc([.05,-.72,-.55,-.2,0]));add("shinR",cyc([.05,-.72,-.55,-.2,0]));
-  add("armL",cyc([-.05,-.65,-.55,-.2,0]));add("armR",cyc([.05,.65,.55,.2,0]));
-  addChain("neckBones",cyc([0,-.12,-.08,.04,0]));add("head",cyc([0,.1,.08,-.03,0]));
-  addChain("tailBones",cyc([-.1,.28,.18,-.08,0],[0,1,0]));
- }else if(action==="land"){
-  add("root",[[0,0,[0,0,1],[0,.12,0]],[.12,0,[0,0,1],[0,-.14,0]],[.28,0,[0,0,1],[0,0,0]],[.55,0,[0,0,1],[0,0,0]]]);
-  add("pelvis",cyc([.1,-.18,.06,0,0]));addChain("spineBones",cyc([-.1,.08,-.025,0,0]));add("thighL",cyc([.4,-.18,-.08,0,0]));add("thighR",cyc([.4,-.18,-.08,0,0]));addChain("tailBones",cyc([.32,-.22,.12,0,0],[0,1,0]));
- }else if(action==="turn"){
-  const direction=options.direction==="right"?-1:1;
-  add("root",[[0,0,[0,1,0],[0,0,0]],[.2,direction*.15,[0,1,0]],[.55,direction*1.35,[0,1,0]],[.8,direction*Math.PI/2,[0,1,0]]]);
-  addChain("spineBones",cyc([0,-.04,-.06,0,0]));add("head",cyc([0,-.16,-.08,.02,0]));addChain("tailBones",cyc([0,-.12,-.2,-.08,0],[0,1,0]));
- }else if(action==="talk"){
-  add("jaw",cyc([.05,.24,.08,.34,.05]));
-  add("head",cyc([0,.045,-.025,.035,0]));
-  addChain("neckBones",cyc([0,.025,-.018,.025,0]));
-  add("armL",cyc([0,-.12,-.22,-.08,0]));add("armR",cyc([0,.12,.22,.08,0]));
-  addChain("tailBones",cyc([0,.025,0,-.025,0],[0,1,0]));
- }else if(action==="hit"){
-  add("root",[[0,0,[0,0,1],[0,0,0]],[.12,-.14,[0,0,1],[-.08,-.04,0]],[.28,.12,[0,0,1],[-.16,.02,0]],[.48,.05,[0,0,1],[-.06,0,0]],[.68,0,[0,0,1],[0,0,0]]]);
-  add("pelvis",cyc([0,-.16,.1,.035,0]));addChain("spineBones",cyc([0,.22,-.1,-.025,0]));addChain("neckBones",cyc([0,.28,-.1,-.02,0]));add("head",cyc([0,.24,-.16,-.03,0]));add("armL",cyc([0,.4,.2,.08,0]));add("armR",cyc([0,-.4,-.2,-.08,0]));addChain("tailBones",cyc([0,.35,-.25,.1,0],[0,1,0]));
- }else if(action==="crouch"){
-  add("pelvis",[[0,0],[.22,-.3],[.7,-.3]]);add("thighL",[[0,0],[.22,.55],[.7,.55]]);add("thighR",[[0,0],[.22,.55],[.7,.55]]);add("shinL",[[0,0],[.22,-.7],[.7,-.7]]);add("shinR",[[0,0],[.22,-.7],[.7,-.7]]);addChain("spineBones",[[0,0],[.22,.12],[.7,.12]]);add("head",[[0,0],[.22,-.08],[.7,-.08]]);
- }
- if(!tracks.length)throw Error("El rig no contiene huesos compatibles para "+action);
- const {SpatialAnimationClip}=window.NexoraSpatialMotion;
- return new SpatialAnimationClip({name:action,duration,fps:30,loop,tracks});
-}
-const slerp=(a,b,t)=>{let end=b.slice(),dot=a.reduce((sum,v,i)=>sum+v*end[i],0);if(dot<0){dot=-dot;end=end.map(v=>-v)}if(dot>.9995)return qnorm(a.map((v,i)=>v+(end[i]-v)*t));const theta=Math.acos(clamp(dot,-1,1)),sin=Math.sin(theta);return qnorm(a.map((v,i)=>(v*Math.sin((1-t)*theta)+end[i]*Math.sin(t*theta))/sin))};
-class SpatialActionPlayer{
- constructor(rig,clip,options={}){this.rig=rig;this.clip=clip;this.time=0;this.elapsed=0;this.playing=false;this.loop=clip.loop;this.blendDuration=clamp(Number(options.blendDuration??.22),0,2);this.rest=(rig.restPose||rig.bones.map(b=>({translation:b.translation,rotation:b.rotation,scale:b.scale}))).map(p=>({translation:p.translation.slice(),rotation:p.rotation.slice(),scale:p.scale.slice()}));this.fromPose=rig.bones.map(b=>({translation:b.translation.slice(),rotation:b.rotation.slice(),scale:b.scale.slice()}))}
- restore(){this.rig.bones.forEach((b,i)=>{const p=this.rest[i];b.translation=p.translation.slice();b.rotation=p.rotation.slice();b.scale=p.scale.slice()});this.rig.updateWorld()}
- apply(){this.restore();this.clip.apply(this.rig,this.time);const weight=this.blendDuration>0?clamp(this.elapsed/this.blendDuration,0,1):1;if(weight<1){this.rig.bones.forEach((b,i)=>{const from=this.fromPose[i];b.translation=b.translation.map((v,j)=>from.translation[j]+(v-from.translation[j])*weight);b.scale=b.scale.map((v,j)=>from.scale[j]+(v-from.scale[j])*weight);b.rotation=slerp(from.rotation,b.rotation,weight)});this.rig.updateWorld()}return this}
- play(){this.playing=true;return this.apply()}
- pause(){this.playing=false;return this}
- seek(seconds){this.time=clamp(Number(seconds)||0,0,this.clip.duration);this.elapsed=this.time;return this.apply()}
- advance(delta){if(!this.playing)return this;const step=Math.max(0,Number(delta)||0);this.elapsed+=step;this.time+=step;if(this.loop)this.time%=this.clip.duration;else if(this.time>=this.clip.duration){this.time=this.clip.duration;this.playing=false}return this.apply()}
-}
-const actions=[{id:"idle",label:"Respirar / reposo"},{id:"walk",label:"Caminar"},{id:"run",label:"Correr"},{id:"jump",label:"Saltar"},{id:"land",label:"Aterrizar"},{id:"turn",label:"Girar"},{id:"talk",label:"Hablar / gesticular"},{id:"hit",label:"Reaccionar a impacto"},{id:"crouch",label:"Agacharse"}];
-function createPlayer(rig,action,options={}){return new SpatialActionPlayer(rig,createClip(rig,action,options),options)}
-class SpatialActionSequence{
- constructor(rig,{name="Secuencia cinematográfica",segments=[]}={}){if(!rig?.bones)throw Error("La secuencia necesita un rig 3D");this.rig=rig;this.name=name;this.segments=[];for(const segment of segments)this.add(segment.action,segment.options||{},segment)}
- add(action,options={},settings={}){
-  if(this.segments.length>=100)throw Error("Una secuencia admite como máximo 100 acciones");
-  if(!options||typeof options!=="object"||Array.isArray(options))throw Error("Las opciones de una acción deben ser un objeto");
-  const clip=createClip(this.rig,action,options),duration=Number(settings.duration??options.duration??clip.duration),blendDuration=Number(settings.blendDuration??options.blendDuration??.22);
-  if(!Number.isFinite(duration)||duration<.05||duration>120)throw Error("La duración de cada acción debe estar entre 0.05 y 120 segundos");
-  if(!Number.isFinite(blendDuration)||blendDuration<0||blendDuration>2)throw Error("El fundido debe estar entre 0 y 2 segundos");
-  this.segments.push({action,options:{...options},duration,blendDuration,clip});
-  return this;
- }
- remove(index){if(!Number.isInteger(index)||index<0||index>=this.segments.length)return false;this.segments.splice(index,1);return true}
- clear(){this.segments=[];return this}
- get totalDuration(){return this.segments.reduce((sum,segment)=>sum+segment.duration,0)}
- timeline(){let start=0;return this.segments.map((segment,index)=>{const entry={index,action:segment.action,start,end:start+segment.duration,duration:segment.duration,blendDuration:segment.blendDuration};start=entry.end;return entry})}
- exportJSON(){return{format:"nexora-spatial-action-sequence",version:1,name:this.name,segments:this.segments.map(({action,options,duration,blendDuration})=>({action,options,duration,blendDuration}))}}
- static fromJSON(rig,data){if(data?.format!=="nexora-spatial-action-sequence"||data.version!==1||!Array.isArray(data.segments))throw Error("Secuencia cinematográfica inválida");return new SpatialActionSequence(rig,{name:data.name,segments:data.segments})}
- createPlayer(options={}){return new SpatialSequencePlayer(this,options)}
-}
-class SpatialSequencePlayer{
- constructor(sequence,{blendDuration}={}){this.sequence=sequence;this.rig=sequence.rig;this.time=0;this.playing=false;this.currentIndex=-1;this.currentPlayer=null;this.defaultBlendDuration=blendDuration}
- locate(time){const timeline=this.sequence.timeline();if(!timeline.length)return null;const t=clamp(Number(time)||0,0,this.sequence.totalDuration);return timeline.find((item,index)=>t<item.end||index===timeline.length-1)||null}
- enter(item,localTime=0){if(this.currentPlayer)this.currentPlayer.pause();const segment=this.sequence.segments[item.index],blend=this.defaultBlendDuration??segment.blendDuration;this.currentPlayer=new SpatialActionPlayer(this.rig,segment.clip,{blendDuration:blend});this.currentIndex=item.index;this.currentPlayer.play();if(localTime>0)this.currentPlayer.advance(localTime);return this.currentPlayer}
- play(){if(!this.sequence.segments.length)throw Error("Añade al menos una acción a la secuencia");if(this.time>=this.sequence.totalDuration)this.time=0;const item=this.locate(this.time);if(!this.currentPlayer||item.index!==this.currentIndex)this.enter(item,this.time-item.start);else this.currentPlayer.play();this.playing=true;return this}
- pause(){this.playing=false;this.currentPlayer?.pause();return this}
- seek(seconds){if(!this.sequence.segments.length)return this;this.time=clamp(Number(seconds)||0,0,this.sequence.totalDuration);const item=this.locate(this.time),local=this.time-item.start;if(!this.currentPlayer||item.index!==this.currentIndex)this.enter(item,local);else this.currentPlayer.seek(local);this.playing=false;this.currentPlayer.pause();return this}
- advance(delta){if(!this.playing)return this;const step=Math.max(0,Number(delta)||0),next=Math.min(this.sequence.totalDuration,this.time+step),item=this.locate(next),local=next-item.start;if(item.index!==this.currentIndex)this.enter(item,local);else if(this.currentPlayer)this.currentPlayer.advance(step);this.time=next;if(next>=this.sequence.totalDuration){this.playing=false;this.currentPlayer?.pause()}return this}
-}
-window.NexoraSpatialActions={actions,roleMap,createClip,createPlayer,SpatialActionPlayer,SpatialActionSequence,SpatialSequencePlayer};
+(() => {
+  "use strict";
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const q = (axis, angle) => {
+    const n = Math.hypot(...axis) || 1,
+      s = Math.sin(angle / 2) / n;
+    return [axis[0] * s, axis[1] * s, axis[2] * s, Math.cos(angle / 2)];
+  };
+  const qmul = (a, b) => [
+    a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1],
+    a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0],
+    a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3],
+    a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2],
+  ];
+  const qnorm = (a) => {
+    const n = Math.hypot(...a) || 1;
+    return a.map((v) => v / n);
+  };
+  const clean = (s) =>
+    String(s || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+  const patterns = {
+    root: /^(root|armature|skeleton|masterroot)$/,
+    pelvis: /(pelvis|hips|hiproot)/,
+    spine: /(spine|torso|back)/,
+    chest: /(chest|upperbody|ribcage)/,
+    neck: /neck/,
+    head: /head/,
+    jaw: /(jaw|mandible)/,
+    tail: /tail/,
+    thigh: /(thigh|upleg|upperleg|femur)/,
+    shin: /(shin|calf|lowerleg)/,
+    foot: /(foot|ankle|toe)/,
+    arm: /(upperarm|arm|forearm|hand|wrist)/,
+  };
+  function findBone(rig, role, side) {
+    const names = rig.bones.map((b) => b.name);
+    if (side) {
+      const suffix = side === "L" ? /(left|l)$/ : /(right|r)$/;
+      const prefix = side === "L" ? /^(left|l)/ : /^(right|r)/;
+      const candidates = names.filter((n) => {
+        const s = clean(n);
+        return (
+          patterns[role]?.test(s) &&
+          (suffix.test(s) ||
+            prefix.test(s) ||
+            s.includes(role.toLowerCase() + side.toLowerCase()))
+        );
+      });
+      return candidates[0] || null;
+    }
+    if (role === "root") {
+      const exact = names.find((n) => patterns.root.test(clean(n)));
+      if (exact) return exact;
+      return rig.bones.find((b) => b.parent === null)?.name || null;
+    }
+    const candidates = names.filter((n) => patterns[role]?.test(clean(n)));
+    if (role === "spine")
+      return (
+        candidates.find((n) => !/(chest|neck)/i.test(n)) ||
+        candidates[0] ||
+        null
+      );
+    if (role === "arm")
+      return (
+        candidates.find((n) => /(upperarm|arm)/i.test(n)) ||
+        candidates[0] ||
+        null
+      );
+    if (role === "thigh")
+      return (
+        candidates.find((n) => /(thigh|upleg|upperleg|femur)/i.test(n)) ||
+        candidates[0] ||
+        null
+      );
+    if (role === "shin")
+      return (
+        candidates.find((n) => /(shin|calf|lowerleg)/i.test(n)) ||
+        candidates[0] ||
+        null
+      );
+    if (role === "foot")
+      return candidates.find((n) => /(foot|ankle|toe)/i.test(n)) || null;
+    return candidates[0] || null;
+  }
+  function roleMap(rig) {
+    const map = {};
+    for (const role of Object.keys(patterns)) {
+      if (["thigh", "shin", "foot", "arm"].includes(role)) continue;
+      map[role] = findBone(rig, role);
+    }
+    for (const role of ["thigh", "shin", "foot", "arm"]) {
+      map[role + "L"] = findBone(rig, role, "L");
+      map[role + "R"] = findBone(rig, role, "R");
+    }
+    map.spineBones = rig.bones
+      .filter(
+        (b) =>
+          patterns.spine.test(clean(b.name)) &&
+          !/(chest|neck)/i.test(clean(b.name)),
+      )
+      .map((b) => b.name);
+    map.neckBones = rig.bones
+      .filter((b) => patterns.neck.test(clean(b.name)))
+      .map((b) => b.name);
+    map.tailBones = rig.bones
+      .filter((b) => patterns.tail.test(clean(b.name)))
+      .map((b) => b.name);
+    return map;
+  }
+  function makeTrack(rig, bone, frames, axis = [0, 0, 1]) {
+    if (!bone) return null;
+    const source = rig.byName.get(bone),
+      index = rig.bones.indexOf(source),
+      base = rig.restPose?.[index] || source;
+    return {
+      bone,
+      keyframes: frames.map((f) => {
+        const key = {
+          time: f[0],
+          rotation: qnorm(
+            qmul(base.rotation || [0, 0, 0, 1], q(f[2] || axis, f[1] || 0)),
+          ),
+        };
+        if (f[3])
+          key.translation = f[3].map(
+            (v, i) => v + (base.translation?.[i] || 0),
+          );
+        return key;
+      }),
+    };
+  }
+  function createClip(rig, action, options = {}) {
+    const map = roleMap(rig),
+      dino = !!map.tail,
+      duration = {
+        idle: 2.4,
+        walk: 1.2,
+        run: 0.72,
+        jump: 0.95,
+        land: 0.55,
+        turn: 0.8,
+        talk: 1.4,
+        hit: 0.68,
+        crouch: 0.7,
+      }[action];
+    if (!duration) throw Error("Acción cinematográfica desconocida: " + action);
+    const loop = ["idle", "walk", "run", "talk"].includes(action),
+      tracks = [];
+    const add = (role, frames, axis) => {
+      const name = map[role];
+      const t = makeTrack(rig, name, frames, axis);
+      if (t) tracks.push(t);
+    };
+    const addChain = (
+      key,
+      frames,
+      axis = [0, 0, 1],
+      baseGain = 0.55,
+      tipGain = 1.3,
+    ) => {
+      const names = map[key] || [];
+      names.forEach((name, index) => {
+        const gain =
+            names.length === 1
+              ? 1
+              : baseGain + ((tipGain - baseGain) * index) / (names.length - 1),
+          scaled = frames.map((frame) => [
+            frame[0],
+            (Number(frame[1]) || 0) * gain,
+            frame[2] || axis,
+            frame[3],
+          ]);
+        const track = makeTrack(rig, name, scaled, axis);
+        if (track) tracks.push(track);
+      });
+    };
+    const cyc = (angles, axis = [0, 0, 1], translations = null) =>
+      angles.map((a, i) => [
+        (duration * i) / (angles.length - 1),
+        a,
+        axis,
+        translations?.[i],
+      ]);
+    if (action === "idle") {
+      add(
+        "pelvis",
+        cyc(
+          [0, 0.012, 0, -0.012, 0],
+          [0, 0, 1],
+          [
+            [0, 0, 0],
+            [0, 0.012, 0],
+            [0, 0, 0],
+            [0, 0.012, 0],
+            [0, 0, 0],
+          ],
+        ),
+      );
+      add("chest", cyc([0, 0.018, 0, -0.018, 0]));
+      addChain("neckBones", cyc([0, -0.025, 0, 0.025, 0]));
+      add("head", cyc([0, 0.018, 0, -0.018, 0]));
+      addChain(
+        "tailBones",
+        cyc([-0.035, 0.035, -0.035, 0.035, -0.035], [0, 1, 0]),
+      );
+      add("jaw", cyc([0, 0.015, 0, 0.01, 0]));
+    } else if (action === "walk" || action === "run") {
+      const fast = action === "run",
+        s = fast ? 1.35 : 1,
+        leg = [0, 0.62 * s, 0, -0.62 * s, 0],
+        legR = leg.map((v) => -v),
+        shin = [0, -0.32 * s, 0, 0.32 * s, 0],
+        shinR = shin.map((v) => -v),
+        arm = [0, -0.28 * s, 0, 0.28 * s, 0],
+        armR = arm.map((v) => -v);
+      const bob = fast ? [0, 0.08, 0, 0.08, 0] : [0, 0.035, 0, 0.035, 0];
+      add(
+        "root",
+        cyc(
+          [0, 0, 0, 0, 0],
+          [0, 0, 1],
+          bob.map((v) => [0, v, 0]),
+        ),
+      );
+      add("pelvis", cyc([-0.025, 0.035, -0.025, 0.035, -0.025]));
+      addChain("spineBones", cyc([0.02, -0.025, 0.02, -0.025, 0.02]));
+      add("thighL", cyc(leg));
+      add("thighR", cyc(legR));
+      add("shinL", cyc(shin));
+      add("shinR", cyc(shinR));
+      add("footL", cyc(shin.map((v) => -v * 0.55)));
+      add("footR", cyc(shinR.map((v) => -v * 0.55)));
+      add("armL", cyc(arm));
+      add("armR", cyc(armR));
+      addChain("neckBones", cyc([0.025, -0.035, 0.025, -0.035, 0.025]));
+      add("head", cyc([-0.018, 0.025, -0.018, 0.025, -0.018]));
+      addChain("tailBones", cyc([-0.13, 0.13, -0.13, 0.13, -0.13], [0, 1, 0]));
+    } else if (action === "jump") {
+      add("root", [
+        [0, 0, [0, 0, 1], [0, 0, 0]],
+        [0.16, 0, [0, 0, 1], [0, -0.16, 0]],
+        [0.42, 0, [0, 0, 1], [0, 0.48, 0]],
+        [0.58, 0, [0, 0, 1], [0, 0.52, 0]],
+        [0.8, 0, [0, 0, 1], [0, 0.08, 0]],
+        [0.95, 0, [0, 0, 1], [0, 0, 0]],
+      ]);
+      add("pelvis", cyc([-0.06, 0.08, 0.02, -0.04, 0]));
+      add("thighL", cyc([-0.15, 0.8, 0.62, 0.4, 0]));
+      add("thighR", cyc([-0.15, 0.8, 0.62, 0.4, 0]));
+      add("shinL", cyc([0.05, -0.72, -0.55, -0.2, 0]));
+      add("shinR", cyc([0.05, -0.72, -0.55, -0.2, 0]));
+      add("armL", cyc([-0.05, -0.65, -0.55, -0.2, 0]));
+      add("armR", cyc([0.05, 0.65, 0.55, 0.2, 0]));
+      addChain("neckBones", cyc([0, -0.12, -0.08, 0.04, 0]));
+      add("head", cyc([0, 0.1, 0.08, -0.03, 0]));
+      addChain("tailBones", cyc([-0.1, 0.28, 0.18, -0.08, 0], [0, 1, 0]));
+    } else if (action === "land") {
+      add("root", [
+        [0, 0, [0, 0, 1], [0, 0.12, 0]],
+        [0.12, 0, [0, 0, 1], [0, -0.14, 0]],
+        [0.28, 0, [0, 0, 1], [0, 0, 0]],
+        [0.55, 0, [0, 0, 1], [0, 0, 0]],
+      ]);
+      add("pelvis", cyc([0.1, -0.18, 0.06, 0, 0]));
+      addChain("spineBones", cyc([-0.1, 0.08, -0.025, 0, 0]));
+      add("thighL", cyc([0.4, -0.18, -0.08, 0, 0]));
+      add("thighR", cyc([0.4, -0.18, -0.08, 0, 0]));
+      addChain("tailBones", cyc([0.32, -0.22, 0.12, 0, 0], [0, 1, 0]));
+    } else if (action === "turn") {
+      const direction = options.direction === "right" ? -1 : 1;
+      add("root", [
+        [0, 0, [0, 1, 0], [0, 0, 0]],
+        [0.2, direction * 0.15, [0, 1, 0]],
+        [0.55, direction * 1.35, [0, 1, 0]],
+        [0.8, (direction * Math.PI) / 2, [0, 1, 0]],
+      ]);
+      addChain("spineBones", cyc([0, -0.04, -0.06, 0, 0]));
+      add("head", cyc([0, -0.16, -0.08, 0.02, 0]));
+      addChain("tailBones", cyc([0, -0.12, -0.2, -0.08, 0], [0, 1, 0]));
+    } else if (action === "talk") {
+      add("jaw", cyc([0.05, 0.24, 0.08, 0.34, 0.05]));
+      add("head", cyc([0, 0.045, -0.025, 0.035, 0]));
+      addChain("neckBones", cyc([0, 0.025, -0.018, 0.025, 0]));
+      add("armL", cyc([0, -0.12, -0.22, -0.08, 0]));
+      add("armR", cyc([0, 0.12, 0.22, 0.08, 0]));
+      addChain("tailBones", cyc([0, 0.025, 0, -0.025, 0], [0, 1, 0]));
+    } else if (action === "hit") {
+      add("root", [
+        [0, 0, [0, 0, 1], [0, 0, 0]],
+        [0.12, -0.14, [0, 0, 1], [-0.08, -0.04, 0]],
+        [0.28, 0.12, [0, 0, 1], [-0.16, 0.02, 0]],
+        [0.48, 0.05, [0, 0, 1], [-0.06, 0, 0]],
+        [0.68, 0, [0, 0, 1], [0, 0, 0]],
+      ]);
+      add("pelvis", cyc([0, -0.16, 0.1, 0.035, 0]));
+      addChain("spineBones", cyc([0, 0.22, -0.1, -0.025, 0]));
+      addChain("neckBones", cyc([0, 0.28, -0.1, -0.02, 0]));
+      add("head", cyc([0, 0.24, -0.16, -0.03, 0]));
+      add("armL", cyc([0, 0.4, 0.2, 0.08, 0]));
+      add("armR", cyc([0, -0.4, -0.2, -0.08, 0]));
+      addChain("tailBones", cyc([0, 0.35, -0.25, 0.1, 0], [0, 1, 0]));
+    } else if (action === "crouch") {
+      add("pelvis", [
+        [0, 0],
+        [0.22, -0.3],
+        [0.7, -0.3],
+      ]);
+      add("thighL", [
+        [0, 0],
+        [0.22, 0.55],
+        [0.7, 0.55],
+      ]);
+      add("thighR", [
+        [0, 0],
+        [0.22, 0.55],
+        [0.7, 0.55],
+      ]);
+      add("shinL", [
+        [0, 0],
+        [0.22, -0.7],
+        [0.7, -0.7],
+      ]);
+      add("shinR", [
+        [0, 0],
+        [0.22, -0.7],
+        [0.7, -0.7],
+      ]);
+      addChain("spineBones", [
+        [0, 0],
+        [0.22, 0.12],
+        [0.7, 0.12],
+      ]);
+      add("head", [
+        [0, 0],
+        [0.22, -0.08],
+        [0.7, -0.08],
+      ]);
+    }
+    if (!tracks.length)
+      throw Error("El rig no contiene huesos compatibles para " + action);
+    const { SpatialAnimationClip } = window.NexoraSpatialMotion;
+    return new SpatialAnimationClip({
+      name: action,
+      duration,
+      fps: 30,
+      loop,
+      tracks,
+    });
+  }
+  const slerp = (a, b, t) => {
+    let end = b.slice(),
+      dot = a.reduce((sum, v, i) => sum + v * end[i], 0);
+    if (dot < 0) {
+      dot = -dot;
+      end = end.map((v) => -v);
+    }
+    if (dot > 0.9995) return qnorm(a.map((v, i) => v + (end[i] - v) * t));
+    const theta = Math.acos(clamp(dot, -1, 1)),
+      sin = Math.sin(theta);
+    return qnorm(
+      a.map(
+        (v, i) =>
+          (v * Math.sin((1 - t) * theta) + end[i] * Math.sin(t * theta)) / sin,
+      ),
+    );
+  };
+  class SpatialActionPlayer {
+    constructor(rig, clip, options = {}) {
+      this.rig = rig;
+      this.clip = clip;
+      this.time = 0;
+      this.elapsed = 0;
+      this.playing = false;
+      this.loop = clip.loop;
+      this.blendDuration = clamp(Number(options.blendDuration ?? 0.22), 0, 2);
+      this.rest = (
+        rig.restPose ||
+        rig.bones.map((b) => ({
+          translation: b.translation,
+          rotation: b.rotation,
+          scale: b.scale,
+        }))
+      ).map((p) => ({
+        translation: p.translation.slice(),
+        rotation: p.rotation.slice(),
+        scale: p.scale.slice(),
+      }));
+      this.fromPose = rig.bones.map((b) => ({
+        translation: b.translation.slice(),
+        rotation: b.rotation.slice(),
+        scale: b.scale.slice(),
+      }));
+    }
+    restore() {
+      this.rig.bones.forEach((b, i) => {
+        const p = this.rest[i];
+        b.translation = p.translation.slice();
+        b.rotation = p.rotation.slice();
+        b.scale = p.scale.slice();
+      });
+      this.rig.updateWorld();
+    }
+    apply() {
+      this.restore();
+      this.clip.apply(this.rig, this.time);
+      const weight =
+        this.blendDuration > 0
+          ? clamp(this.elapsed / this.blendDuration, 0, 1)
+          : 1;
+      if (weight < 1) {
+        this.rig.bones.forEach((b, i) => {
+          const from = this.fromPose[i];
+          b.translation = b.translation.map(
+            (v, j) => from.translation[j] + (v - from.translation[j]) * weight,
+          );
+          b.scale = b.scale.map(
+            (v, j) => from.scale[j] + (v - from.scale[j]) * weight,
+          );
+          b.rotation = slerp(from.rotation, b.rotation, weight);
+        });
+        this.rig.updateWorld();
+      }
+      return this;
+    }
+    play() {
+      this.playing = true;
+      return this.apply();
+    }
+    pause() {
+      this.playing = false;
+      return this;
+    }
+    seek(seconds) {
+      this.time = clamp(Number(seconds) || 0, 0, this.clip.duration);
+      this.elapsed = this.time;
+      return this.apply();
+    }
+    advance(delta) {
+      if (!this.playing) return this;
+      const step = Math.max(0, Number(delta) || 0);
+      this.elapsed += step;
+      this.time += step;
+      if (this.loop) this.time %= this.clip.duration;
+      else if (this.time >= this.clip.duration) {
+        this.time = this.clip.duration;
+        this.playing = false;
+      }
+      return this.apply();
+    }
+  }
+  const actions = [
+    { id: "idle", label: "Respirar / reposo" },
+    { id: "walk", label: "Caminar" },
+    { id: "run", label: "Correr" },
+    { id: "jump", label: "Saltar" },
+    { id: "land", label: "Aterrizar" },
+    { id: "turn", label: "Girar" },
+    { id: "talk", label: "Hablar / gesticular" },
+    { id: "hit", label: "Reaccionar a impacto" },
+    { id: "crouch", label: "Agacharse" },
+  ];
+  function createPlayer(rig, action, options = {}) {
+    return new SpatialActionPlayer(
+      rig,
+      createClip(rig, action, options),
+      options,
+    );
+  }
+  class SpatialActionSequence {
+    constructor(
+      rig,
+      { name = "Secuencia cinematográfica", segments = [] } = {},
+    ) {
+      if (!rig?.bones) throw Error("La secuencia necesita un rig 3D");
+      this.rig = rig;
+      this.name = name;
+      this.segments = [];
+      for (const segment of segments)
+        this.add(segment.action, segment.options || {}, segment);
+    }
+    add(action, options = {}, settings = {}) {
+      if (this.segments.length >= 100)
+        throw Error("Una secuencia admite como máximo 100 acciones");
+      if (!options || typeof options !== "object" || Array.isArray(options))
+        throw Error("Las opciones de una acción deben ser un objeto");
+      const clip = createClip(this.rig, action, options),
+        duration = Number(
+          settings.duration ?? options.duration ?? clip.duration,
+        ),
+        blendDuration = Number(
+          settings.blendDuration ?? options.blendDuration ?? 0.22,
+        );
+      if (!Number.isFinite(duration) || duration < 0.05 || duration > 120)
+        throw Error(
+          "La duración de cada acción debe estar entre 0.05 y 120 segundos",
+        );
+      if (
+        !Number.isFinite(blendDuration) ||
+        blendDuration < 0 ||
+        blendDuration > 2
+      )
+        throw Error("El fundido debe estar entre 0 y 2 segundos");
+      this.segments.push({
+        action,
+        options: { ...options },
+        duration,
+        blendDuration,
+        clip,
+      });
+      return this;
+    }
+    remove(index) {
+      if (
+        !Number.isInteger(index) ||
+        index < 0 ||
+        index >= this.segments.length
+      )
+        return false;
+      this.segments.splice(index, 1);
+      return true;
+    }
+    clear() {
+      this.segments = [];
+      return this;
+    }
+    get totalDuration() {
+      return this.segments.reduce((sum, segment) => sum + segment.duration, 0);
+    }
+    timeline() {
+      let start = 0;
+      return this.segments.map((segment, index) => {
+        const entry = {
+          index,
+          action: segment.action,
+          start,
+          end: start + segment.duration,
+          duration: segment.duration,
+          blendDuration: segment.blendDuration,
+        };
+        start = entry.end;
+        return entry;
+      });
+    }
+    exportJSON() {
+      return {
+        format: "nexora-spatial-action-sequence",
+        version: 1,
+        name: this.name,
+        segments: this.segments.map(
+          ({ action, options, duration, blendDuration }) => ({
+            action,
+            options,
+            duration,
+            blendDuration,
+          }),
+        ),
+      };
+    }
+    static fromJSON(rig, data) {
+      if (
+        data?.format !== "nexora-spatial-action-sequence" ||
+        data.version !== 1 ||
+        !Array.isArray(data.segments)
+      )
+        throw Error("Secuencia cinematográfica inválida");
+      return new SpatialActionSequence(rig, {
+        name: data.name,
+        segments: data.segments,
+      });
+    }
+    createPlayer(options = {}) {
+      return new SpatialSequencePlayer(this, options);
+    }
+  }
+  class SpatialSequencePlayer {
+    constructor(sequence, { blendDuration } = {}) {
+      this.sequence = sequence;
+      this.rig = sequence.rig;
+      this.time = 0;
+      this.playing = false;
+      this.currentIndex = -1;
+      this.currentPlayer = null;
+      this.defaultBlendDuration = blendDuration;
+    }
+    locate(time) {
+      const timeline = this.sequence.timeline();
+      if (!timeline.length) return null;
+      const t = clamp(Number(time) || 0, 0, this.sequence.totalDuration);
+      return (
+        timeline.find(
+          (item, index) => t < item.end || index === timeline.length - 1,
+        ) || null
+      );
+    }
+    enter(item, localTime = 0) {
+      if (this.currentPlayer) this.currentPlayer.pause();
+      const segment = this.sequence.segments[item.index],
+        blend = this.defaultBlendDuration ?? segment.blendDuration;
+      this.currentPlayer = new SpatialActionPlayer(this.rig, segment.clip, {
+        blendDuration: blend,
+      });
+      this.currentIndex = item.index;
+      this.currentPlayer.play();
+      if (localTime > 0) this.currentPlayer.advance(localTime);
+      return this.currentPlayer;
+    }
+    play() {
+      if (!this.sequence.segments.length)
+        throw Error("Añade al menos una acción a la secuencia");
+      if (this.time >= this.sequence.totalDuration) this.time = 0;
+      const item = this.locate(this.time);
+      if (!this.currentPlayer || item.index !== this.currentIndex)
+        this.enter(item, this.time - item.start);
+      else this.currentPlayer.play();
+      this.playing = true;
+      return this;
+    }
+    pause() {
+      this.playing = false;
+      this.currentPlayer?.pause();
+      return this;
+    }
+    seek(seconds) {
+      if (!this.sequence.segments.length) return this;
+      this.time = clamp(Number(seconds) || 0, 0, this.sequence.totalDuration);
+      const item = this.locate(this.time),
+        local = this.time - item.start;
+      if (!this.currentPlayer || item.index !== this.currentIndex)
+        this.enter(item, local);
+      else this.currentPlayer.seek(local);
+      this.playing = false;
+      this.currentPlayer.pause();
+      return this;
+    }
+    advance(delta) {
+      if (!this.playing) return this;
+      const step = Math.max(0, Number(delta) || 0),
+        next = Math.min(this.sequence.totalDuration, this.time + step),
+        item = this.locate(next),
+        local = next - item.start;
+      if (item.index !== this.currentIndex) this.enter(item, local);
+      else if (this.currentPlayer) this.currentPlayer.advance(step);
+      this.time = next;
+      if (next >= this.sequence.totalDuration) {
+        this.playing = false;
+        this.currentPlayer?.pause();
+      }
+      return this;
+    }
+  }
+  window.NexoraSpatialActions = {
+    actions,
+    roleMap,
+    createClip,
+    createPlayer,
+    SpatialActionPlayer,
+    SpatialActionSequence,
+    SpatialSequencePlayer,
+  };
 })();
