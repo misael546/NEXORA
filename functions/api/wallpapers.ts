@@ -95,6 +95,10 @@ export const onRequest:PagesFunction<Env>=async({request,env})=>{
    "SELECT id,title,category,tags,thumb_url,image_url,source_url,source_name,author,license,width,height,downloads FROM wallpapers WHERE "+where+" ORDER BY "+order+" LIMIT ? OFFSET ?"
   ).bind(...values,limit,(page-1)*limit).all();
   const total=Number(countRow?.total||0);
+  if(total===0){
+   const live=await liveSearch(q,category,device);
+   return json({...live,notice:"Catálogo persistente vacío; mostrando resultados en vivo de Wikimedia Commons."});
+  }
   return json({wallpapers:results,total,page,limit,has_more:page*limit<total});
  }catch(error){
   console.warn("Wallpaper database unavailable; using live Commons discovery.",error);
