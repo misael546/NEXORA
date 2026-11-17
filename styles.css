@@ -9,3 +9,4 @@
 .category-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media(max-width:800px){.category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.category-grid{grid-template-columns:1fr}}
+.article-visual img{width:100%;height:100%;object-fit:cover;display:block}.article-visual .visual-label{z-index:2;text-shadow:0 1px 8px rgba(0,0,0,.8);background:rgba(9,13,24,.55);padding:6px 9px;border-radius:6px}.article-hero{margin:22px 0 0}.article-hero img{width:100%;height:320px;object-fit:cover;border-radius:10px;display:block}.article-hero figcaption{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6}@media(max-width:560px){.article-hero img{height:210px}}
