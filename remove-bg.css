@@ -70,3 +70,8 @@
 .category-removebg h3 em,.category-removebg .category-icon{color:#72e5e8}.category-removebg .category-glow{background:#72e5e8}
 
 .rb-preview-stage canvas{touch-action:none;cursor:crosshair}
+
+.rb-upload:focus-within,.rb-tool:focus-visible,.rb-actions button:focus-visible,.rb-quiet:focus-visible,.rb-swatch:focus-visible{outline:2px solid #72e5e8;outline-offset:3px}
+.rb-actions button:focus-visible,.rb-tool:focus-visible,.rb-quiet:focus-visible{box-shadow:0 0 0 4px #72e5e822}
+.rb-status{overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){.rb-upload,.rb-progress-track span{transition:none}}
