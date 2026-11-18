@@ -62,6 +62,8 @@
   const tracks = $("na-tracks"), ruler = $("na-ruler-scale"), durationInput = $("na-duration");
   let duration = Math.max(10,sequence.duration() || 10);
   let playhead = 0;
+  const baseEngineDraw=window.nexoraEngine.draw.bind(window.nexoraEngine);
+  window.nexoraEngine.draw=function(time){return baseEngineDraw((time===0&&!window.nexoraVisualPlayback)?playhead:time);};
   const colors = {bg:"na-clip-bg",layer:"na-clip-layer",audio:"na-clip-audio"};
   function makeTrack(name,type,start,end,details,collapsed){
     const row=document.createElement("div");row.className="na-track-row";
@@ -115,7 +117,7 @@
     });
     const playheadRow=document.createElement("div");playheadRow.className="na-track-row";playheadRow.innerHTML='<span class="na-track-name">Cabezal de reproducción</span><div class="na-track-lane" style="background:transparent;border:0;overflow:visible"><input id="na-scrub" type="range" min="0" max="'+duration+'" step=".01" value="'+Math.min(playhead,duration)+'" style="width:100%;accent-color:#6da8ff"></div>';tracks.appendChild(playheadRow);
     $("na-scrub").addEventListener("input",e=>{playhead=Number(e.target.value)||0;updateRulerHead();});
-    const marker=document.createElement("div");marker.id="na-playhead";marker.style.cssText="position:relative;height:2px;background:#6da8ff;left:0;width:100%;margin-top:2px";tracks.appendChild(marker);
+    tracks.style.position="relative";const marker=document.createElement("div");marker.id="na-playhead";marker.style.cssText="position:absolute;z-index:4;pointer-events:none;top:0;bottom:0;left:0;width:2px;background:#6da8ff;box-shadow:0 0 8px #6da8ff";tracks.appendChild(marker);
     updateRulerHead();
   }
   $("na-refresh").addEventListener("click",drawTracks);
