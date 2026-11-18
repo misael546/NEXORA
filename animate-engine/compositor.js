@@ -124,7 +124,7 @@
             const el = new Audio();
             el.crossOrigin = "anonymous";
             el.src = a.src;
-            el.loop = a.loop;
+            el.loop = false;
             el.preload = "auto";
             const src = ctx.createMediaElementSource(el),
               gain = ctx.createGain(),
@@ -186,7 +186,11 @@
       });
       recorder.start(200);
       const start = performance.now(),
-        audioEnd = media.reduce((end, item) => Math.max(end, item.start + (Number.isFinite(item.el.duration) ? item.el.duration : 0)), 0),
+        audioEnd = media.reduce((end, item) => {
+          const clipEnd = item.track.trimEnd == null ? item.el.duration : Math.min(item.track.trimEnd, item.el.duration);
+          const clipLength = Math.max(0, clipEnd - (item.track.trimStart || 0));
+          return Math.max(end, item.start + (Number.isFinite(clipLength) ? clipLength : 0));
+        }, 0),
         duration = Math.max(0.1, this.duration, audioEnd);
       // Si la pestaña pasa a segundo plano, la grabación se pausa y el
       // reloj de la escena se congela: al volver, la grabación continúa
@@ -214,23 +218,19 @@
           for (const item of media) {
             const { el, gain, track } = item,
               local = t - item.start;
-            if (local >= 0 && local < duration - item.start) {
+            const clipStart = track.trimStart || 0;
+            const clipEnd = track.trimEnd == null ? el.duration : Math.min(track.trimEnd, el.duration);
+            const clipLength = Math.max(0, clipEnd - clipStart);
+            const clipLocal = track.loop && clipLength > 0 ? local % clipLength : local;
+            if (local >= 0 && (track.loop ? clipLength > 0 : local < clipLength)) {
               if (el.paused) {
-                el.currentTime = track.loop
-                  ? local % (el.duration || 1)
-                  : Math.min(local, Math.max(0, (el.duration || local) - 0.01));
+                el.currentTime = Math.min(clipStart + clipLocal, Math.max(0, (el.duration || clipStart) - 0.01));
                 el.play().catch(() => {});
               }
-              const fadeIn = track.fadeIn
-                ? Math.min(1, local / track.fadeIn)
-                : 1;
+              const fadeIn = track.fadeIn ? Math.min(1, local / track.fadeIn) : 1;
               let fadeOut = 1;
-              if (
-                !track.loop &&
-                track.fadeOut &&
-                Number.isFinite(el.duration)
-              ) {
-                const remaining = el.duration - local;
+              if (!track.loop && track.fadeOut && Number.isFinite(clipLength)) {
+                const remaining = clipLength - local;
                 fadeOut = Math.max(0, Math.min(1, remaining / track.fadeOut));
               }
               gain.gain.setTargetAtTime(
