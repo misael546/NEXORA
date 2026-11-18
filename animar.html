@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#090d18">
-  <meta name="description" content="NEXORA ANIMATE: crea tu propia animación 2D en el navegador. Elige un personaje y una acción, previsualízala y expórtala como vídeo o fotogramas.">
+  <meta name="description" content="NEXORA ANIMATE: compón animaciones manualmente con fondos, personajes PNG transparentes, fotogramas y audio.">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://nexora-ey8.pages.dev/animar.html">
-  <title>Crear animación — NEXORA ANIMATE</title>
+  <title>Estudio de composición manual — NEXORA ANIMATE</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,7 +75,7 @@
         <button class="button button-outline" id="exportVideo" type="button">Exportar vídeo WebM</button>
         <button class="button button-outline" id="exportFrames" type="button">Exportar fotogramas PNG</button>
       </div>
-      <p class="studio-status" id="status" role="status">Motor listo. Elige un personaje y una acción.</p>
+      <p class="studio-status" id="status" role="status">Motor listo. Carga un fondo o un PNG y crea tu primer fotograma.</p>
       <p class="studio-note">Flujo manual: carga un fondo, añade personajes PNG transparentes, ajusta sus capas y pulsa “Guardar composición como fotograma”. Cambia la posición o los elementos y guarda cada pose siguiente. Ordena o elimina fotogramas, agrega pistas MP3 y reproduce toda la escena antes de exportar.</p>
     </section>
   </main>
@@ -264,7 +264,7 @@
       $("mode").addEventListener("change", function (e) {
         mode = e.target.value;
         applyMode();
-        status(mode === "sequence" ? "Modo fotogramas: sube tus dibujos en orden." : mode === "camera" ? "Modo foto con cámara: sube una foto y elige el movimiento." : "Modo personaje 2D.");
+        status("Estudio de composición manual por fotogramas.");
       });
       $("camFile").addEventListener("change", async function (e) {
         var file = e.target.files && e.target.files[0];
