@@ -2,7 +2,7 @@
 (() => {
   "use strict";
   const $=id=>document.getElementById(id);
-  const editor=window.nexoraStudioEditor,canvas=$("studioCanvas"),app=document.querySelector(".na-app");
+  const editor=window.nexoraStudioEditor,app=document.querySelector(".na-app");\n  let canvas=$("studioCanvas");
   if(!editor||!canvas||!app)return;
   const status=$("status");
   const say=m=>{if(status)status.textContent=m;};
@@ -21,7 +21,7 @@
   // Quita entradas antiguas duplicadas y paneles técnicos que ya no forman parte del flujo.
   document.querySelectorAll("#na-bg-slot,#na-png-slot,#na-frame-slot,#na-sheet-slot,#na-transform-slot,#na-layer-slot,#na-layer-actions,#na-audio-slot,.na-audio,.na-frame-strip").forEach(el=>el.style.display="none");
   const stage=$(".na-stage");
-  if(stage){stage.setAttribute("aria-label","Previsualización interactiva");}
+  if(stage){stage.setAttribute("aria-label","Previsualización interactiva");}\n  // Sustituye el canvas para retirar los listeners de arrastre antiguos y evitar movimientos duplicados.\n  const cleanCanvas=canvas.cloneNode(false);canvas.replaceWith(cleanCanvas);canvas=cleanCanvas;editor.canvas=canvas;
   const fileInput=$("na-unified-files");
   if(fileInput)fileInput.addEventListener("change",async e=>{
     const files=Array.from(e.target.files||[]);
