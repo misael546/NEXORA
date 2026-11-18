@@ -52,6 +52,11 @@
           <div><label>Inicio (segundos)</label><input id="audioStart" type="number" min="0" step=".1" value="0"></div>
           <div><label>Volumen (%)</label><input id="audioVolume" type="range" min="0" max="200" value="100"></div>
         </div>
+        <div class="studio-controls">
+          <div style="grid-column:1/-1"><label for="voiceText">Texto para generar una voz MP3</label><textarea id="voiceText" rows="3" maxlength="1000" placeholder="Escribe aquí el diálogo del personaje..." style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid rgba(160,180,220,.25);background:#0d1422;color:#f3f6ff;font:inherit"></textarea></div>
+          <div><label for="voiceSpeaker">Voz en español</label><select id="voiceSpeaker"><option value="sirio">Sirio</option><option value="nestor">Néstor</option><option value="alvaro">Álvaro</option><option value="javier">Javier</option><option value="aquila">Aquila</option></select></div>
+          <div style="display:flex;align-items:end"><button class="button button-primary" id="voiceGenerate" type="button">Generar voz MP3</button></div>
+        </div>
         <div id="audioTrackList" class="studio-note">Todavía no hay pistas de audio.</div>
       `;
       this.host.insertBefore(section, this.host.querySelector(".studio-actions"));
@@ -68,6 +73,20 @@
       $("layerAnimate").addEventListener("click", () => { if(!this.selected)return; this.selected.moveX=Number($("layerMoveX").value)||0; this.selected.moveY=Number($("layerMoveY").value)||0; this.selected.duration=Math.max(1,Number($("layerDuration").value)||5); this.engine.draw(0); this.status("Movimiento aplicado a la capa seleccionada."); });
       $("layerDelete").addEventListener("click", () => { if(!this.selected)return; this.items=this.items.filter(x=>x!==this.selected); this.selected=null; this._refreshLayers(); this.engine.draw(0); });
       $("audioFile").addEventListener("change", e => { const f=e.target.files && e.target.files[0]; if(!f)return; try { const t=this.audio.add(f,{name:f.name,kind:$("audioKind").value,start:Number($("audioStart").value)||0,volume:Number($("audioVolume").value)/100}); this._renderAudio(); this.status("Pista de audio agregada: "+t.name); } catch(err){this.status("No se pudo agregar el audio: "+err.message);} e.target.value=""; });
+      $("voiceGenerate").addEventListener("click", async () => {
+        const text=$("voiceText").value.trim(), speaker=$("voiceSpeaker").value, button=$("voiceGenerate");
+        if(!text){this.status("Escribe primero el diálogo que quieres convertir en voz.");return;}
+        button.disabled=true;button.textContent="Generando MP3…";this.status("NEXORA está generando la voz. Espera un momento.");
+        try {
+          const response=await fetch("/api/animate/voice",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text,speaker})});
+          if(!response.ok){let message="No se pudo generar la voz.";try{message=(await response.json()).error||message;}catch{}throw new Error(message);}
+          const blob=await response.blob();
+          if(!blob.size)throw new Error("El servicio devolvió un MP3 vacío.");
+          const track=this.audio.add(blob,{name:"Diálogo "+speaker,kind:"voice",start:Number($("audioStart").value)||0,volume:1});
+          this._renderAudio();this.status("Voz MP3 generada y agregada a la línea de tiempo: "+track.name);
+        } catch(err){this.status(err.message||"Error al generar la voz.");}
+        finally{button.disabled=false;button.textContent="Generar voz MP3";}
+      });
     }
     _loadImage(file, done) {
       if(!file || !file.type.startsWith("image/")) return;
