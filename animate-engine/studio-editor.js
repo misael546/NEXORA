@@ -246,6 +246,7 @@
       try {
         const frames=this.sequence.frames.map(frame=>({
           name:frame.name,
+          durationFrames:frame.durationFrames||1,
           image:this._imageData(frame.image),
           composition:frame.composition?{
             background:this._imageData(frame.composition.background),
@@ -289,7 +290,7 @@
           }
           composition={background,backgroundTransform:{x:0,y:0,scale:1,...saved.composition.backgroundTransform},items};
         }
-        frames.push({image,name:saved.name||"Fotograma",composition});
+        frames.push({image,name:saved.name||"Fotograma",durationFrames:saved.durationFrames||1,composition});
       }
       const audio=[];
       for(const track of project.audio){
@@ -306,6 +307,7 @@
       for(const saved of frames){
         const frame=this.sequence.addImage(saved.image,saved.name);
         frame.composition=saved.composition;
+        frame.durationFrames=saved.durationFrames||1;
         frame.thumb=this._imageData(saved.image);
       }
       for(const track of audio)this.audio.add(track.blob,track.options);
