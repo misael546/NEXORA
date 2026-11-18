@@ -349,7 +349,7 @@
       const hasCurrentScene=!!(currentScene&&(currentScene.background||this.items.length));
       this._refreshLayers();this._renderAudio();this.setEditingVisible(hasCurrentScene);
       if(window.nexoraSequenceLayer)this.engine.updateLayer(window.nexoraSequenceLayer,{visible:!hasCurrentScene});
-      this.onFrameCaptured();this.engine.draw(0);
+      this.onFrameCaptured();if(hasCurrentScene&&window.nexoraSequenceLayer)this.engine.updateLayer(window.nexoraSequenceLayer,{visible:false});this.engine.draw(0);
       this.status("Proyecto abierto: "+this.sequence.count+" fotogramas y "+this.audio.tracks.length+" pistas de audio.");
     }
     _renderAudio() {
