@@ -84,7 +84,7 @@
         catch(err) { this.status("No se pudo abrir el proyecto: "+err.message); }
         finally { e.target.value=""; }
       });
-      $("layerBackground").addEventListener("change", e => this._loadImage(e.target.files[0], img => { this.background = img; this.backgroundTransform = { x: 0, y: 0, scale: 1 }; this.engine.draw(0); this.status("Fondo cargado. Ajusta su zoom y posición si lo necesitas."); }));
+      $("layerBackground").addEventListener("change", e => this._loadImage(e.target.files[0], img => { this.background = img; this.backgroundTransform = { x: 0, y: 0, scale: 1 }; this.backgroundStartTime = 0; this.backgroundEndTime = null; this.engine.draw(0); this.status("Fondo cargado. Ajusta su zoom y posición si lo necesitas."); }));
       $("layerImage").addEventListener("change", e => this._loadImage(e.target.files[0], img => {
         const item = { id: "layer_" + Date.now() + "_" + Math.random().toString(36).slice(2,6), name: e.target.files[0].name, image: img, x: this.engine.width/2, y: this.engine.height/2, scale: 1, rotation: 0, opacity: 1, flipX: false };
         this.items.push(item); this.selected = item; this._refreshLayers(); this.engine.draw(0); this.status("Personaje agregado. Arrástralo sobre el escenario.");
