@@ -242,6 +242,7 @@
       buildActor();
       applyMode();
       function applyMode() {
+        studioEditor.stopAudio();
         if (raf) {
           cancelAnimationFrame(raf);
           raf = 0;
