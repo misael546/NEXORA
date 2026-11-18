@@ -102,6 +102,14 @@
       inputs[1].addEventListener("change",()=>{editor.backgroundEndTime=inputs[1].value===""?null:Math.max(editor.backgroundStartTime,Number(inputs[1].value)||0);drawTracks();window.nexoraEngine.draw(playhead);});
       sub.appendChild(range);
     });
+    if(sequence.count){
+      const row=document.createElement("div");row.className="na-track-row";
+      const label=document.createElement("div");label.className="na-track-name";label.textContent="Fotogramas principales";
+      const lane=document.createElement("div");lane.className="na-track-lane";
+      let cursor=0;
+      sequence.frames.forEach((frame,index)=>{const seconds=(frame.durationFrames||1)/sequence.fps;const clip=document.createElement("button");clip.type="button";clip.className="na-clip na-clip-bg";clip.style.left=(cursor/duration*100)+"%";clip.style.width=(seconds/duration*100)+"%";clip.style.border="1px solid rgba(255,255,255,.35)";clip.title=(index+1)+". "+frame.name+" · "+cursor.toFixed(2)+"s";clip.addEventListener("click",()=>{playhead=cursor;updateRulerHead();});lane.appendChild(clip);cursor+=seconds;});
+      row.append(label,lane);tracks.appendChild(row);
+    }
     editor.items.forEach((item,index)=>{
       const start=Number.isFinite(item.startTime)?item.startTime:0,end=Number.isFinite(item.endTime)?item.endTime:duration;
       makeTrack(item.name||("Capa "+(index+1)),"layer",start,end,sub=>{
