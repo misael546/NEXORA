@@ -68,3 +68,5 @@
 @media(max-width:420px){.rb-actions{flex-direction:column}.rb-upload{min-height:230px}.rb-toolbar{align-items:flex-start}.rb-toolbar strong{font-size:14px}.rb-quiet{font-size:10px}}
 
 .category-removebg h3 em,.category-removebg .category-icon{color:#72e5e8}.category-removebg .category-glow{background:#72e5e8}
+
+.rb-preview-stage canvas{touch-action:none;cursor:crosshair}
