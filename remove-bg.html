@@ -77,6 +77,12 @@
           <button type="button" class="rb-tool rb-history" id="rb-undo" disabled>↶ Deshacer</button>
           <button type="button" class="rb-tool rb-history" id="rb-redo" disabled>↷ Rehacer</button>
         </div>
+        <div class="rb-edge-panel">
+          <div class="rb-edge-title"><strong>Control avanzado de bordes</strong><small>Ajusta halos, bordes duros y pequeños restos alrededor del sujeto.</small></div>
+          <label>Suavizado <output id="rb-feather-value">0 px</output><input id="rb-feather" type="range" min="0" max="8" value="0"></label>
+          <label>Expandir / contraer borde <output id="rb-edge-value">0</output><input id="rb-edge" type="range" min="-30" max="30" value="0"></label>
+          <button type="button" class="rb-tool" id="rb-edge-reset">Restablecer bordes</button>
+        </div>
         <div class="rb-bg-controls">
           <span>Fondo de vista previa</span>
           <button class="rb-swatch active" data-bg="transparent" aria-label="Transparente"></button>
