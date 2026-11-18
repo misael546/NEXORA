@@ -271,8 +271,16 @@
             trimEnd:track.trimEnd,volume:track.volume,pan:track.pan,fadeIn:track.fadeIn,
             fadeOut:track.fadeOut,loop:track.loop,mute:track.mute,data:await this._blobData(blob)});
         }
+        const currentScene={
+          background:this._imageData(this.background),
+          backgroundTransform:{...this.backgroundTransform},
+          backgroundTiming:{startTime:this.backgroundStartTime,endTime:this.backgroundEndTime},
+          items:this.items.map(item=>({name:item.name,image:this._imageData(item.image),x:item.x,y:item.y,
+            scale:item.scale,rotation:item.rotation,opacity:item.opacity,flipX:!!item.flipX,
+            startTime:item.startTime,endTime:item.endTime,keyframes:(item.keyframes||[]).map(k=>({...k}))}))
+        };
         const project={format:"nexora-animate-project",version:1,createdAt:new Date().toISOString(),
-          sequence:{fps:this.sequence.fps,loop:this.sequence.loop,onionSkin:this.sequence.onionSkin,frames},audio};
+          sequence:{fps:this.sequence.fps,loop:this.sequence.loop,onionSkin:this.sequence.onionSkin,frames},audio,currentScene};
         const blob=new Blob([JSON.stringify(project)],{type:"application/json"});
         const url=URL.createObjectURL(blob),a=document.createElement("a");
         a.href=url;a.download=(document.title||"nexora-animate").toLowerCase().replace(/[^a-z0-9]+/g,"-")+".nexora.json";
@@ -295,9 +303,18 @@
           for(const item of saved.composition.items||[]){
             items.push({...item,image:await this._dataImage(item.image)});
           }
-          composition={background,backgroundTransform:{x:0,y:0,scale:1,...saved.composition.backgroundTransform},items};
+          composition={background,backgroundTransform:{x:0,y:0,scale:1,...saved.composition.backgroundTransform},
+            backgroundTiming:{startTime:saved.composition.backgroundTiming?.startTime??0,endTime:saved.composition.backgroundTiming?.endTime??null},items};
         }
         frames.push({image,name:saved.name||"Fotograma",durationFrames:saved.durationFrames||1,composition});
+      }
+      let currentScene=null;
+      if(project.currentScene){
+        const background=project.currentScene.background?await this._dataImage(project.currentScene.background):null;
+        const items=[];
+        for(const item of project.currentScene.items||[]) items.push({...item,image:await this._dataImage(item.image)});
+        currentScene={background,backgroundTransform:{x:0,y:0,scale:1,...project.currentScene.backgroundTransform},
+          backgroundTiming:{startTime:project.currentScene.backgroundTiming?.startTime??0,endTime:project.currentScene.backgroundTiming?.endTime??null},items};
       }
       const audio=[];
       for(const track of project.audio){
@@ -324,8 +341,13 @@
       if(fpsValue)fpsValue.textContent=this.sequence.fps;
       if(loop)loop.value=this.sequence.loop;
       if(onion)onion.value=this.sequence.onionSkin?"on":"off";
-      this.background=null;this.backgroundStartTime=0;this.backgroundEndTime=null;this.items=[];this.selected=null;this.editingFrame=null;
-      this._refreshLayers();this._renderAudio();this.setEditingVisible(false);
+      this.background=currentScene?.background||null;
+      this.backgroundTransform={x:0,y:0,scale:1,...(currentScene?.backgroundTransform||{})};
+      this.backgroundStartTime=currentScene?.backgroundTiming?.startTime??0;
+      this.backgroundEndTime=currentScene?.backgroundTiming?.endTime??null;
+      this.items=currentScene?.items||[];this.selected=this.items[0]||null;this.editingFrame=null;
+      this._refreshLayers();this._renderAudio();this.setEditingVisible(!!currentScene);
+      if(window.nexoraSequenceLayer)this.engine.updateLayer(window.nexoraSequenceLayer,{visible:!currentScene});
       this.onFrameCaptured();this.engine.draw(0);
       this.status("Proyecto abierto: "+this.sequence.count+" fotogramas y "+this.audio.tracks.length+" pistas de audio.");
     }
