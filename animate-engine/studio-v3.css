@@ -1,0 +1,22 @@
+/* NEXORA ANIMATE V3 — interfaz táctil simplificada */
+.na-app .na-shell{grid-template-columns:minmax(0,1fr) 220px;grid-template-rows:minmax(360px,1fr) auto}
+.na-app .na-assets{grid-column:1/-1;grid-row:1;min-height:0;padding:12px}
+.na-app .na-preview{grid-column:1;grid-row:2;min-height:420px}
+.na-app .na-inspector{grid-column:2;grid-row:2;max-height:none}
+.na-app .na-timeline{grid-column:1/-1;grid-row:3}
+.na-app .na-upload-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.na-app .na-upload-head h2{margin:0 0 4px}
+.na-app .na-upload-head p,.na-app .na-resource-hint{margin:0;color:#9aa7bd;font-size:12px}
+.na-app #na-unified-files{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.na-app .na-upload-button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 18px;border-radius:10px;background:#477eea;color:white;font-weight:700;cursor:pointer}
+.na-app .na-resource-hint{margin-top:8px}
+.na-app .na-selected-name{padding:10px;background:#0c1422;border-radius:8px;overflow-wrap:anywhere}
+.na-app .na-touch-help{font-size:12px;line-height:1.6;color:#9aa7bd}
+.na-app .na-selected-actions{display:grid;gap:8px;margin-top:14px}
+.na-app .na-stage{touch-action:none}
+.na-app #studioCanvas{touch-action:none;user-select:none;-webkit-user-select:none}
+.na-app .na-project-actions{display:grid;gap:8px;margin-top:18px}
+.na-app .na-project-actions input[type=file]{display:none}
+.na-app .na-inspector .studio-actions{display:grid}
+.na-app .na-frame-strip,.na-app #na-bg-slot,.na-app #na-png-slot,.na-app #na-frame-slot,.na-app #na-sheet-slot{display:none!important}
+@media(max-width:760px){.na-app{padding:10px 8px 28px!important}.na-app .na-shell{display:flex;flex-direction:column;gap:9px}.na-app .na-assets{order:1}.na-app .na-preview{order:2;min-height:0}.na-app .na-inspector{order:3}.na-app .na-timeline{order:4}.na-app .na-stage{min-height:0}.na-app .na-preview-tools{gap:6px}.na-app .na-upload-button{width:100%}.na-app .na-selected-actions{grid-template-columns:1fr 1fr}.na-app .na-selected-actions #na-keyframe{grid-column:1/-1}}

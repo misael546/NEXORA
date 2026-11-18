@@ -12,6 +12,8 @@
       this.sequence = sequence || null;
       this.onFrameCaptured = onFrameCaptured || (() => {});
       this.backgroundTransform = { x: 0, y: 0, scale: 1 };
+      this.backgroundStartTime = 0;
+      this.backgroundEndTime = null;
       this.background = null;
       this.items = [];
       this.selected = null;
@@ -22,7 +24,7 @@
       this._buildUI();
       this.backgroundLayer = engine.addLayer({
         name: "Fondo importado", type: "custom", z: 5,
-        visible: true, draw: (ctx) => this._drawBackground(ctx)
+        visible: true, draw: (ctx, t) => this._drawBackground(ctx, t)
       });
       this.objectLayer = engine.addLayer({
         name: "Capas PNG", type: "custom", z: 40,
@@ -72,7 +74,7 @@
       `;
       this.host.insertBefore(section, this.host.querySelector(".studio-actions"));
       this.ui = section;
-      const $ = id => section.querySelector("#" + id);
+      const $ = id => section.querySelector("#" + id) || document.getElementById(id);
       $("saveProject").addEventListener("click", () => this.saveProjectFile());
       $("openProject").addEventListener("click", () => $("projectFile").click());
       $("projectFile").addEventListener("change", async e => {
@@ -82,7 +84,7 @@
         catch(err) { this.status("No se pudo abrir el proyecto: "+err.message); }
         finally { e.target.value=""; }
       });
-      $("layerBackground").addEventListener("change", e => this._loadImage(e.target.files[0], img => { this.background = img; this.backgroundTransform = { x: 0, y: 0, scale: 1 }; this.engine.draw(0); this.status("Fondo cargado. Ajusta su zoom y posición si lo necesitas."); }));
+      $("layerBackground").addEventListener("change", e => this._loadImage(e.target.files[0], img => { this.background = img; this.backgroundTransform = { x: 0, y: 0, scale: 1 }; this.backgroundStartTime = 0; this.backgroundEndTime = null; this.engine.draw(0); this.status("Fondo cargado. Ajusta su zoom y posición si lo necesitas."); }));
       $("layerImage").addEventListener("change", e => this._loadImage(e.target.files[0], img => {
         const item = { id: "layer_" + Date.now() + "_" + Math.random().toString(36).slice(2,6), name: e.target.files[0].name, image: img, x: this.engine.width/2, y: this.engine.height/2, scale: 1, rotation: 0, opacity: 1, flipX: false };
         this.items.push(item); this.selected = item; this._refreshLayers(); this.engine.draw(0); this.status("Personaje agregado. Arrástralo sobre el escenario.");
@@ -149,8 +151,9 @@
       $("layerOpacity").value=Math.round((x.opacity ?? 1)*100);
       $("layerFlip").value=x.flipX?"yes":"no";
     }
-    _drawBackground(ctx) {
-      if(!this.background)return;
+    _drawBackground(ctx,time) {
+      const t=Number.isFinite(time)?time:(window.nexoraVisualEditorTime||0);
+      if(!this.background || t<this.backgroundStartTime || (this.backgroundEndTime!=null && t>this.backgroundEndTime))return;
       const w=this.engine.width,h=this.engine.height,scale=Math.max(w/this.background.width,h/this.background.height);
       const transform=this.backgroundTransform || {x:0,y:0,scale:1};
       scale *= transform.scale || 1;
@@ -175,18 +178,16 @@
       const ctx=frameCanvas.getContext("2d");
       ctx.fillStyle="#080c14";ctx.fillRect(0,0,frameCanvas.width,frameCanvas.height);
       this._drawBackground(ctx);
-      for(const item of this.items){
-        const w=item.image.width*item.scale,h=item.image.height*item.scale;
-        ctx.save();ctx.globalAlpha=item.opacity ?? 1;ctx.translate(item.x,item.y);ctx.rotate(item.rotation);ctx.scale(item.flipX?-1:1,1);
-        ctx.drawImage(item.image,-w/2,-h/2,w,h);ctx.restore();
-      }
+      const previousSelection=this.selected;this.selected=null;
+      this.draw(ctx,window.nexoraVisualEditorTime||0);
+      this.selected=previousSelection;
       let frame;
       if(this.editingFrame){
         frame=this.editingFrame;frame.image=frameCanvas;frame.width=frameCanvas.width;frame.height=frameCanvas.height;
       }else{
         frame=this.sequence.addImage(frameCanvas,"Composición "+(this.sequence.count+1));
       }
-      frame.composition={background:this.background,backgroundTransform:{...this.backgroundTransform},items:this.items.map(item=>({...item}))};
+      frame.composition={background:this.background,backgroundTransform:{...this.backgroundTransform},backgroundTiming:{startTime:this.backgroundStartTime,endTime:this.backgroundEndTime},items:this.items.map(item=>({...item}))};
       frame.thumb=frameCanvas.toDataURL("image/jpeg",0.78);
       this.editingFrame=null;
       this.onFrameCaptured();
@@ -197,6 +198,8 @@
       const composition=frame.composition || {background:frame.image,backgroundTransform:{x:0,y:0,scale:1},items:[]};
       this.background=composition.background || null;
       this.backgroundTransform={x:0,y:0,scale:1,...(composition.backgroundTransform||{})};
+      this.backgroundStartTime=composition.backgroundTiming?.startTime??0;
+      this.backgroundEndTime=composition.backgroundTiming?.endTime??null;
       this.items=(composition.items||[]).map(item=>({...item}));
       this.selected=this.items[0]||null;
       this.editingFrame=frame;
@@ -251,9 +254,11 @@
           composition:frame.composition?{
             background:this._imageData(frame.composition.background),
             backgroundTransform:{...frame.composition.backgroundTransform},
+            backgroundTiming:{...(frame.composition.backgroundTiming||{startTime:0,endTime:null})},
             items:frame.composition.items.map(item=>({
               name:item.name,image:this._imageData(item.image),x:item.x,y:item.y,
-              scale:item.scale,rotation:item.rotation,opacity:item.opacity,flipX:!!item.flipX
+              scale:item.scale,rotation:item.rotation,opacity:item.opacity,flipX:!!item.flipX,
+              startTime:item.startTime,endTime:item.endTime,keyframes:(item.keyframes||[]).map(k=>({...k}))
             }))
           }:null
         }));
@@ -264,8 +269,16 @@
             trimEnd:track.trimEnd,volume:track.volume,pan:track.pan,fadeIn:track.fadeIn,
             fadeOut:track.fadeOut,loop:track.loop,mute:track.mute,data:await this._blobData(blob)});
         }
+        const currentScene={
+          background:this._imageData(this.background),
+          backgroundTransform:{...this.backgroundTransform},
+          backgroundTiming:{startTime:this.backgroundStartTime,endTime:this.backgroundEndTime},
+          items:this.items.map(item=>({name:item.name,image:this._imageData(item.image),x:item.x,y:item.y,
+            scale:item.scale,rotation:item.rotation,opacity:item.opacity,flipX:!!item.flipX,
+            startTime:item.startTime,endTime:item.endTime,keyframes:(item.keyframes||[]).map(k=>({...k}))}))
+        };
         const project={format:"nexora-animate-project",version:1,createdAt:new Date().toISOString(),
-          sequence:{fps:this.sequence.fps,loop:this.sequence.loop,onionSkin:this.sequence.onionSkin,frames},audio};
+          sequence:{fps:this.sequence.fps,loop:this.sequence.loop,onionSkin:this.sequence.onionSkin,frames},audio,currentScene};
         const blob=new Blob([JSON.stringify(project)],{type:"application/json"});
         const url=URL.createObjectURL(blob),a=document.createElement("a");
         a.href=url;a.download=(document.title||"nexora-animate").toLowerCase().replace(/[^a-z0-9]+/g,"-")+".nexora.json";
@@ -288,9 +301,18 @@
           for(const item of saved.composition.items||[]){
             items.push({...item,image:await this._dataImage(item.image)});
           }
-          composition={background,backgroundTransform:{x:0,y:0,scale:1,...saved.composition.backgroundTransform},items};
+          composition={background,backgroundTransform:{x:0,y:0,scale:1,...saved.composition.backgroundTransform},
+            backgroundTiming:{startTime:saved.composition.backgroundTiming?.startTime??0,endTime:saved.composition.backgroundTiming?.endTime??null},items};
         }
         frames.push({image,name:saved.name||"Fotograma",durationFrames:saved.durationFrames||1,composition});
+      }
+      let currentScene=null;
+      if(project.currentScene){
+        const background=project.currentScene.background?await this._dataImage(project.currentScene.background):null;
+        const items=[];
+        for(const item of project.currentScene.items||[]) items.push({...item,image:await this._dataImage(item.image)});
+        currentScene={background,backgroundTransform:{x:0,y:0,scale:1,...project.currentScene.backgroundTransform},
+          backgroundTiming:{startTime:project.currentScene.backgroundTiming?.startTime??0,endTime:project.currentScene.backgroundTiming?.endTime??null},items};
       }
       const audio=[];
       for(const track of project.audio){
@@ -317,9 +339,15 @@
       if(fpsValue)fpsValue.textContent=this.sequence.fps;
       if(loop)loop.value=this.sequence.loop;
       if(onion)onion.value=this.sequence.onionSkin?"on":"off";
-      this.background=null;this.items=[];this.selected=null;this.editingFrame=null;
-      this._refreshLayers();this._renderAudio();this.setEditingVisible(false);
-      this.onFrameCaptured();this.engine.draw(0);
+      this.background=currentScene?.background||null;
+      this.backgroundTransform={x:0,y:0,scale:1,...(currentScene?.backgroundTransform||{})};
+      this.backgroundStartTime=currentScene?.backgroundTiming?.startTime??0;
+      this.backgroundEndTime=currentScene?.backgroundTiming?.endTime??null;
+      this.items=currentScene?.items||[];this.selected=this.items[0]||null;this.editingFrame=null;
+      const hasCurrentScene=!!(currentScene&&(currentScene.background||this.items.length));
+      this._refreshLayers();this._renderAudio();this.setEditingVisible(hasCurrentScene);
+      if(window.nexoraSequenceLayer)this.engine.updateLayer(window.nexoraSequenceLayer,{visible:!hasCurrentScene});
+      this.onFrameCaptured();if(hasCurrentScene&&window.nexoraSequenceLayer)this.engine.updateLayer(window.nexoraSequenceLayer,{visible:false});this.engine.draw(0);
       this.status("Proyecto abierto: "+this.sequence.count+" fotogramas y "+this.audio.tracks.length+" pistas de audio.");
     }
     _renderAudio() {
