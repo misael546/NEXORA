@@ -66,3 +66,5 @@
 .rb-privacy strong{color:#72e5e8}
 @media(max-width:700px){.rb-hero{padding-top:48px}.rb-preview-grid{grid-template-columns:1fr}.rb-preview-stage{height:260px}.rb-info-grid{grid-template-columns:1fr}.rb-workspace{padding:14px}.rb-brush-size{width:100%;margin:4px 0}.rb-brush-size input{flex:1}}
 @media(max-width:420px){.rb-actions{flex-direction:column}.rb-upload{min-height:230px}.rb-toolbar{align-items:flex-start}.rb-toolbar strong{font-size:14px}.rb-quiet{font-size:10px}}
+
+.category-removebg h3 em,.category-removebg .category-icon{color:#72e5e8}.category-removebg .category-glow{background:#72e5e8}
