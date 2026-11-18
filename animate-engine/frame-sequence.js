@@ -52,6 +52,7 @@
         name: String(name || "Fotograma " + (this.frames.length + 1)),
         width: image.width,
         height: image.height,
+        durationFrames: 1,
       };
       this.frames.push(frame);
       return frame;
@@ -156,22 +157,39 @@
     get count() {
       return this.frames.length;
     }
-    duration() {
-      return this.frames.length ? this.frames.length / this.fps : 0;
+    frameSteps(frame) {
+      return Math.max(1, Math.min(600, Math.floor(Number(frame?.durationFrames) || 1)));
     }
-    // Índice del fotograma que toca en el tiempo t (segundos).
+    duration() {
+      return this.frames.reduce((sum, frame) => sum + this.frameSteps(frame), 0) / this.fps;
+    }
+    // Índice del fotograma que toca en el tiempo t (segundos), respetando
+    // la duración individual de cada imagen.
     frameIndexAt(time) {
       const n = this.frames.length;
       if (!n) return -1;
-      const position = Math.max(0, time) * this.fps;
-      if (this.loop === "once") return Math.min(Math.floor(position), n - 1);
-      if (this.loop === "pingpong") {
-        if (n === 1) return 0;
-        const cycle = 2 * (n - 1);
-        const step = Math.floor(position) % cycle;
-        return step < n ? step : cycle - step;
+      const steps = this.frames.map(frame => this.frameSteps(frame));
+      const total = steps.reduce((sum, value) => sum + value, 0);
+      let position = Math.max(0, Number(time) || 0) * this.fps;
+      if (this.loop === "once") position = Math.min(position, Math.max(0, total - 0.000001));
+      else if (this.loop === "pingpong" && n > 1) {
+        const reverse = steps.slice(0, -1).reverse();
+        const cycle = total + reverse.reduce((sum, value) => sum + value, 0);
+        position %= cycle;
+        if (position >= total) {
+          position -= total;
+          for (let i = n - 2; i >= 0; i--) {
+            if (position < steps[i]) return i;
+            position -= steps[i];
+          }
+          return 0;
+        }
+      } else position %= total;
+      for (let i = 0; i < n; i++) {
+        if (position < steps[i]) return i;
+        position -= steps[i];
       }
-      return Math.floor(position) % n;
+      return n - 1;
     }
     frameAt(time) {
       const index = this.frameIndexAt(time);
