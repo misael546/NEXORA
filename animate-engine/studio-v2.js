@@ -83,6 +83,7 @@
     return {row,sub,clip};
   }
   function updateRulerHead(){
+    window.nexoraVisualEditorTime=playhead;
     const marker=$("na-playhead");if(marker)marker.style.left=(playhead/duration*100)+"%";
     if(window.nexoraEngine)window.nexoraEngine.draw(playhead);
   }
@@ -92,8 +93,14 @@
     durationInput.value=String(Math.ceil(duration));
     ruler.innerHTML="";
     for(let i=0;i<=10;i++){const tick=document.createElement("span");tick.textContent=(duration*i/10).toFixed(1)+"s";ruler.appendChild(tick);}
-    const bg=makeTrack("Fondo de escena","bg",0,duration,sub=>{
-      const note=document.createElement("p");note.className="studio-note";note.textContent="El fondo comparte la duración global del video. Puedes cambiarlo desde Biblioteca de recursos.";sub.appendChild(note);
+    const bgStart=editor.backgroundStartTime||0,bgEnd=editor.backgroundEndTime==null?duration:editor.backgroundEndTime;
+    makeTrack("Fondo de escena","bg",bgStart,bgEnd,sub=>{
+      const note=document.createElement("p");note.className="studio-note";note.textContent="Define cuándo aparece el fondo dentro de la duración global.";sub.appendChild(note);
+      const range=document.createElement("div");range.className="na-field";range.innerHTML='<label>Mostrar desde (s)</label><input type="number" min="0" step=".1" value="'+bgStart+'"><label>Mostrar hasta (s)</label><input type="number" min="0" step=".1" value="'+(editor.backgroundEndTime==null?"":editor.backgroundEndTime)+'" placeholder="Final del video">';
+      const inputs=range.querySelectorAll("input");
+      inputs[0].addEventListener("change",()=>{editor.backgroundStartTime=Math.max(0,Number(inputs[0].value)||0);drawTracks();window.nexoraEngine.draw(playhead);});
+      inputs[1].addEventListener("change",()=>{editor.backgroundEndTime=inputs[1].value===""?null:Math.max(editor.backgroundStartTime,Number(inputs[1].value)||0);drawTracks();window.nexoraEngine.draw(playhead);});
+      sub.appendChild(range);
     });
     editor.items.forEach((item,index)=>{
       const start=Number.isFinite(item.startTime)?item.startTime:0,end=Number.isFinite(item.endTime)?item.endTime:duration;
