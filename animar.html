@@ -97,6 +97,7 @@
   <script src="animate-engine/camera-move.js"></script>
   <script src="animate-engine/motion-system.js"></script>
   <script src="animate-engine/scene-project.js"></script>
+  <script src="animate-engine/studio-editor.js"></script>
   <script src="animate-engine/mesh-deformer.js"></script>
   <script src="animate-engine/character-art.js"></script>
   <script src="animate-engine/character-stage.js"></script>
@@ -185,6 +186,7 @@
         },
       });
       var compositor = new window.NexoraCompositor.SceneCompositor(engine);
+      var studioEditor = new window.NexoraStudioEditor.StudioEditor(engine, $("studioCanvas"), document.querySelector(".studio-panel"), status);
       var cameraLayer = engine.addLayer({
         name: "Foto con cámara",
         type: "custom",
@@ -417,15 +419,17 @@
       });
       var raf = 0;
       var startAt = 0;
-      $("play").addEventListener("click", function () {
+      $("play").addEventListener("click", async function () {
         if (raf) {
           cancelAnimationFrame(raf);
           raf = 0;
           $("play").textContent = "▶ Previsualizar";
+          studioEditor.stopAudio();
           return;
         }
         $("play").textContent = "⏸ Detener";
         startAt = performance.now();
+        try { await studioEditor.playAudio(); } catch (audioError) { status("La animación se reproducirá, pero no se pudo iniciar el audio: " + audioError.message); }
         var tick = function (now) {
           var elapsed = (now - startAt) / 1000;
           var t = elapsed;
