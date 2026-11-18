@@ -35,7 +35,10 @@
       section.className = "studio-panel";
       section.style.marginTop = "14px";
       section.innerHTML = `
-        <h2 style="margin:0 0 8px">Composición por capas</h2>
+        <h2 style="margin:0 0 8px">Proyecto</h2>
+        <p class="studio-note">Guarda el proyecto completo en un archivo .nexora.json para continuar otro día o abrirlo en otro dispositivo. Incluye imágenes, composiciones y pistas de audio.</p>
+        <div class="studio-actions"><button class="button button-primary" id="saveProject" type="button">Guardar proyecto</button><button class="button button-outline" id="openProject" type="button">Abrir proyecto</button><input id="projectFile" type="file" accept=".json,.nexora.json,application/json" hidden></div>
+        <h2 style="margin:18px 0 8px">Composición por capas</h2>
         <p class="studio-note">Estudio manual por composición: carga un fondo, coloca personajes y objetos PNG transparentes, edita cada elemento y guarda cada pose como un fotograma independiente. No hay articulaciones ni movimiento automático.</p>
         <div class="studio-controls">
           <div><label>Imagen de fondo</label><input id="layerBackground" type="file" accept="image/*"></div>
@@ -70,6 +73,15 @@
       this.host.insertBefore(section, this.host.querySelector(".studio-actions"));
       this.ui = section;
       const $ = id => section.querySelector("#" + id);
+      $("saveProject").addEventListener("click", () => this.saveProjectFile());
+      $("openProject").addEventListener("click", () => $("projectFile").click());
+      $("projectFile").addEventListener("change", async e => {
+        const file=e.target.files && e.target.files[0];
+        if(!file)return;
+        try { await this.openProjectFile(file); }
+        catch(err) { this.status("No se pudo abrir el proyecto: "+err.message); }
+        finally { e.target.value=""; }
+      });
       $("layerBackground").addEventListener("change", e => this._loadImage(e.target.files[0], img => { this.background = img; this.backgroundTransform = { x: 0, y: 0, scale: 1 }; this.engine.draw(0); this.status("Fondo cargado. Ajusta su zoom y posición si lo necesitas."); }));
       $("layerImage").addEventListener("change", e => this._loadImage(e.target.files[0], img => {
         const item = { id: "layer_" + Date.now() + "_" + Math.random().toString(36).slice(2,6), name: e.target.files[0].name, image: img, x: this.engine.width/2, y: this.engine.height/2, scale: 1, rotation: 0, opacity: 1, flipX: false };
@@ -202,6 +214,111 @@
       this.canvas.addEventListener("pointerdown",e=>{const p=point(e);for(let i=this.items.length-1;i>=0;i--){const x=this.items[i],w=x.image.width*x.scale,h=x.image.height*x.scale;if(p.x>=x.x-w/2&&p.x<=x.x+w/2&&p.y>=x.y-h/2&&p.y<=x.y+h/2){this.selected=x;this.ui.querySelector("#layerSelect").value=x.id;this._syncInputs();dragging=true;last=p;this.canvas.setPointerCapture(e.pointerId);break;}}});
       this.canvas.addEventListener("pointermove",e=>{if(!dragging||!this.selected)return;const p=point(e);this.selected.x+=p.x-last.x;this.selected.y+=p.y-last.y;last=p;this.ui.querySelector("#layerX").value=Math.round(this.selected.x);this.ui.querySelector("#layerY").value=Math.round(this.selected.y);this.engine.draw(0);});
       const stop=()=>{dragging=false;last=null;};this.canvas.addEventListener("pointerup",stop);this.canvas.addEventListener("pointercancel",stop);
+    }
+    _imageData(image) {
+      if(!image) return null;
+      const canvas=document.createElement("canvas");
+      canvas.width=image.width;canvas.height=image.height;
+      const ctx=canvas.getContext("2d");
+      ctx.drawImage(image,0,0);
+      return canvas.toDataURL("image/png");
+    }
+    _dataImage(data) {
+      return new Promise((resolve,reject)=>{
+        const img=new Image();
+        img.onload=()=>resolve(img);
+        img.onerror=()=>reject(new Error("Una imagen del proyecto está dañada"));
+        img.src=data;
+      });
+    }
+    _blobData(blob) {
+      return new Promise((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onload=()=>resolve(reader.result);
+        reader.onerror=()=>reject(reader.error||new Error("No se pudo leer el audio"));
+        reader.readAsDataURL(blob);
+      });
+    }
+    async saveProjectFile() {
+      if(!this.sequence){this.status("No hay una secuencia disponible para guardar.");return;}
+      const button=this.ui.querySelector("#saveProject");
+      button.disabled=true;button.textContent="Preparando proyecto…";
+      try {
+        const frames=this.sequence.frames.map(frame=>({
+          name:frame.name,
+          image:this._imageData(frame.image),
+          composition:frame.composition?{
+            background:this._imageData(frame.composition.background),
+            backgroundTransform:{...frame.composition.backgroundTransform},
+            items:frame.composition.items.map(item=>({
+              name:item.name,image:this._imageData(item.image),x:item.x,y:item.y,
+              scale:item.scale,rotation:item.rotation,opacity:item.opacity,flipX:!!item.flipX
+            }))
+          }:null
+        }));
+        const audio=[];
+        for(const track of this.audio.tracks){
+          const blob=await fetch(track.src).then(r=>{if(!r.ok)throw new Error("No se pudo leer "+track.name);return r.blob();});
+          audio.push({name:track.name,kind:track.kind,start:track.start,trimStart:track.trimStart,
+            trimEnd:track.trimEnd,volume:track.volume,pan:track.pan,fadeIn:track.fadeIn,
+            fadeOut:track.fadeOut,loop:track.loop,mute:track.mute,data:await this._blobData(blob)});
+        }
+        const project={format:"nexora-animate-project",version:1,createdAt:new Date().toISOString(),
+          sequence:{fps:this.sequence.fps,loop:this.sequence.loop,onionSkin:this.sequence.onionSkin,frames},audio};
+        const blob=new Blob([JSON.stringify(project)],{type:"application/json"});
+        const url=URL.createObjectURL(blob),a=document.createElement("a");
+        a.href=url;a.download=(document.title||"nexora-animate").toLowerCase().replace(/[^a-z0-9]+/g,"-")+".nexora.json";
+        a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+        this.status("Proyecto guardado. Conserva el archivo .nexora.json para volver a abrirlo.");
+      } catch(err){this.status("No se pudo guardar: "+err.message);}
+      finally{button.disabled=false;button.textContent="Guardar proyecto";}
+    }
+    async openProjectFile(file) {
+      const project=JSON.parse(await file.text());
+      if(project.format!=="nexora-animate-project"||project.version!==1||!project.sequence||!Array.isArray(project.sequence.frames)||!Array.isArray(project.audio))
+        throw new Error("El archivo no es un proyecto NEXORA ANIMATE compatible");
+      const frames=[];
+      for(const saved of project.sequence.frames){
+        const image=await this._dataImage(saved.image);
+        let composition=null;
+        if(saved.composition){
+          const background=saved.composition.background?await this._dataImage(saved.composition.background):null;
+          const items=[];
+          for(const item of saved.composition.items||[]){
+            items.push({...item,image:await this._dataImage(item.image)});
+          }
+          composition={background,backgroundTransform:{x:0,y:0,scale:1,...saved.composition.backgroundTransform},items};
+        }
+        frames.push({image,name:saved.name||"Fotograma",composition});
+      }
+      const audio=[];
+      for(const track of project.audio){
+        const blob=await fetch(track.data).then(r=>r.blob());
+        audio.push({blob,options:{name:track.name,kind:track.kind,start:track.start,trimStart:track.trimStart,
+          trimEnd:track.trimEnd,volume:track.volume,pan:track.pan,fadeIn:track.fadeIn,
+          fadeOut:track.fadeOut,loop:track.loop,mute:track.mute}});
+      }
+      this.stopAudio();this.audio.clear();
+      this.sequence.clear();
+      this.sequence.setFps(project.sequence.fps||12);
+      this.sequence.setLoop(project.sequence.loop||"loop");
+      this.sequence.onionSkin=!!project.sequence.onionSkin;
+      for(const saved of frames){
+        const frame=this.sequence.addImage(saved.image,saved.name);
+        frame.composition=saved.composition;
+        frame.thumb=this._imageData(saved.image);
+      }
+      for(const track of audio)this.audio.add(track.blob,track.options);
+      const fps=document.getElementById("seqFps"),fpsValue=document.getElementById("seqFpsValue");
+      const loop=document.getElementById("seqLoop"),onion=document.getElementById("seqOnion");
+      if(fps)fps.value=this.sequence.fps;
+      if(fpsValue)fpsValue.textContent=this.sequence.fps;
+      if(loop)loop.value=this.sequence.loop;
+      if(onion)onion.value=this.sequence.onionSkin?"on":"off";
+      this.background=null;this.items=[];this.selected=null;this.editingFrame=null;
+      this._refreshLayers();this._renderAudio();this.setEditingVisible(false);
+      this.onFrameCaptured();this.engine.draw(0);
+      this.status("Proyecto abierto: "+this.sequence.count+" fotogramas y "+this.audio.tracks.length+" pistas de audio.");
     }
     _renderAudio() {
       const list=this.ui.querySelector("#audioTrackList");list.innerHTML="";
