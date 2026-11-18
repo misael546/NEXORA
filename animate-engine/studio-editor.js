@@ -50,7 +50,7 @@
           <div><label>Posición X del fondo</label><input id="backgroundX" type="number" value="0"></div>
           <div><label>Posición Y del fondo</label><input id="backgroundY" type="number" value="0"></div>
         </div>
-        <div class="studio-actions"><button class="button button-outline" id="layerDelete" type="button">Eliminar capa seleccionada</button><button class="button button-primary" id="captureFrame" type="button">Guardar composición como fotograma</button></div>
+        <div class="studio-actions"><button class="button button-outline" id="layerUp" type="button">Subir capa</button><button class="button button-outline" id="layerDown" type="button">Bajar capa</button><button class="button button-outline" id="layerDuplicate" type="button">Duplicar PNG</button><button class="button button-outline" id="layerDelete" type="button">Eliminar capa</button><button class="button button-primary" id="captureFrame" type="button">Guardar composición como fotograma</button></div>
         <h2 style="margin:18px 0 8px">Audio de la escena</h2>
         <p class="studio-note">Importa voces, música o efectos MP3/WAV. Las pistas se reproducen junto con la animación durante la previsualización y se incorporan al renderizado compatible.</p>
         <div class="studio-controls">
@@ -85,6 +85,9 @@
       $("backgroundX").addEventListener("change", e => { this.backgroundTransform.x=Number(e.target.value)||0;this.engine.draw(0); });
       $("backgroundY").addEventListener("change", e => { this.backgroundTransform.y=Number(e.target.value)||0;this.engine.draw(0); });
       $("captureFrame").addEventListener("click", () => this.captureFrame());
+      $("layerUp").addEventListener("click", () => this._moveSelectedLayer(1));
+      $("layerDown").addEventListener("click", () => this._moveSelectedLayer(-1));
+      $("layerDuplicate").addEventListener("click", () => { if(!this.selected)return; const copy={...this.selected,id:"layer_"+Date.now()+"_"+Math.random().toString(36).slice(2,6),name:this.selected.name+" copia",x:this.selected.x+18,y:this.selected.y+18}; this.items.splice(this.items.indexOf(this.selected)+1,0,copy); this.selected=copy; this._refreshLayers(); this.engine.draw(0); });
       $("layerDelete").addEventListener("click", () => { if(!this.selected)return; this.items=this.items.filter(x=>x!==this.selected); this.selected=null; this._refreshLayers(); this.engine.draw(0); });
       $("audioFile").addEventListener("change", e => { const f=e.target.files && e.target.files[0]; if(!f)return; try { const t=this.audio.add(f,{name:f.name,kind:$("audioKind").value,start:Number($("audioStart").value)||0,volume:Number($("audioVolume").value)/100}); this._renderAudio(); this.status("Pista de audio agregada: "+t.name); } catch(err){this.status("No se pudo agregar el audio: "+err.message);} e.target.value=""; });
       $("voiceGenerate").addEventListener("click", async () => {
@@ -108,6 +111,13 @@
       img.onload=()=>{URL.revokeObjectURL(url);done(img);};
       img.onerror=()=>{URL.revokeObjectURL(url);this.status("No se pudo abrir la imagen.");};
       img.src=url;
+    }
+    _moveSelectedLayer(direction) {
+      if(!this.selected)return;
+      const index=this.items.indexOf(this.selected), target=index+direction;
+      if(target<0||target>=this.items.length)return;
+      const [item]=this.items.splice(index,1);this.items.splice(target,0,item);
+      this._refreshLayers();this.engine.draw(0);
     }
     _refreshLayers() {
       const select=this.ui.querySelector("#layerSelect"), old=this.selected?.id || "";
