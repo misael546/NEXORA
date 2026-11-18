@@ -6,7 +6,7 @@ Síntesis neuronal de voz ejecutada en el navegador. No se utiliza una API de TT
 ## Arquitectura inicial
 - Interfaz estática en Cloudflare Pages.
 - Inferencia local con Piper TTS, ONNX Runtime Web y WebAssembly dentro de un Web Worker.
-- Modelo inicial: voz es_MX (español de México), descargado desde el repositorio público de modelos Piper.
+- Modelos iniciales: es_MX-ald-medium (español de México) y es_ES-davefx-medium (español de España), descargados desde el repositorio público de modelos Piper.
 - Conversión WAV → MP3 en el navegador.
 - Vista previa mediante un objeto Blob temporal.
 - El texto y el audio generado no se escriben en D1, KV, R2, logs de aplicación ni almacenamiento local.
@@ -19,7 +19,8 @@ La inferencia no requiere una solicitud de texto al servidor. El navegador desca
 ## Modelos y atribución
 - Piper TTS Web: https://github.com/Mintplex-Labs/piper-tts-web
 - Modelos Piper: https://huggingface.co/rhasspy/piper-voices
-- Voz es_MX-ald-medium: https://huggingface.co/rhasspy/piper-voices/tree/main/es/es_MX/ald/medium
+- Voz es_MX-ald-medium: https://huggingface.co/rhasspy/piper-voices/tree/main/es/es_MX/ald/medium (dataset Unlicense).
+- Voz es_ES-davefx-medium: https://huggingface.co/rhasspy/piper-voices/tree/main/es/es_ES/davefx/medium (dataset CC0).
 - La tarjeta del modelo identifica el conjunto de datos de voz Ald Mexican Spanish como Unlicense: https://huggingface.co/rhasspy/piper-voices/blob/main/es/es_MX/ald/medium/MODEL_CARD
 - ONNX Runtime Web: https://onnxruntime.ai/
 
