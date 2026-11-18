@@ -4,11 +4,14 @@
 (() => {
   "use strict";
   class StudioEditor {
-    constructor(engine, canvas, host, status) {
+    constructor(engine, canvas, host, status, sequence, onFrameCaptured) {
       this.engine = engine;
       this.canvas = canvas;
       this.host = host;
       this.status = status || (() => {});
+      this.sequence = sequence || null;
+      this.onFrameCaptured = onFrameCaptured || (() => {});
+      this.backgroundTransform = { x: 0, y: 0, scale: 1 };
       this.background = null;
       this.items = [];
       this.selected = null;
@@ -32,18 +35,22 @@
       section.style.marginTop = "14px";
       section.innerHTML = `
         <h2 style="margin:0 0 8px">Composición por capas</h2>
-        <p class="studio-note">Carga un escenario y coloca personajes PNG transparentes encima. Selecciona una capa y arrástrala directamente en el lienzo. Puedes definir un desplazamiento automático para cada elemento.</p>
+        <p class="studio-note">Estudio manual por composición: carga un fondo, coloca personajes y objetos PNG transparentes, edita cada elemento y guarda cada pose como un fotograma independiente. No hay articulaciones ni movimiento automático.</p>
         <div class="studio-controls">
           <div><label>Imagen de fondo</label><input id="layerBackground" type="file" accept="image/*"></div>
-          <div><label>Personaje u objeto PNG</label><input id="layerImage" type="file" accept="image/*"></div>
+          <div><label>Personaje u objeto PNG</label><input id="layerImage" type="file" accept="image/png"></div>
           <div><label>Capa seleccionada</label><select id="layerSelect"><option value="">Ninguna</option></select></div>
-          <div><label>Tamaño (%)</label><input id="layerScale" type="range" min="10" max="250" value="100"></div>
+          <div><label>Posición X</label><input id="layerX" type="number" value="320"></div>
+          <div><label>Posición Y</label><input id="layerY" type="number" value="180"></div>
+          <div><label>Tamaño (%)</label><input id="layerScale" type="range" min="5" max="400" value="100"></div>
           <div><label>Rotación (grados)</label><input id="layerRotation" type="range" min="-180" max="180" value="0"></div>
-          <div><label>Duración de escena (s)</label><input id="layerDuration" type="number" min="1" max="120" value="5"></div>
-          <div><label>Desplazamiento horizontal final (px)</label><input id="layerMoveX" type="number" value="120"></div>
-          <div><label>Desplazamiento vertical final (px)</label><input id="layerMoveY" type="number" value="0"></div>
+          <div><label>Opacidad (%)</label><input id="layerOpacity" type="range" min="0" max="100" value="100"></div>
+          <div><label>Voltear horizontal</label><select id="layerFlip"><option value="no">No</option><option value="yes">Sí</option></select></div>
+          <div><label>Zoom del fondo (%)</label><input id="backgroundScale" type="range" min="50" max="250" value="100"></div>
+          <div><label>Posición X del fondo</label><input id="backgroundX" type="number" value="0"></div>
+          <div><label>Posición Y del fondo</label><input id="backgroundY" type="number" value="0"></div>
         </div>
-        <div class="studio-actions"><button class="button button-outline" id="layerAnimate" type="button">Aplicar movimiento</button><button class="button button-outline" id="layerDelete" type="button">Eliminar capa</button></div>
+        <div class="studio-actions"><button class="button button-outline" id="layerDelete" type="button">Eliminar capa seleccionada</button><button class="button button-primary" id="captureFrame" type="button">Guardar composición como fotograma</button></div>
         <h2 style="margin:18px 0 8px">Audio de la escena</h2>
         <p class="studio-note">Importa voces, música o efectos MP3/WAV. Las pistas se reproducen junto con la animación durante la previsualización y se incorporan al renderizado compatible.</p>
         <div class="studio-controls">
@@ -62,15 +69,22 @@
       this.host.insertBefore(section, this.host.querySelector(".studio-actions"));
       this.ui = section;
       const $ = id => section.querySelector("#" + id);
-      $("layerBackground").addEventListener("change", e => this._loadImage(e.target.files[0], img => { this.background = img; this.engine.draw(0); this.status("Fondo cargado."); }));
+      $("layerBackground").addEventListener("change", e => this._loadImage(e.target.files[0], img => { this.background = img; this.backgroundTransform = { x: 0, y: 0, scale: 1 }; this.engine.draw(0); this.status("Fondo cargado. Ajusta su zoom y posición si lo necesitas."); }));
       $("layerImage").addEventListener("change", e => this._loadImage(e.target.files[0], img => {
-        const item = { id: "layer_" + Date.now() + "_" + Math.random().toString(36).slice(2,6), name: e.target.files[0].name, image: img, x: this.engine.width/2, y: this.engine.height/2, scale: 1, rotation: 0, moveX: 0, moveY: 0, duration: 5 };
+        const item = { id: "layer_" + Date.now() + "_" + Math.random().toString(36).slice(2,6), name: e.target.files[0].name, image: img, x: this.engine.width/2, y: this.engine.height/2, scale: 1, rotation: 0, opacity: 1, flipX: false };
         this.items.push(item); this.selected = item; this._refreshLayers(); this.engine.draw(0); this.status("Personaje agregado. Arrástralo sobre el escenario.");
       }));
       $("layerSelect").addEventListener("change", () => { this.selected = this.items.find(x => x.id === $("layerSelect").value) || null; this._syncInputs(); });
+      $("layerX").addEventListener("change", e => { if(this.selected){this.selected.x=Number(e.target.value)||0;this.engine.draw(0);} });
+      $("layerY").addEventListener("change", e => { if(this.selected){this.selected.y=Number(e.target.value)||0;this.engine.draw(0);} });
       $("layerScale").addEventListener("input", e => { if(this.selected){this.selected.scale=Number(e.target.value)/100;this.engine.draw(0);} });
       $("layerRotation").addEventListener("input", e => { if(this.selected){this.selected.rotation=Number(e.target.value)*Math.PI/180;this.engine.draw(0);} });
-      $("layerAnimate").addEventListener("click", () => { if(!this.selected)return; this.selected.moveX=Number($("layerMoveX").value)||0; this.selected.moveY=Number($("layerMoveY").value)||0; this.selected.duration=Math.max(1,Number($("layerDuration").value)||5); this.engine.draw(0); this.status("Movimiento aplicado a la capa seleccionada."); });
+      $("layerOpacity").addEventListener("input", e => { if(this.selected){this.selected.opacity=Number(e.target.value)/100;this.engine.draw(0);} });
+      $("layerFlip").addEventListener("change", e => { if(this.selected){this.selected.flipX=e.target.value==="yes";this.engine.draw(0);} });
+      $("backgroundScale").addEventListener("input", e => { this.backgroundTransform.scale=Number(e.target.value)/100;this.engine.draw(0); });
+      $("backgroundX").addEventListener("change", e => { this.backgroundTransform.x=Number(e.target.value)||0;this.engine.draw(0); });
+      $("backgroundY").addEventListener("change", e => { this.backgroundTransform.y=Number(e.target.value)||0;this.engine.draw(0); });
+      $("captureFrame").addEventListener("click", () => this.captureFrame());
       $("layerDelete").addEventListener("click", () => { if(!this.selected)return; this.items=this.items.filter(x=>x!==this.selected); this.selected=null; this._refreshLayers(); this.engine.draw(0); });
       $("audioFile").addEventListener("change", e => { const f=e.target.files && e.target.files[0]; if(!f)return; try { const t=this.audio.add(f,{name:f.name,kind:$("audioKind").value,start:Number($("audioStart").value)||0,volume:Number($("audioVolume").value)/100}); this._renderAudio(); this.status("Pista de audio agregada: "+t.name); } catch(err){this.status("No se pudo agregar el audio: "+err.message);} e.target.value=""; });
       $("voiceGenerate").addEventListener("click", async () => {
@@ -105,34 +119,58 @@
     _syncInputs() {
       const x=this.selected, $=id=>this.ui.querySelector("#"+id);
       if(!x)return;
+      $("layerX").value=Math.round(x.x);
+      $("layerY").value=Math.round(x.y);
       $("layerScale").value=Math.round(x.scale*100);
       $("layerRotation").value=Math.round(x.rotation*180/Math.PI);
-      $("layerMoveX").value=x.moveX;
-      $("layerMoveY").value=x.moveY;
-      $("layerDuration").value=x.duration;
+      $("layerOpacity").value=Math.round((x.opacity ?? 1)*100);
+      $("layerFlip").value=x.flipX?"yes":"no";
     }
     _drawBackground(ctx) {
       if(!this.background)return;
       const w=this.engine.width,h=this.engine.height,scale=Math.max(w/this.background.width,h/this.background.height);
+      const transform=this.backgroundTransform || {x:0,y:0,scale:1};
+      scale *= transform.scale || 1;
       const dw=this.background.width*scale,dh=this.background.height*scale;
-      ctx.drawImage(this.background,(w-dw)/2,(h-dh)/2,dw,dh);
+      ctx.drawImage(this.background,(w-dw)/2+(transform.x||0),(h-dh)/2+(transform.y||0),dw,dh);
     }
     draw(ctx,time) {
       for(const item of this.items) {
-        const p=Math.max(0,Math.min(1,time/Math.max(.1,item.duration)));
-        const x=item.x+item.moveX*p,y=item.y+item.moveY*p;
         const w=item.image.width*item.scale,h=item.image.height*item.scale;
-        ctx.save();ctx.translate(x,y);ctx.rotate(item.rotation);
+        ctx.save();ctx.globalAlpha=item.opacity ?? 1;ctx.translate(item.x,item.y);ctx.rotate(item.rotation);
+        ctx.scale(item.flipX?-1:1,1);
         ctx.drawImage(item.image,-w/2,-h/2,w,h);
         if(item===this.selected){ctx.strokeStyle="#6da8ff";ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.strokeRect(-w/2,-h/2,w,h);}
         ctx.restore();
       }
     }
+    captureFrame() {
+      if (!this.sequence) { this.status("No se encontró la línea de tiempo de fotogramas."); return; }
+      if (!this.background && !this.items.length) { this.status("Agrega un fondo o un personaje antes de guardar el fotograma."); return; }
+      const frameCanvas=document.createElement("canvas");
+      frameCanvas.width=this.engine.width;frameCanvas.height=this.engine.height;
+      const ctx=frameCanvas.getContext("2d");
+      ctx.fillStyle="#080c14";ctx.fillRect(0,0,frameCanvas.width,frameCanvas.height);
+      this._drawBackground(ctx);
+      for(const item of this.items){
+        const w=item.image.width*item.scale,h=item.image.height*item.scale;
+        ctx.save();ctx.globalAlpha=item.opacity ?? 1;ctx.translate(item.x,item.y);ctx.rotate(item.rotation);ctx.scale(item.flipX?-1:1,1);
+        ctx.drawImage(item.image,-w/2,-h/2,w,h);ctx.restore();
+      }
+      const frame=this.sequence.addImage(frameCanvas,"Composición "+(this.sequence.count+1));
+      frame.thumb=frameCanvas.toDataURL("image/jpeg",0.78);
+      this.onFrameCaptured();
+      this.status("Fotograma "+this.sequence.count+" guardado. Modifica las capas y guarda la siguiente pose.");
+    }
+    setEditingVisible(visible) {
+      this.engine.updateLayer(this.backgroundLayer,{visible});
+      this.engine.updateLayer(this.objectLayer,{visible});
+    }
     _bindCanvas() {
       let dragging=false,last=null;
       const point=e=>{const r=this.canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*this.engine.width/r.width,y:(e.clientY-r.top)*this.engine.height/r.height};};
       this.canvas.addEventListener("pointerdown",e=>{const p=point(e);for(let i=this.items.length-1;i>=0;i--){const x=this.items[i],w=x.image.width*x.scale,h=x.image.height*x.scale;if(p.x>=x.x-w/2&&p.x<=x.x+w/2&&p.y>=x.y-h/2&&p.y<=x.y+h/2){this.selected=x;this.ui.querySelector("#layerSelect").value=x.id;this._syncInputs();dragging=true;last=p;this.canvas.setPointerCapture(e.pointerId);break;}}});
-      this.canvas.addEventListener("pointermove",e=>{if(!dragging||!this.selected)return;const p=point(e);this.selected.x+=p.x-last.x;this.selected.y+=p.y-last.y;last=p;this.engine.draw(0);});
+      this.canvas.addEventListener("pointermove",e=>{if(!dragging||!this.selected)return;const p=point(e);this.selected.x+=p.x-last.x;this.selected.y+=p.y-last.y;last=p;this.ui.querySelector("#layerX").value=Math.round(this.selected.x);this.ui.querySelector("#layerY").value=Math.round(this.selected.y);this.engine.draw(0);});
       const stop=()=>{dragging=false;last=null;};this.canvas.addEventListener("pointerup",stop);this.canvas.addEventListener("pointercancel",stop);
     }
     _renderAudio() {
