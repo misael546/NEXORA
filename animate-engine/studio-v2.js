@@ -7,6 +7,8 @@
   const editor = window.nexoraStudioEditor;
   const sequence = window.nexoraSequence;
   if (!app || !oldPanel || !canvas || !editor || !sequence) return;
+  const uiQuery=editor.ui.querySelector.bind(editor.ui);
+  editor.ui.querySelector=function(selector){return uiQuery(selector)||(selector.charAt(0)==="#"?document.getElementById(selector.slice(1)):null);};
   app.classList.add("na-app");
   const heading = document.createElement("div");
   heading.className = "na-heading";
@@ -94,12 +96,15 @@
     editor.items.forEach((item,index)=>{
       const start=Number.isFinite(item.startTime)?item.startTime:0,end=Number.isFinite(item.endTime)?item.endTime:duration;
       makeTrack(item.name||("Capa "+(index+1)),"layer",start,end,sub=>{
-        const p=document.createElement("p");p.className="studio-note";p.textContent="Selecciona esta capa en Propiedades para moverla, escalarla, girarla o cambiar su opacidad.";sub.appendChild(p);
+        const p=document.createElement("p");p.className="studio-note";p.textContent="Guarda poses en distintos momentos. NEXORA interpolará posición, tamaño, giro y opacidad entre ellas.";sub.appendChild(p);
         const range=document.createElement("div");range.className="na-field";range.innerHTML='<label>Visible desde (s)</label><input type="number" min="0" step=".1" value="'+start+'"><label>Visible hasta (s)</label><input type="number" min="0" step=".1" value="'+end+'">';
         const inputs=range.querySelectorAll("input");
         inputs[0].addEventListener("change",()=>{item.startTime=Math.max(0,Number(inputs[0].value)||0);drawTracks();});
         inputs[1].addEventListener("change",()=>{item.endTime=Math.max(item.startTime||0,Number(inputs[1].value)||duration);drawTracks();});
         sub.appendChild(range);
+        const keyLane=document.createElement("div");keyLane.className="na-track-lane";keyLane.style.margin="8px 0";
+        (item.keyframes||[]).forEach(k=>{const marker=document.createElement("button");marker.type="button";marker.title="Pose en "+k.time.toFixed(2)+" s";marker.style.cssText="position:absolute;top:2px;left:"+Math.max(0,Math.min(100,k.time/duration*100))+"%;height:19px;width:8px;padding:0;border:0;border-radius:2px;background:#f2c36b;transform:translateX(-50%);cursor:pointer";marker.addEventListener("click",()=>{playhead=k.time;updateRulerHead();});keyLane.appendChild(marker);});
+        const addPose=document.createElement("button");addPose.type="button";addPose.className="button button-outline";addPose.textContent="＋ Guardar pose en "+playhead.toFixed(2)+" s";addPose.addEventListener("click",()=>{const pose={time:playhead,x:item.x,y:item.y,scale:item.scale,rotation:item.rotation,opacity:item.opacity??1};item.keyframes=item.keyframes||[];const at=item.keyframes.findIndex(k=>Math.abs(k.time-playhead)<.025);if(at>=0)item.keyframes[at]=pose;else item.keyframes.push(pose);item.keyframes.sort((a,b)=>a.time-b.time);drawTracks();window.nexoraEngine.draw(playhead);});sub.append(keyLane,addPose);
       });
     });
     editor.audio.tracks.forEach(track=>{
@@ -117,7 +122,7 @@
   durationInput.addEventListener("change",drawTracks);
   $("na-layer-slot").addEventListener("change",()=>{editor.selected=editor.items.find(x=>x.id===$("layerSelect").value)||null;});
   const originalDraw=editor.draw.bind(editor);
-  editor.draw=function(ctx,time){for(const item of this.items){const t=Number(time)||0;if(t<(item.startTime||0)||t>(item.endTime==null?Infinity:item.endTime))continue;const w=item.image.width*item.scale,h=item.image.height*item.scale;ctx.save();ctx.globalAlpha=item.opacity??1;ctx.translate(item.x,item.y);ctx.rotate(item.rotation);ctx.scale(item.flipX?-1:1,1);ctx.drawImage(item.image,-w/2,-h/2,w,h);if(item===this.selected){ctx.strokeStyle="#6da8ff";ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.strokeRect(-w/2,-h/2,w,h);}ctx.restore();}};
+  editor.draw=function(ctx,time){const t=Number(time)||0;for(const item of this.items){if(t<(item.startTime||0)||t>(item.endTime==null?Infinity:item.endTime))continue;let pose={x:item.x,y:item.y,scale:item.scale,rotation:item.rotation,opacity:item.opacity??1};const keys=(item.keyframes||[]).slice().sort((a,b)=>a.time-b.time);if(keys.length){if(t<=keys[0].time)pose={...pose,...keys[0]};else if(t>=keys[keys.length-1].time)pose={...pose,...keys[keys.length-1]};else{let right=keys.findIndex(k=>k.time>=t),a=keys[right-1],b=keys[right],p=(t-a.time)/Math.max(.0001,b.time-a.time);["x","y","scale","rotation","opacity"].forEach(k=>{pose[k]=Number(a[k]??pose[k])+(Number(b[k]??pose[k])-Number(a[k]??pose[k]))*p;});}}const w=item.image.width*pose.scale,h=item.image.height*pose.scale;ctx.save();ctx.globalAlpha=pose.opacity??1;ctx.translate(pose.x,pose.y);ctx.rotate(pose.rotation);ctx.scale(item.flipX?-1:1,1);ctx.drawImage(item.image,-w/2,-h/2,w,h);if(item===this.selected){ctx.strokeStyle="#6da8ff";ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.strokeRect(-w/2,-h/2,w,h);}ctx.restore();}};
   const refresh=editor._refreshLayers.bind(editor);
   editor._refreshLayers=function(){refresh();drawTracks();};
   const originalAdd=editor.audio.add.bind(editor.audio);
