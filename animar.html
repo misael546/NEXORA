@@ -313,6 +313,15 @@
           var label = document.createElement("span");
           label.textContent = (i + 1) + ". " + frame.name;
           label.style.cssText = "flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+          var duplicate = document.createElement("button");
+          duplicate.className = "button button-outline";
+          duplicate.textContent = "Duplicar";
+          duplicate.addEventListener("click", function () {
+            var copy = sequence.addImage(frame.image, frame.name + " copia");
+            copy.thumb = frame.thumb || frame.image.toDataURL("image/jpeg", 0.78);
+            renderFrameList(); syncCompositor(); applyMode();
+            status("Fotograma duplicado. Puedes seguir editando la composición para crear una nueva pose.");
+          });
           var up = document.createElement("button");
           up.className = "button button-outline";
           up.textContent = "↑";
@@ -332,7 +341,7 @@
             renderFrameList();
             applyMode();
           });
-          row.append(thumb, label, up, down, del);
+          row.append(thumb, label, duplicate, up, down, del);
           list.append(row);
         });
       }
