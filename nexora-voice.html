@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d18">
+  <meta name="description" content="NEXORA VOICE: convierte texto en voz con síntesis neuronal que se ejecuta en tu navegador.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://nexora-ey8.pages.dev/nexora-voice.html">
+  <title>NEXORA VOICE — Texto a voz</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="nexora-voice.css">
+</head>
+<body>
+  <header class="nv-header">
+    <a class="nv-brand" href="index.html"><span class="nv-mark">N</span><span>NEXORA<span>.</span></span></a>
+    <a class="nv-back" href="index.html">← Volver a NEXORA</a>
+  </header>
+  <main class="nv-main">
+    <section class="nv-intro">
+      <div class="nv-eyebrow"><i></i> HERRAMIENTA DE AUDIO · PROCESAMIENTO LOCAL</div>
+      <h1>NEXORA <span>VOICE</span></h1>
+      <p>Convierte tus palabras en voz. Genera, escucha y descarga tu audio sin crear una cuenta ni guardar tus textos.</p>
+    </section>
+
+    <section class="nv-workspace" aria-label="Generador de voz">
+      <div class="nv-panel nv-editor">
+        <div class="nv-panel-head">
+          <div><span class="nv-step">01</span><h2>Tu texto</h2></div>
+          <span class="nv-private"><span></span> Privado en tu dispositivo</span>
+        </div>
+        <label class="nv-label" for="nvText">¿Qué quieres que diga la voz?</label>
+        <textarea id="nvText" maxlength="2500" placeholder="Escribe o pega aquí tu texto..."></textarea>
+        <div class="nv-text-meta"><span id="nvCount">0 / 2,500</span><button type="button" id="nvClearText" class="nv-text-button">Limpiar texto</button></div>
+
+        <div class="nv-options">
+          <div class="nv-field">
+            <label class="nv-label" for="nvVoice">Voz</label>
+            <select id="nvVoice">
+              <option value="es_MX-ald-medium">Ald · Español de México</option>
+              <option value="es_ES-davefx-medium">DaveFX · Español de España</option>
+            </select>
+          </div>
+        </div>
+        <button id="nvGenerate" class="nv-generate" type="button"><span>✦</span> Generar voz</button>
+        <div class="nv-progress" id="nvProgress" hidden>
+          <div class="nv-progress-top"><span id="nvStatus">Preparando motor de voz…</span><strong id="nvPercent">0%</strong></div>
+          <div class="nv-progress-track"><span id="nvProgressBar"></span></div>
+          <p id="nvProgressHint">La primera carga descarga el modelo de voz al navegador. Puede tardar un poco.</p>
+        </div>
+        <p class="nv-error" id="nvError" role="alert" hidden></p>
+      </div>
+
+      <aside class="nv-panel nv-output">
+        <div class="nv-panel-head"><div><span class="nv-step">02</span><h2>Tu audio</h2></div><span class="nv-format">MP3</span></div>
+        <div class="nv-empty" id="nvEmpty">
+          <div class="nv-wave-icon"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <h3>Tu voz aparecerá aquí</h3>
+          <p>Escribe un texto y pulsa «Generar voz» para escuchar el resultado.</p>
+        </div>
+        <div class="nv-result" id="nvResult" hidden>
+          <div class="nv-audio-card">
+            <div class="nv-audio-art">N<span>.</span></div>
+            <div class="nv-audio-info"><strong>NEXORA VOICE</strong><span id="nvAudioDetails">Audio generado</span></div>
+          </div>
+          <audio id="nvPlayer" controls preload="none"></audio>
+          <a id="nvDownload" class="nv-download" download="nexora-voice.mp3"><span>↓</span> Descargar MP3</a>
+          <button id="nvDiscard" type="button" class="nv-discard">Eliminar audio de esta sesión</button>
+        </div>
+        <div class="nv-output-note"><span>◈</span><p>El texto y el audio se procesan en este navegador. NEXORA no recibe ni almacena el contenido que escribes.</p></div>
+      </aside>
+    </section>
+
+    <section class="nv-privacy">
+      <div class="nv-privacy-icon">⌁</div>
+      <div><h2>Tu contenido es tuyo.</h2><p>La síntesis se ejecuta en tu dispositivo. El modelo neuronal se descarga una vez y puede quedar guardado en la caché privada del navegador para acelerar usos posteriores. Los textos y audios generados no se guardan en NEXORA. Al salir de esta página se libera el audio temporal; las descargas que tú guardes permanecen en tu dispositivo.</p></div>
+    </section>
+    <p class="nv-credit">Motor neuronal Piper · Modelos de voz con sus licencias y atribuciones correspondientes.</p>
+  </main>
+  <script src="nexora-voice.js" type="module"></script>
+</body>
+</html>
