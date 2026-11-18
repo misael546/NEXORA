@@ -33,7 +33,7 @@
   const stage = preview.querySelector(".na-stage");
   stage.appendChild(canvas);
   const studioUi = editor.ui;
-  const move = (id,target) => { const el = studioUi.querySelector("#"+id); if(el) target.appendChild(el); };
+  const move = (id,target) => { const el = studioUi.querySelector("#"+id); if(!el)return; const parent=el.parentElement; if(parent && (parent.classList.contains("studio-actions") || parent.classList.contains("studio-controls"))) target.appendChild(parent); else if(parent && parent.parentElement && (parent.parentElement.classList.contains("studio-controls") || parent.parentElement.classList.contains("studio-actions"))) target.appendChild(parent); else target.appendChild(el); };
   move("layerBackground",$("na-bg-slot"));
   move("layerImage",$("na-png-slot"));
   move("frameFiles",$("na-frame-slot"));
