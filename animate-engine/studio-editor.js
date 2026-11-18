@@ -82,7 +82,7 @@
           if(!response.ok){let message="No se pudo generar la voz.";try{message=(await response.json()).error||message;}catch{}throw new Error(message);}
           const blob=await response.blob();
           if(!blob.size)throw new Error("El servicio devolvió un MP3 vacío.");
-          const track=this.audio.add(blob,{name:"Diálogo "+speaker,kind:"voice",start:Number($("audioStart").value)||0,volume:1});
+          const track=this.audio.add(blob,{name:"Diálogo "+speaker,kind:"voice",start:Number($("audioStart").value)||0,volume:Number($("audioVolume").value)/100});
           this._renderAudio();this.status("Voz MP3 generada y agregada a la línea de tiempo: "+track.name);
         } catch(err){this.status(err.message||"Error al generar la voz.");}
         finally{button.disabled=false;button.textContent="Generar voz MP3";}
