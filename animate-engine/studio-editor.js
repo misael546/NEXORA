@@ -72,7 +72,7 @@
       `;
       this.host.insertBefore(section, this.host.querySelector(".studio-actions"));
       this.ui = section;
-      const $ = id => section.querySelector("#" + id);
+      const $ = id => section.querySelector("#" + id) || document.getElementById(id);
       $("saveProject").addEventListener("click", () => this.saveProjectFile());
       $("openProject").addEventListener("click", () => $("projectFile").click());
       $("projectFile").addEventListener("change", async e => {
