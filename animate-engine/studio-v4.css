@@ -9,3 +9,5 @@
 #nexora-v4 .nv-bg-item small{color:#9eb2d1;align-self:center}
 #nexora-v4 .nv-bg-controls{grid-column:1/-1;display:flex;gap:6px}
 #nexora-v4 .nv-bg-controls .nv-btn{padding:6px 10px}
+
+#nexora-v4 .nv-privacy{margin:0 0 14px;padding:11px 13px;border:1px solid #285b4c;border-radius:10px;background:#10251f;color:#c5f3df;font-size:12px;line-height:1.55}#nexora-v4 .nv-privacy b{color:#e1fff0}
