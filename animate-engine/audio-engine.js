@@ -99,7 +99,8 @@
           "loadedmetadata",
           () => {
             if (!t.loop && t.fadeOut > 0 && Number.isFinite(el.duration)) {
-              const end = start + el.duration;
+              const clipEnd = t.trimEnd === null ? el.duration : Math.min(t.trimEnd, el.duration);
+              const end = start + Math.max(0, clipEnd - t.trimStart);
               gain.gain.setValueAtTime(
                 t.volume,
                 Math.max(start, end - t.fadeOut),
@@ -172,6 +173,8 @@
             name,
             kind,
             start,
+            trimStart,
+            trimEnd,
             volume,
             pan,
             fadeIn,
