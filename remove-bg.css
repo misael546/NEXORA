@@ -75,3 +75,14 @@
 .rb-actions button:focus-visible,.rb-tool:focus-visible,.rb-quiet:focus-visible{box-shadow:0 0 0 4px #72e5e822}
 .rb-status{overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){.rb-upload,.rb-progress-track span{transition:none}}
+
+.rb-edge-panel{display:grid;grid-template-columns:1fr 1fr auto;align-items:end;gap:13px;margin-top:17px;padding:15px;border:1px solid var(--rb-line);border-radius:10px;background:#0c1625}
+.rb-edge-title{grid-column:1/-1}
+.rb-edge-title strong{display:block;font:600 13px var(--display);color:#e3edfc}
+.rb-edge-title small{display:block;margin-top:5px;color:var(--rb-muted);font-size:10px;line-height:1.5}
+.rb-edge-panel label{display:flex;flex-direction:column;gap:8px;color:#aab8cc;font-size:10px}
+.rb-edge-panel output{color:#72e5e8;font-weight:700}
+.rb-edge-panel input{width:100%;accent-color:#72e5e8}
+.rb-edge-panel button{white-space:nowrap}
+@media(max-width:700px){.rb-edge-panel{grid-template-columns:1fr 1fr}.rb-edge-title{grid-column:1/-1}.rb-edge-panel button{grid-column:1/-1}}
+@media(max-width:390px){.rb-edge-panel{grid-template-columns:1fr}}
