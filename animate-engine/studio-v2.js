@@ -150,7 +150,7 @@
   const originalRemove=editor.audio.remove.bind(editor.audio);
   editor.audio.remove=function(...args){const result=originalRemove(...args);setTimeout(drawTracks,0);return result;};
   const originalCapture=editor.captureFrame.bind(editor);
-  editor.captureFrame=function(){originalCapture();drawTracks();};
+  editor.captureFrame=function(){originalCapture();if((this.background||this.items.length)&&window.nexoraSequenceLayer)this.engine.updateLayer(window.nexoraSequenceLayer,{visible:false});drawTracks();};
   const originalLoad=editor._loadImage.bind(editor);
   editor._loadImage=function(file,done){originalLoad(file,img=>{done(img);drawTracks();});};
   const originalFrameRender=window.renderFrameList;
