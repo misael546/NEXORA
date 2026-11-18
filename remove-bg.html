@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#090d18">
+  <meta name="description" content="Elimina fondos de imágenes con inteligencia artificial desde tu navegador. Refina el recorte y descarga PNG con transparencia real.">
+  <link rel="canonical" href="https://nexora-ey8.pages.dev/remove-bg.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="remove-bg.css">
+  <title>NEXORA REMOVE BG — Elimina fondos gratis</title>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="NEXORA inicio"><span class="brand-mark">N</span><span>NEXORA<span class="brand-dot">.</span></span></a>
+  <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+  <nav class="nav" id="mainNav" aria-label="Navegación principal">
+    <a href="index.html">Inicio</a><a href="wallpaper.html">Fondos</a><a href="animar.html">NEXORA ANIMATE</a><a href="acerca.html">Sobre NEXORA</a>
+  </nav>
+</header>
+<main class="rb-app">
+  <section class="rb-hero">
+    <div class="rb-eyebrow"><span></span> HERRAMIENTA GRATUITA DE NEXORA</div>
+    <h1>NEXORA <span>REMOVE BG</span></h1>
+    <p>Elimina fondos, perfecciona tus recortes y descarga imágenes PNG con transparencia real. Todo el procesamiento de tu imagen ocurre en tu dispositivo.</p>
+    <div class="rb-pills"><span>✦ IA en tu navegador</span><span>PNG transparente</span><span>Sin cuenta</span></div>
+  </section>
+
+  <section class="rb-workspace" aria-label="Editor para quitar fondos">
+    <div class="rb-toolbar">
+      <div><strong>Tu imagen</strong><small id="rb-fileinfo">Aún no has cargado ningún archivo</small></div>
+      <button class="rb-quiet" id="rb-reset" type="button" disabled>Empezar de nuevo</button>
+    </div>
+    <label class="rb-upload" id="rb-drop">
+      <input id="rb-file" type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/bmp,image/gif">
+      <span class="rb-upload-icon">＋</span>
+      <strong>Selecciona o arrastra una imagen aquí</strong>
+      <small>JPG, PNG, WEBP, AVIF, BMP o GIF · Recomendado: imágenes de buena calidad</small>
+      <span class="rb-upload-button">Elegir imagen</span>
+    </label>
+
+    <div class="rb-editor" id="rb-editor" hidden>
+      <div class="rb-preview-grid">
+        <section class="rb-preview-card">
+          <div class="rb-preview-head"><strong>Original</strong><span>Antes</span></div>
+          <div class="rb-preview-stage"><img id="rb-original" alt="Imagen original"></div>
+        </section>
+        <section class="rb-preview-card">
+          <div class="rb-preview-head"><strong>Resultado</strong><span id="rb-result-label">Vista previa</span></div>
+          <div class="rb-preview-stage rb-checker" id="rb-result-stage">
+            <canvas id="rb-canvas" aria-label="Resultado recortado y editable"></canvas>
+          </div>
+        </section>
+      </div>
+
+      <div class="rb-actions">
+        <button class="rb-primary" id="rb-remove" type="button">✦ Quitar fondo con IA</button>
+        <button class="rb-secondary" id="rb-download" type="button" disabled>Descargar PNG</button>
+      </div>
+      <div class="rb-progress" id="rb-progress" hidden>
+        <div class="rb-progress-top"><span id="rb-progress-text">Preparando motor de IA…</span><b id="rb-progress-percent">0%</b></div>
+        <div class="rb-progress-track"><span id="rb-progress-bar"></span></div>
+        <small>La primera ejecución descarga el modelo de IA. Puede tardar un poco según tu conexión.</small>
+      </div>
+      <p class="rb-status" id="rb-status" role="status" aria-live="polite">Carga una imagen y pulsa «Quitar fondo con IA».</p>
+
+      <section class="rb-refine" id="rb-refine" hidden>
+        <div class="rb-refine-heading"><div><strong>Perfeccionar recorte</strong><small>Corrige a mano los bordes que la IA no haya detectado bien.</small></div><span class="rb-ready">EDITABLE</span></div>
+        <div class="rb-tools">
+          <button type="button" class="rb-tool active" data-brush="erase">Borrar fondo</button>
+          <button type="button" class="rb-tool" data-brush="restore">Recuperar parte</button>
+          <label class="rb-brush-size">Tamaño <input id="rb-brush" type="range" min="5" max="120" value="34"><output id="rb-brush-value">34 px</output></label>
+          <button type="button" class="rb-tool rb-history" id="rb-undo" disabled>↶ Deshacer</button>
+          <button type="button" class="rb-tool rb-history" id="rb-redo" disabled>↷ Rehacer</button>
+        </div>
+        <div class="rb-bg-controls">
+          <span>Fondo de vista previa</span>
+          <button class="rb-swatch active" data-bg="transparent" aria-label="Transparente"></button>
+          <button class="rb-swatch" data-bg="#ffffff" aria-label="Blanco"></button>
+          <button class="rb-swatch" data-bg="#171c2b" aria-label="Oscuro"></button>
+          <button class="rb-swatch" data-bg="#70d6c5" aria-label="Verde"></button>
+          <label class="rb-custom-color">Personalizar <input id="rb-custom-bg" type="color" value="#7c8cff"></label>
+        </div>
+        <p class="rb-tip">Consejo: usa «Borrar fondo» sobre los restos que quieras hacer transparentes y «Recuperar parte» para devolver zonas del sujeto.</p>
+      </section>
+    </div>
+  </section>
+
+  <section class="rb-info-grid">
+    <article><span>01</span><h2>Sube tu imagen</h2><p>Selecciona una fotografía, producto, personaje, mascota o ilustración.</p></article>
+    <article><span>02</span><h2>Deja trabajar a la IA</h2><p>El modelo detecta el sujeto y separa el fondo directamente en tu navegador.</p></article>
+    <article><span>03</span><h2>Afina y descarga</h2><p>Retoca el recorte y guarda un PNG que conserva el canal alfa.</p></article>
+  </section>
+  <aside class="rb-privacy"><strong>Privacidad:</strong> tus imágenes no se suben a NEXORA. El navegador descarga el motor y el modelo de IA la primera vez; la imagen se procesa localmente en tu dispositivo.</aside>
+</main>
+<footer class="site-footer"><div class="wrap footer-inner"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXORA<span class="brand-dot">.</span></span></a><span>Herramientas para crear.</span><div class="footer-links"><a href="index.html">Inicio</a><a href="privacidad.html">Privacidad</a><a href="contacto.html">Contacto</a></div><span>© <span id="year"></span> NEXORA.</span></div></footer>
+<script src="script.js"></script>
+<script src="remove-bg.js"></script>
+</body></html>
