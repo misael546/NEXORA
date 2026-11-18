@@ -27,7 +27,7 @@
         fadeIn: Math.max(0, Number(options.fadeIn) || 0),
         fadeOut: Math.max(0, Number(options.fadeOut) || 0),
         loop: !!options.loop,
-        mute: false,
+        mute: !!options.mute,
         owned: typeof fileOrUrl !== "string",
       };
       this.tracks.push(item);
