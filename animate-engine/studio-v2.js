@@ -10,6 +10,10 @@
   const uiQuery=editor.ui.querySelector.bind(editor.ui);
   editor.ui.querySelector=function(selector){return uiQuery(selector)||(selector.charAt(0)==="#"?document.getElementById(selector.slice(1)):null);};
   app.classList.add("na-app");
+  // El encabezado anterior duplicaba el título del nuevo estudio.
+  app.querySelector(":scope > .eyebrow")?.classList.add("na-legacy-intro");
+  app.querySelector(":scope > h1")?.classList.add("na-legacy-intro");
+  app.querySelector(":scope > .hero-lead")?.classList.add("na-legacy-intro");
   const heading = document.createElement("div");
   heading.className = "na-heading";
   heading.innerHTML = '<div><div class="eyebrow"><span class="pulse"></span> NEXORA ANIMATE · ESTUDIO VISUAL</div><h1>Tu escena, <span>tu control.</span></h1><p>Compón con imágenes, organiza tus pistas y crea cada fotograma manualmente.</p></div>';
@@ -33,7 +37,17 @@
   const stage = preview.querySelector(".na-stage");
   stage.appendChild(canvas);
   const studioUi = editor.ui;
-  const move = (id,target) => { const el = studioUi.querySelector("#"+id); if(!el)return; const parent=el.parentElement; if(parent && (parent.classList.contains("studio-actions") || parent.classList.contains("studio-controls"))) target.appendChild(parent); else if(parent && parent.parentElement && (parent.parentElement.classList.contains("studio-controls") || parent.parentElement.classList.contains("studio-actions"))) target.appendChild(parent); else target.appendChild(el); };
+  // Mueve cada control por separado. Nunca mover el contenedor .studio-controls:
+  // hacerlo desplaza todos los campos juntos y deja la interfaz mezclada.
+  const move = (id,target) => {
+    const el = studioUi.querySelector("#"+id);
+    if(!el || !target) return;
+    const parent=el.parentElement;
+    if(parent && parent.classList.contains("studio-controls")) target.appendChild(el);
+    else if(parent && parent.classList.contains("studio-actions")) target.appendChild(el);
+    else if(parent && parent.tagName==="DIV") target.appendChild(parent);
+    else target.appendChild(el);
+  };
   move("layerBackground",$("na-bg-slot"));
   move("layerImage",$("na-png-slot"));
   move("frameFiles",$("na-frame-slot"));
