@@ -313,6 +313,24 @@
           var label = document.createElement("span");
           label.textContent = (i + 1) + ". " + frame.name;
           label.style.cssText = "flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+          var durationLabel = document.createElement("label");
+          durationLabel.style.cssText = "font-size:11px;white-space:nowrap";
+          durationLabel.textContent = "Duración";
+          var durationInput = document.createElement("input");
+          durationInput.type = "number";
+          durationInput.min = "1";
+          durationInput.max = "600";
+          durationInput.step = "1";
+          durationInput.value = frame.durationFrames || 1;
+          durationInput.title = "Duración de este fotograma en unidades de FPS";
+          durationInput.style.cssText = "width:54px;padding:5px";
+          durationInput.addEventListener("change", function () {
+            frame.durationFrames = Math.max(1, Math.min(600, Math.floor(Number(durationInput.value) || 1)));
+            durationInput.value = frame.durationFrames;
+            renderFrameList(); syncCompositor();
+            status("Duración del fotograma actualizada.");
+          });
+          durationLabel.append(durationInput);
           var editFrame = document.createElement("button");
           editFrame.className = "button button-outline";
           editFrame.textContent = "Editar";
@@ -327,7 +345,7 @@
           duplicate.textContent = "Duplicar";
           duplicate.addEventListener("click", function () {
             var copy = sequence.addImage(frame.image, frame.name + " copia");
-            copy.thumb = frame.thumb || frame.image.toDataURL("image/jpeg", 0.78);
+            copy.thumb = frame.thumb || frame.image.toDataURL("image/jpeg", 0.78);\n            copy.durationFrames = frame.durationFrames || 1;
             renderFrameList(); syncCompositor(); applyMode();
             status("Fotograma duplicado. Puedes seguir editando la composición para crear una nueva pose.");
           });
@@ -350,7 +368,7 @@
             renderFrameList();
             applyMode();
           });
-          row.append(thumb, label, editFrame, duplicate, up, down, del);
+          row.append(thumb, label, durationLabel, editFrame, duplicate, up, down, del);
           list.append(row);
         });
       }
