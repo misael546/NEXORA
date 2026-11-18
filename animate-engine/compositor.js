@@ -186,7 +186,8 @@
       });
       recorder.start(200);
       const start = performance.now(),
-        duration = Math.max(0.1, this.duration);
+        audioEnd = media.reduce((end, item) => Math.max(end, item.start + (Number.isFinite(item.el.duration) ? item.el.duration : 0)), 0),
+        duration = Math.max(0.1, this.duration, audioEnd);
       // Si la pestaña pasa a segundo plano, la grabación se pausa y el
       // reloj de la escena se congela: al volver, la grabación continúa
       // donde se quedó en vez de saltarse el tiempo que estuvo oculta.
