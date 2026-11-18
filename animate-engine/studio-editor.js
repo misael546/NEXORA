@@ -138,11 +138,21 @@
     _renderAudio() {
       const list=this.ui.querySelector("#audioTrackList");list.innerHTML="";
       if(!this.audio.tracks.length){list.textContent="Todavía no hay pistas de audio.";return;}
-      this.audio.tracks.forEach(t=>{const row=document.createElement("div");row.style.cssText="display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid rgba(160,180,220,.12)";
-        const label=document.createElement("span");label.style.flex="1";label.textContent=t.kind+" · "+t.name+" · inicio "+t.start.toFixed(1)+" s";
+      this.audio.tracks.forEach(t=>{
+        const row=document.createElement("div");
+        row.style.cssText="display:grid;grid-template-columns:minmax(120px,1fr) 90px minmax(90px,120px) auto auto;align-items:center;gap:8px;padding:9px 0;border-top:1px solid rgba(160,180,220,.12)";
+        const label=document.createElement("span");label.textContent=t.kind+" · "+t.name;label.style.cssText="overflow:hidden;text-overflow:ellipsis";
+        const startWrap=document.createElement("label");startWrap.textContent="Inicio s";
+        const start=document.createElement("input");start.type="number";start.min="0";start.step=".1";start.value=String(t.start);start.style.width="76px";
+        start.addEventListener("change",()=>{this.audio.update(t.id,{start:Math.max(0,Number(start.value)||0)});});
+        startWrap.append(start);
+        const volumeWrap=document.createElement("label");volumeWrap.textContent="Volumen";
+        const volume=document.createElement("input");volume.type="range";volume.min="0";volume.max="200";volume.value=String(Math.round(t.volume*100));
+        volume.addEventListener("input",()=>this.audio.update(t.id,{volume:Number(volume.value)/100}));
+        volumeWrap.append(volume);
         const mute=document.createElement("button");mute.className="button button-outline";mute.textContent=t.mute?"Activar":"Silenciar";mute.addEventListener("click",()=>{this.audio.update(t.id,{mute:!t.mute});this._renderAudio();});
         const del=document.createElement("button");del.className="button button-outline";del.textContent="Quitar";del.addEventListener("click",()=>{this.audio.remove(t.id);this._renderAudio();});
-        row.append(label,mute,del);list.append(row);
+        row.append(label,startWrap,volumeWrap,mute,del);list.append(row);
       });
     }
     async playAudio(){if(this.audio.tracks.length)await this.audio.play();}
