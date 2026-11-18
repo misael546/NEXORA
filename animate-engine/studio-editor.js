@@ -178,11 +178,9 @@
       const ctx=frameCanvas.getContext("2d");
       ctx.fillStyle="#080c14";ctx.fillRect(0,0,frameCanvas.width,frameCanvas.height);
       this._drawBackground(ctx);
-      for(const item of this.items){
-        const w=item.image.width*item.scale,h=item.image.height*item.scale;
-        ctx.save();ctx.globalAlpha=item.opacity ?? 1;ctx.translate(item.x,item.y);ctx.rotate(item.rotation);ctx.scale(item.flipX?-1:1,1);
-        ctx.drawImage(item.image,-w/2,-h/2,w,h);ctx.restore();
-      }
+      const previousSelection=this.selected;this.selected=null;
+      this.draw(ctx,window.nexoraVisualEditorTime||0);
+      this.selected=previousSelection;
       let frame;
       if(this.editingFrame){
         frame=this.editingFrame;frame.image=frameCanvas;frame.width=frameCanvas.width;frame.height=frameCanvas.height;
