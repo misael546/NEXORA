@@ -1,7 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const textInput = $("nvText");
 const voiceInput = $("nvVoice");
-const speedInput = $("nvSpeed");
 const generateButton = $("nvGenerate");
 const progressBox = $("nvProgress");
 const worker = new Worker("./nexora-voice.worker.js", { type: "module" });
@@ -37,9 +36,6 @@ $("nvClearText").addEventListener("click", () => {
   textInput.value = "";
   textInput.dispatchEvent(new Event("input"));
   textInput.focus();
-});
-speedInput.addEventListener("input", () => {
-  $("nvSpeedValue").textContent = Number(speedInput.value).toFixed(2).replace(/0$/, "") + "×";
 });
 
 function loadMp3Encoder() {
@@ -100,7 +96,7 @@ generateButton.addEventListener("click", () => {
   const id = ++currentJob;
   setBusy(true);
   setProgress("Preparando el motor neuronal…", 0, "La primera vez se descargará el modelo de voz. El texto no se envía a ningún servidor.");
-  worker.postMessage({ id, text, voiceId: voiceInput.value, speed: Number(speedInput.value) });
+  worker.postMessage({ id, text, voiceId: voiceInput.value });
 });
 $("nvDiscard").addEventListener("click", () => {
   clearAudio();
