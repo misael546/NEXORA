@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#090d18">
+  <meta name="description" content="Convierte texto en voz y descarga MP3 con las voces de NEXORA.">
+  <link rel="canonical" href="https://nexora-ey8.pages.dev/texto-a-mp3.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="texto-a-mp3.css">
+  <title>NEXORA VOICE — Texto a MP3</title>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="NEXORA inicio"><span class="brand-mark">N</span><span>NEXORA<span class="brand-dot">.</span></span></a>
+  <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+  <nav class="nav" id="mainNav" aria-label="Navegación principal">
+    <a href="index.html">Inicio</a><a href="wallpaper.html">Fondos</a><a href="remove-bg.html">Quitar fondo</a><a href="animar.html">Animar</a><a href="acerca.html">Sobre NEXORA</a>
+  </nav>
+</header>
+<main class="tts-app">
+  <section class="tts-hero">
+    <div class="tts-eyebrow"><span></span> HERRAMIENTA DE NEXORA</div>
+    <h1>TEXTO <span>A MP3</span></h1>
+    <p>Escribe lo que quieras escuchar, elige una voz y crea tu audio. Reproduce el resultado aquí mismo o descarga el MP3.</p>
+    <div class="tts-pills"><span>10 voces en español</span><span>MP3 descargable</span><span>Sin registro</span></div>
+  </section>
+
+  <section class="tts-workspace">
+    <div class="tts-panel-head"><div><strong>01 / Tu texto</strong><small>Escribe o pega el contenido que quieres convertir en voz.</small></div><button id="tts-clear" class="tts-quiet" type="button">Limpiar</button></div>
+    <label class="sr-only" for="tts-text">Texto para convertir en voz</label>
+    <textarea id="tts-text" maxlength="2500" placeholder="Escribe aquí tu texto…&#10;&#10;Puedes crear narraciones, diálogos, avisos, historias o voces para tus proyectos."></textarea>
+    <div class="tts-text-meta"><span id="tts-count">0 / 2,500 caracteres</span><span>El texto se envía al motor de voz para generar el audio.</span></div>
+
+    <div class="tts-panel-head tts-voice-head"><div><strong>02 / Elige tu voz</strong><small>Incluimos cinco voces nuevas y cinco voces adicionales.</small></div></div>
+    <div class="tts-voice-grid" id="tts-voices">
+      <label class="tts-voice selected"><input type="radio" name="tts-voice" value="carina" checked><span class="tts-voice-icon">C</span><span class="tts-voice-info"><b>Carina</b><small>Nueva · Aura 2</small></span><span class="tts-check">✓</span></label>
+      <label class="tts-voice"><input type="radio" name="tts-voice" value="celeste"><span class="tts-voice-icon">C</span><span class="tts-voice-info"><b>Celeste</b><small>Nueva · Aura 2</small></span><span class="tts-check">✓</span></label>
+      <label class="tts-voice"><input type="radio" name="tts-voice" value="diana"><span class="tts-voice-icon">D</span><span class="tts-voice-info"><b>Diana</b><small>Nueva · Aura 2</small></span><span class="tts-check">✓</span></label>
+      <label class="tts-voice"><input type="radio" name="tts-voice" value="selena"><span class="tts-voice-icon">S</span><span class="tts-voice-info"><b>Selena</b><small>Nueva · Aura 2</small></span><span class="tts-check">✓</span></label>
+      <label class="tts-voice"><input type="radio" name="tts-voice" value="estrella"><span class="tts-voice-icon">E</span><span class="tts-voice-info"><b>Estrella</b><small>Nueva · Aura 2</small></span><span class="tts-check">✓</span></label>
+      <label class="tts-voice"><input type="radio" name="tts-voice" value="sirio"><span class="tts-voice-icon">S</span><span class="tts-voice-info"><b>Sirio</b><small>Aura 2</small></span><span class="tts-check">✓</span></label>
+      <label class="tts-voice"><input type="radio" name="tts-voice" value="nestor"><span class="tts-voice-icon">N</span><span class="tts-voice-info"><b>Néstor</b><small>Aura 2</small></span><span class="tts-check">✓</span></label>
+      <label class="tts-voice"><input type="radio" name="tts-voice" value="alvaro"><span class="tts-voice-icon">A</span><span class="tts-voice-info"><b>Álvaro</b><small>Aura 2</small></span><span class="tts-check">✓</span></label>
+      <label class="tts-voice"><input type="radio" name="tts-voice" value="javier"><span class="tts-voice-icon">J</span><span class="tts-voice-info"><b>Javier</b><small>Aura 2</small></span><span class="tts-check">✓</span></label>
+      <label class="tts-voice"><input type="radio" name="tts-voice" value="aquila"><span class="tts-voice-icon">A</span><span class="tts-voice-info"><b>Aquila</b><small>Aura 2</small></span><span class="tts-check">✓</span></label>
+    </div>
+
+    <div class="tts-actions"><button id="tts-generate" class="tts-generate" type="button">✦ Generar MP3</button><span>Hasta 5 generaciones por hora por conexión.</span></div>
+    <div id="tts-progress" class="tts-progress" hidden><span></span><b>Generando tu voz…</b><small>Esto puede tardar unos segundos. Mantén esta página abierta.</small></div>
+    <p id="tts-status" class="tts-status" role="status" aria-live="polite">Tu audio aparecerá aquí cuando termine la generación.</p>
+
+    <section id="tts-result" class="tts-result" hidden>
+      <div class="tts-result-head"><div><strong>03 / Tu audio está listo</strong><small id="tts-result-meta">MP3 · NEXORA VOICE</small></div><span class="tts-ready">LISTO</span></div>
+      <audio id="tts-player" controls preload="metadata"></audio>
+      <a id="tts-download" class="tts-download" download="nexora-voz.mp3">↓ Descargar MP3</a>
+    </section>
+  </section>
+
+  <section class="tts-info"><article><span>01</span><h2>Escribe</h2><p>Prepara una narración, diálogo, mensaje o texto para tus proyectos.</p></article><article><span>02</span><h2>Selecciona</h2><p>Prueba las voces disponibles y elige la que mejor encaje con tu contenido.</p></article><article><span>03</span><h2>Descarga</h2><p>Escucha el resultado y guarda el archivo MP3 en tu dispositivo.</p></article></section>
+  <aside class="tts-notice"><strong>Uso responsable:</strong> esta herramienta utiliza Workers AI de Cloudflare. El servicio tiene cuotas y precios por caracteres procesados; por eso aplicamos límites de uso. No subas información privada o sensible.</aside>
+</main>
+<footer class="site-footer"><div class="wrap footer-inner"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXORA<span class="brand-dot">.</span></span></a><span>Herramientas para crear.</span><div class="footer-links"><a href="index.html">Inicio</a><a href="privacidad.html">Privacidad</a><a href="contacto.html">Contacto</a></div><span>© <span id="year"></span> NEXORA.</span></div></footer>
+<script src="script.js"></script>
+<script src="texto-a-mp3.js"></script>
+</body></html>
