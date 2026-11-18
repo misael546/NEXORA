@@ -253,7 +253,8 @@
             backgroundTransform:{...frame.composition.backgroundTransform},
             items:frame.composition.items.map(item=>({
               name:item.name,image:this._imageData(item.image),x:item.x,y:item.y,
-              scale:item.scale,rotation:item.rotation,opacity:item.opacity,flipX:!!item.flipX
+              scale:item.scale,rotation:item.rotation,opacity:item.opacity,flipX:!!item.flipX,
+              startTime:item.startTime,endTime:item.endTime,keyframes:(item.keyframes||[]).map(k=>({...k}))
             }))
           }:null
         }));
