@@ -212,6 +212,7 @@
       function syncCompositor() {
         if (trackId) compositor.removeTrack(trackId);
         trackId = compositor.addTrack({ name: "Plano", duration: currentDuration(), render: function () {} });
+        compositor.audio = studioEditor.getAudioTracks();
       }
       function buildActor() {
         var rig = new window.NexoraAnimationTools.CharacterRig()[
