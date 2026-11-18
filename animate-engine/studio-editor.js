@@ -15,6 +15,7 @@
       this.background = null;
       this.items = [];
       this.selected = null;
+      this.editingFrame = null;
       this.audio = new window.NexoraAudio.AudioTimeline();
       this.audioDuration = 0;
       this.playing = false;
@@ -167,10 +168,29 @@
         ctx.save();ctx.globalAlpha=item.opacity ?? 1;ctx.translate(item.x,item.y);ctx.rotate(item.rotation);ctx.scale(item.flipX?-1:1,1);
         ctx.drawImage(item.image,-w/2,-h/2,w,h);ctx.restore();
       }
-      const frame=this.sequence.addImage(frameCanvas,"Composición "+(this.sequence.count+1));
+      let frame;
+      if(this.editingFrame){
+        frame=this.editingFrame;frame.image=frameCanvas;frame.width=frameCanvas.width;frame.height=frameCanvas.height;
+      }else{
+        frame=this.sequence.addImage(frameCanvas,"Composición "+(this.sequence.count+1));
+      }
+      frame.composition={background:this.background,backgroundTransform:{...this.backgroundTransform},items:this.items.map(item=>({...item}))};
       frame.thumb=frameCanvas.toDataURL("image/jpeg",0.78);
+      this.editingFrame=null;
       this.onFrameCaptured();
-      this.status("Fotograma "+this.sequence.count+" guardado. Modifica las capas y guarda la siguiente pose.");
+      this.status("Fotograma actualizado y guardado. Puedes editar otro o continuar con el siguiente.");
+    }
+    loadComposition(frame) {
+      if(!frame)return;
+      const composition=frame.composition || {background:frame.image,backgroundTransform:{x:0,y:0,scale:1},items:[]};
+      this.background=composition.background || null;
+      this.backgroundTransform={x:0,y:0,scale:1,...(composition.backgroundTransform||{})};
+      this.items=(composition.items||[]).map(item=>({...item}));
+      this.selected=this.items[0]||null;
+      this.editingFrame=frame;
+      this._refreshLayers();
+      this.engine.draw(0);
+      this.status("Editando "+frame.name+". Pulsa Guardar composición para actualizar este fotograma.");
     }
     setEditingVisible(visible) {
       this.engine.updateLayer(this.backgroundLayer,{visible});
