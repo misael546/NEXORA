@@ -1,5 +1,11 @@
 import * as tts from "https://esm.sh/@mintplex-labs/piper-tts-web@1.0.3?bundle";
 let activeId = 0;
+const originalFetch = self.fetch.bind(self);
+self.fetch = (input, init) => {
+  const raw = typeof input === 'string' ? input : input?.url || '';
+  const fixed = raw.replace('https://huggingface.co/diffusionstudio/piper-voices/resolve/main/', 'https://huggingface.co/rhasspy/piper-voices/resolve/main/');
+  return originalFetch(fixed || input, init);
+};
 
 self.addEventListener("message", async (event) => {
   const { id, text, voiceId } = event.data || {};
