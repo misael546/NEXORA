@@ -104,5 +104,17 @@
   $("rb-reset").addEventListener("click",()=>{
     if(sourceURL)URL.revokeObjectURL(sourceURL);sourceURL=null;sourceImage=null;activeFile=null;resultBlob=null;fileInput.value="";editor.hidden=true;upload.hidden=false;refine.hidden=true;progress.hidden=true;downloadBtn.disabled=true;removeBtn.disabled=false;$("rb-reset").disabled=true;$("rb-fileinfo").textContent="Aún no has cargado ningún archivo";say("Carga una imagen para comenzar.");resetHistory();
   });
+
+  window.addEventListener("paste",event=>{
+    const item=[...(event.clipboardData?.items||[])].find(entry=>entry.type.startsWith("image/"));
+    if(item){const file=item.getAsFile();if(file){event.preventDefault();loadFile(new File([file],"imagen-del-portapapeles.png",{type:file.type||"image/png"}));}}
+  });
+  window.addEventListener("keydown",event=>{
+    if(!(event.ctrlKey||event.metaKey)||event.altKey)return;
+    const tag=event.target?.tagName?.toLowerCase();
+    if(tag==="input"||tag==="textarea"||event.target?.isContentEditable)return;
+    if(event.key.toLowerCase()==="z"){event.preventDefault();(event.shiftKey?$("rb-redo"):$("rb-undo")).click();}
+    else if(event.key.toLowerCase()==="y"){event.preventDefault();$("rb-redo").click();}
+  });
   setBackground("transparent");
 })();
