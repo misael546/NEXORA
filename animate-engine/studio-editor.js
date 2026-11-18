@@ -12,6 +12,8 @@
       this.sequence = sequence || null;
       this.onFrameCaptured = onFrameCaptured || (() => {});
       this.backgroundTransform = { x: 0, y: 0, scale: 1 };
+      this.backgroundStartTime = 0;
+      this.backgroundEndTime = null;
       this.background = null;
       this.items = [];
       this.selected = null;
@@ -22,7 +24,7 @@
       this._buildUI();
       this.backgroundLayer = engine.addLayer({
         name: "Fondo importado", type: "custom", z: 5,
-        visible: true, draw: (ctx) => this._drawBackground(ctx)
+        visible: true, draw: (ctx, t) => this._drawBackground(ctx, t)
       });
       this.objectLayer = engine.addLayer({
         name: "Capas PNG", type: "custom", z: 40,
@@ -149,8 +151,9 @@
       $("layerOpacity").value=Math.round((x.opacity ?? 1)*100);
       $("layerFlip").value=x.flipX?"yes":"no";
     }
-    _drawBackground(ctx) {
-      if(!this.background)return;
+    _drawBackground(ctx,time) {
+      const t=Number.isFinite(time)?time:(window.nexoraVisualEditorTime||0);
+      if(!this.background || t<this.backgroundStartTime || (this.backgroundEndTime!=null && t>this.backgroundEndTime))return;
       const w=this.engine.width,h=this.engine.height,scale=Math.max(w/this.background.width,h/this.background.height);
       const transform=this.backgroundTransform || {x:0,y:0,scale:1};
       scale *= transform.scale || 1;
@@ -186,7 +189,7 @@
       }else{
         frame=this.sequence.addImage(frameCanvas,"Composición "+(this.sequence.count+1));
       }
-      frame.composition={background:this.background,backgroundTransform:{...this.backgroundTransform},items:this.items.map(item=>({...item}))};
+      frame.composition={background:this.background,backgroundTransform:{...this.backgroundTransform},backgroundTiming:{startTime:this.backgroundStartTime,endTime:this.backgroundEndTime},items:this.items.map(item=>({...item}))};
       frame.thumb=frameCanvas.toDataURL("image/jpeg",0.78);
       this.editingFrame=null;
       this.onFrameCaptured();
@@ -197,6 +200,8 @@
       const composition=frame.composition || {background:frame.image,backgroundTransform:{x:0,y:0,scale:1},items:[]};
       this.background=composition.background || null;
       this.backgroundTransform={x:0,y:0,scale:1,...(composition.backgroundTransform||{})};
+      this.backgroundStartTime=composition.backgroundTiming?.startTime??0;
+      this.backgroundEndTime=composition.backgroundTiming?.endTime??null;
       this.items=(composition.items||[]).map(item=>({...item}));
       this.selected=this.items[0]||null;
       this.editingFrame=frame;
@@ -251,6 +256,7 @@
           composition:frame.composition?{
             background:this._imageData(frame.composition.background),
             backgroundTransform:{...frame.composition.backgroundTransform},
+            backgroundTiming:{...(frame.composition.backgroundTiming||{startTime:0,endTime:null})},
             items:frame.composition.items.map(item=>({
               name:item.name,image:this._imageData(item.image),x:item.x,y:item.y,
               scale:item.scale,rotation:item.rotation,opacity:item.opacity,flipX:!!item.flipX,
@@ -318,7 +324,7 @@
       if(fpsValue)fpsValue.textContent=this.sequence.fps;
       if(loop)loop.value=this.sequence.loop;
       if(onion)onion.value=this.sequence.onionSkin?"on":"off";
-      this.background=null;this.items=[];this.selected=null;this.editingFrame=null;
+      this.background=null;this.backgroundStartTime=0;this.backgroundEndTime=null;this.items=[];this.selected=null;this.editingFrame=null;
       this._refreshLayers();this._renderAudio();this.setEditingVisible(false);
       this.onFrameCaptured();this.engine.draw(0);
       this.status("Proyecto abierto: "+this.sequence.count+" fotogramas y "+this.audio.tracks.length+" pistas de audio.");
