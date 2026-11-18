@@ -36,6 +36,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
   try {
     await env.DB.prepare("CREATE TABLE IF NOT EXISTS animate_voice_limits (ip_hash TEXT PRIMARY KEY, window_start INTEGER NOT NULL, request_count INTEGER NOT NULL)").run();
     const now = Math.floor(Date.now() / 1000);
+    await env.DB.prepare("DELETE FROM animate_voice_limits WHERE window_start < ?").bind(now - 86400).run();
     const key = await hashIp(ip);
     await env.DB.prepare(
       "INSERT INTO animate_voice_limits (ip_hash, window_start, request_count) VALUES (?, ?, 1) ON CONFLICT(ip_hash) DO UPDATE SET window_start = CASE WHEN ? - window_start >= 3600 THEN ? ELSE window_start END, request_count = CASE WHEN ? - window_start >= 3600 THEN 1 ELSE request_count + 1 END"
