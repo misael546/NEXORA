@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="animate-engine/studio-v2.css">
   <style>
     .studio-wrap{max-width:860px;margin:0 auto;padding:24px 18px 60px}
     .studio-panel{background:#101827;border:1px solid rgba(160,180,220,.15);border-radius:12px;padding:18px}
@@ -189,6 +190,9 @@
       });
       var compositor = new window.NexoraCompositor.SceneCompositor(engine);
       var studioEditor = new window.NexoraStudioEditor.StudioEditor(engine, $("studioCanvas"), document.querySelector(".studio-panel"), status, sequence, function () { renderFrameList(); syncCompositor(); applyMode(); });
+      window.nexoraStudioEditor = studioEditor;
+      window.nexoraSequence = sequence;
+      window.nexoraEngine = engine;
       var cameraLayer = engine.addLayer({
         name: "Foto con cámara",
         type: "custom",
@@ -599,5 +603,6 @@
       });
     })();
   </script>
+  <script src="animate-engine/studio-v2.js"></script>
 </body>
 </html>
