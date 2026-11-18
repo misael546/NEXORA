@@ -356,7 +356,7 @@
           row.setAttribute("tabindex", "0");
           row.setAttribute("aria-label", "Seleccionar fotograma " + (i + 1));
           row.style.cssText = "display:flex;align-items:center;gap:8px;padding:9px 8px;border:1px solid " + (i === selectedFrameIndex ? "#6da8ff" : "rgba(160,180,220,.12)") + ";border-radius:8px;margin:6px 0;background:" + (i === selectedFrameIndex ? "rgba(109,168,255,.10)" : "transparent") + ";cursor:pointer";
-          function selectThis() { selectedFrameIndex = i; renderFrameList(); }
+          function selectThis() { window.nexoraSelectFrame(i); }
           row.addEventListener("click", function (event) {
             if (event.target === row || event.target === thumb || event.target === label) selectThis();
           });
@@ -420,7 +420,7 @@
           list.append(row);
         });
       }
-      window.nexoraSelectFrame = function (index) { selectedFrameIndex = Math.max(0, Math.min(sequence.count - 1, Number(index) || 0)); renderFrameList(); };
+      window.nexoraSelectFrame = function (index) { selectedFrameIndex = Math.max(0, Math.min(sequence.count - 1, Number(index) || 0)); var frame = sequence.frames[selectedFrameIndex]; if (frame && frame.composition) { studioEditor.loadComposition(frame); studioEditor.setEditingVisible(true); engine.updateLayer(sequenceLayer, { visible: false }); } else { studioEditor.setEditingVisible(false); engine.updateLayer(sequenceLayer, { visible: true }); } engine.draw(0); renderFrameList(); };
       $("frameFiles").addEventListener("change", async function (e) {
         var files = Array.from(e.target.files || []);
         for (var k = 0; k < files.length; k++) {
