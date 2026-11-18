@@ -55,3 +55,35 @@
 .na-app .na-timeline .na-collapse{background:none;border:0;color:#9fb7df;cursor:pointer;font:inherit}
 @media(max-width:1000px){.na-app .na-shell{grid-template-columns:180px minmax(0,1fr);grid-template-rows:minmax(340px,auto) auto auto}.na-app .na-assets{grid-column:1;grid-row:1}.na-app .na-preview{grid-column:2;grid-row:1}.na-app .na-inspector{grid-column:1/-1;grid-row:2;max-height:none}.na-app .na-inspector .studio-controls{grid-template-columns:repeat(3,minmax(0,1fr))}.na-app .na-timeline{grid-row:3}}
 @media(max-width:640px){.na-app{padding:12px 10px 32px!important}.na-app .na-shell{display:flex;flex-direction:column}.na-app .na-assets{order:1}.na-app .na-preview{order:2;min-height:300px}.na-app .na-inspector{order:3}.na-app .na-inspector .studio-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.na-app .na-timeline{order:4}.na-app .na-stage{min-height:220px}.na-app .na-audio .studio-controls{grid-template-columns:1fr}}
+
+/* Correcciones de estructura: controles independientes y escenario prioritario */
+.na-app > .na-legacy-intro{display:none!important}
+.na-app .na-assets > .na-import > .na-field,
+.na-app .na-inspector > #na-layer-slot > div,
+.na-app .na-inspector > #na-transform-slot > div,
+.na-app .na-inspector > #na-audio-slot > div{
+  min-width:0;padding:8px;background:#0c1422;border:1px solid rgba(160,180,220,.10);border-radius:9px;margin:6px 0
+}
+.na-app .na-inspector > #na-transform-slot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.na-app .na-inspector > #na-transform-slot > div{margin:0}
+.na-app .na-inspector input,.na-app .na-inspector select,.na-app .na-assets input{max-width:100%;min-width:0}
+.na-app .na-preview-tools button{min-height:38px}
+.na-app .na-frame-strip #sequencePanel{display:block!important}
+.na-app .na-frame-strip #seqInfo{margin:6px 0}
+.na-app .na-frame-strip .studio-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.na-app .na-frame-strip .studio-controls>div{min-width:120px;flex:1}
+.na-app .na-audio #audioTrackList{overflow-wrap:anywhere}
+.na-app .na-timeline .na-track-name{display:flex;align-items:center;gap:5px}
+.na-app .na-timeline .na-subtracks .na-field{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:460px}
+.na-app .na-timeline .na-subtracks input{width:100%;box-sizing:border-box}
+@media(max-width:640px){
+  .na-app .na-heading{margin:2px 0 12px}
+  .na-app .na-shell{gap:9px}
+  .na-app .na-panel{padding:10px}
+  .na-app .na-preview{min-height:0}
+  .na-app .na-stage{min-height:0;padding:5px}
+  .na-app #studioCanvas{width:100%;height:auto;max-height:none}
+  .na-app .na-inspector > #na-transform-slot{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .na-app .na-timeline-scroll{margin-right:-4px}
+  .na-app .na-ruler,.na-app .na-track-row{grid-template-columns:112px minmax(420px,1fr);min-width:540px}
+}
