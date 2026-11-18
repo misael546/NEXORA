@@ -36,12 +36,12 @@
   </header>
   <main class="studio-wrap">
     <div class="eyebrow"><span class="pulse"></span> NEXORA ANIMATE · ESTUDIO PÚBLICO</div>
-    <h1>Crea tu propia <span>animación.</span></h1>
-    <p class="hero-lead">Sube tus dibujos como fotogramas en orden y el motor los anima. O sube una foto y muévele la cámara para hacer un vídeo. O prueba con un personaje 2D. Todo se hace en tu navegador: nada se sube a ningún servidor.</p>
+    <h1>Crea tu animación <span>fotograma a fotograma.</span></h1>
+    <p class="hero-lead">Compón cada imagen manualmente con fondos, personajes PNG transparentes, objetos y audio. Guarda cada composición como un fotograma, revisa la secuencia completa con sonido y exporta el resultado.</p>
     <section class="studio-panel" aria-label="Estudio de animación">
       <canvas id="studioCanvas" width="640" height="360"></canvas>
       <div class="studio-controls">
-        <div><label for="mode">Animar con</label><select id="mode"><option value="sequence">Mis fotogramas</option><option value="camera">Foto con cámara</option><option value="character">Personaje 2D</option></select></div>
+        <div><label for="mode">Modo de trabajo</label><select id="mode"><option value="sequence">Composición manual por fotogramas</option></select></div>
         <div id="characterControls"><label for="characterType">Personaje</label><select id="characterType"><option value="worker">Trabajador 2D</option><option value="dinosaur">Dinosaurio 2D</option></select></div>
         <div id="actionControls"><label for="action">Acción</label><select id="action"></select></div>
         <div id="durationControls"><label for="duration">Duración (segundos)</label><input id="duration" type="number" min="1" max="10" step="1" value="3"></div>
@@ -76,7 +76,7 @@
         <button class="button button-outline" id="exportFrames" type="button">Exportar fotogramas PNG</button>
       </div>
       <p class="studio-status" id="status" role="status">Motor listo. Elige un personaje y una acción.</p>
-      <p class="studio-note">En modo foto con cámara, sube una sola foto y elige el movimiento: acercar, alejar, desplazar o deriva lenta. La cámara se mueve sobre tu foto y puedes exportar ese movimiento como vídeo WebM. En modo secuencia, cada imagen que subes es un fotograma: a 12 fps, 12 dibujos duran 1 segundo. Puedes reordenarlos con las flechas y quitarlos con la ✕. También puedes subir una sola imagen con todos los fotogramas en rejilla (una hoja de sprites): indica cuántas columnas y filas tiene y pulsa “Cortar en fotogramas”; el motor corta cada celda sin perder resolución. La exportación de vídeo graba en tiempo real; si cambias de pestaña, la grabación se pausa sola y continúa al volver. La exportación de fotogramas no depende del tiempo real: renderiza cada fotograma en su tiempo exacto y descarga una imagen PNG por fotograma, lista para montar en un editor de vídeo.</p>
+      <p class="studio-note">Flujo manual: carga un fondo, añade personajes PNG transparentes, ajusta sus capas y pulsa “Guardar composición como fotograma”. Cambia la posición o los elementos y guarda cada pose siguiente. Ordena o elimina fotogramas, agrega pistas MP3 y reproduce toda la escena antes de exportar.</p>
     </section>
   </main>
   <footer class="site-footer"><div class="wrap footer-inner"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>NEXORA<span class="brand-dot">.</span></span></a><span>Explora lo que viene.</span><div class="footer-links"><a href="acerca.html">Sobre NEXORA</a><a href="privacidad.html">Privacidad</a><a href="cookies.html">Cookies</a><a href="contacto.html">Contacto</a><a href="animar.html">Crear animación</a></div><span>© <span id="year"></span> NEXORA.</span></div></footer>
@@ -186,7 +186,7 @@
         },
       });
       var compositor = new window.NexoraCompositor.SceneCompositor(engine);
-      var studioEditor = new window.NexoraStudioEditor.StudioEditor(engine, $("studioCanvas"), document.querySelector(".studio-panel"), status);
+      var studioEditor = new window.NexoraStudioEditor.StudioEditor(engine, $("studioCanvas"), document.querySelector(".studio-panel"), status, sequence, function () { renderFrameList(); syncCompositor(); applyMode(); });
       var cameraLayer = engine.addLayer({
         name: "Foto con cámara",
         type: "custom",
@@ -427,9 +427,12 @@
           raf = 0;
           $("play").textContent = "▶ Previsualizar";
           studioEditor.stopAudio();
+          studioEditor.setEditingVisible(true);
+          engine.draw(0);
           return;
         }
         $("play").textContent = "⏸ Detener";
+        studioEditor.setEditingVisible(false);
         startAt = performance.now();
         try { await studioEditor.playAudio(); } catch (audioError) { status("La animación se reproducirá, pero no se pudo iniciar el audio: " + audioError.message); }
         var tick = function (now) {
@@ -453,6 +456,7 @@
           return;
         }
         syncCompositor();
+        studioEditor.setEditingVisible(false);
         $("exportVideo").disabled = true;
         status("Renderizando vídeo… si cambias de pestaña, la grabación se pausa sola y continúa al volver.");
         try {
@@ -467,6 +471,8 @@
         } catch (err) {
           status("No se pudo exportar: " + err.message);
         } finally {
+          studioEditor.setEditingVisible(true);
+          engine.draw(0);
           $("exportVideo").disabled = false;
         }
       });
@@ -480,6 +486,7 @@
           return;
         }
         syncCompositor();
+        studioEditor.setEditingVisible(false);
         $("exportFrames").disabled = true;
         status("Renderizando fotogramas… no depende del tiempo real.");
         try {
@@ -503,6 +510,8 @@
         } catch (err) {
           status("No se pudo exportar: " + err.message);
         } finally {
+          studioEditor.setEditingVisible(true);
+          engine.draw(0);
           $("exportFrames").disabled = false;
         }
       });
