@@ -313,6 +313,15 @@
           var label = document.createElement("span");
           label.textContent = (i + 1) + ". " + frame.name;
           label.style.cssText = "flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+          var editFrame = document.createElement("button");
+          editFrame.className = "button button-outline";
+          editFrame.textContent = "Editar";
+          editFrame.addEventListener("click", function () {
+            studioEditor.loadComposition(frame);
+            engine.updateLayer(sequenceLayer, { visible: false });
+            studioEditor.setEditingVisible(true);
+            engine.draw(0);
+          });
           var duplicate = document.createElement("button");
           duplicate.className = "button button-outline";
           duplicate.textContent = "Duplicar";
@@ -341,7 +350,7 @@
             renderFrameList();
             applyMode();
           });
-          row.append(thumb, label, duplicate, up, down, del);
+          row.append(thumb, label, editFrame, duplicate, up, down, del);
           list.append(row);
         });
       }
@@ -441,6 +450,7 @@
           return;
         }
         $("play").textContent = "⏸ Detener";
+        engine.updateLayer(sequenceLayer, { visible: true });
         studioEditor.setEditingVisible(false);
         startAt = performance.now();
         try { await studioEditor.playAudio(); } catch (audioError) { status("La animación se reproducirá, pero no se pudo iniciar el audio: " + audioError.message); }
@@ -465,6 +475,7 @@
           return;
         }
         syncCompositor();
+        engine.updateLayer(sequenceLayer, { visible: true });
         studioEditor.setEditingVisible(false);
         $("exportVideo").disabled = true;
         status("Renderizando vídeo… si cambias de pestaña, la grabación se pausa sola y continúa al volver.");
@@ -495,6 +506,7 @@
           return;
         }
         syncCompositor();
+        engine.updateLayer(sequenceLayer, { visible: true });
         studioEditor.setEditingVisible(false);
         $("exportFrames").disabled = true;
         status("Renderizando fotogramas… no depende del tiempo real.");
