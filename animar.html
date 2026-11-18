@@ -300,6 +300,7 @@
         applyMode();
       });
       function renderFrameList() {
+        if (selectedFrameIndex >= sequence.count) selectedFrameIndex = sequence.count ? sequence.count - 1 : -1;
         var list = $("frameList");
         list.innerHTML = "";
         var toolbar = document.createElement("div");
