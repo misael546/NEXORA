@@ -5,13 +5,13 @@
   const removeBtn=$("rb-remove"), downloadBtn=$("rb-download"), status=$("rb-status");
   const progress=$("rb-progress"), progressText=$("rb-progress-text"), progressPercent=$("rb-progress-percent"), progressBar=$("rb-progress-bar");
   const refine=$("rb-refine"), brushInput=$("rb-brush"), brushValue=$("rb-brush-value");
-  let sourceImage=null, sourceURL=null, resultBlob=null, maskCanvas=null, maskCtx=null, brushMode="erase", brushSize=34, isDrawing=false, undoStack=[], redoStack=[], background="transparent", aiFunction=null, busy=false;
+  let sourceImage=null, sourceURL=null, activeFile=null, resultBlob=null, maskCanvas=null, maskCtx=null, brushMode="erase", brushSize=34, isDrawing=false, lastPoint=null, undoStack=[], redoStack=[], background="transparent", aiFunction=null, busy=false;
 
   function say(message,type=""){status.textContent=message;status.className="rb-status "+type}
   function formatSize(bytes){return bytes<1048576?(bytes/1024).toFixed(0)+" KB":(bytes/1048576).toFixed(1)+" MB"}
   function resetHistory(){undoStack=[];redoStack=[];updateHistory()}
   function updateHistory(){$("rb-undo").disabled=!undoStack.length;$("rb-redo").disabled=!redoStack.length}
-  function saveHistory(){if(!maskCtx)return;undoStack.push(maskCtx.getImageData(0,0,maskCanvas.width,maskCanvas.height));if(undoStack.length>12)undoStack.shift();redoStack=[];updateHistory()}
+  async function saveHistory(){if(!maskCanvas)return;const snapshot=await new Promise(resolve=>maskCanvas.toBlob(resolve,"image/png"));if(!snapshot)return;undoStack.push(snapshot);if(undoStack.length>6)undoStack.shift();redoStack=[];updateHistory()}\n  async function restoreSnapshot(blob){const bitmap=await createImageBitmap(blob);maskCtx.clearRect(0,0,maskCanvas.width,maskCanvas.height);maskCtx.drawImage(bitmap,0,0);bitmap.close?.();drawResult()}
   function setCanvasSize(w,h){canvas.width=w;canvas.height=h;maskCanvas=document.createElement("canvas");maskCanvas.width=w;maskCanvas.height=h;maskCtx=maskCanvas.getContext("2d",{willReadFrequently:true})}
   function drawResult(){
     if(!sourceImage||!maskCanvas)return;
@@ -21,9 +21,9 @@
   }
   function loadFile(file){
     if(!file||!file.type.startsWith("image/")){say("Selecciona un archivo de imagen válido.","error");return}
-    if(file.size>25*1024*1024){say("La imagen supera 25 MB. Reduce su tamaño e inténtalo de nuevo.","error");return}
+    if(file.size>30*1024*1024){say("La imagen supera 30 MB. Reduce su tamaño e inténtalo de nuevo.","error");return}
     if(sourceURL)URL.revokeObjectURL(sourceURL);
-    sourceURL=URL.createObjectURL(file);sourceImage=new Image();
+    activeFile=file;sourceURL=URL.createObjectURL(file);sourceImage=new Image();
     sourceImage.onload=()=>{
       const scale=Math.min(1,4096/Math.max(sourceImage.naturalWidth,sourceImage.naturalHeight));
       const w=Math.max(1,Math.round(sourceImage.naturalWidth*scale)),h=Math.max(1,Math.round(sourceImage.naturalHeight*scale));
@@ -57,7 +57,8 @@
     say("Procesando en tu dispositivo. No cierres esta pestaña.");
     try{
       const engine=await getEngine();
-      const file=fileInput.files[0];
+      const file=activeFile;
+      if(!file)throw new Error("No se encontró el archivo seleccionado.");
       const blob=await engine(file,{
         progress:(key,current,total)=>{
           const pct=total?Math.max(0,Math.min(100,Math.round(current/total*100))):0;
@@ -78,7 +79,7 @@
       $("rb-result-label").textContent="Fondo eliminado";
       say("¡Listo! El fondo se eliminó. Puedes retocar los bordes y descargar tu PNG transparente.","success");
     }catch(error){console.error(error);say("No se pudo procesar la imagen: "+(error.message||"error desconocido")+". Comprueba tu conexión e inténtalo de nuevo.","error")}
-    finally{busy=false;removeBtn.disabled=false}
+    finally{busy=false;removeBtn.disabled=false;downloadBtn.disabled=!refine.hidden?false:true}
   });
 
   document.querySelectorAll("[data-brush]").forEach(button=>button.addEventListener("click",()=>{
@@ -101,7 +102,7 @@
     drawResult();canvas.toBlob(blob=>{if(!blob){say("No se pudo generar el PNG.","error");return}const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nexora-recorte-transparente.png";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);say("PNG descargado con transparencia real.","success")},"image/png");
   });
   $("rb-reset").addEventListener("click",()=>{
-    if(sourceURL)URL.revokeObjectURL(sourceURL);sourceURL=null;sourceImage=null;resultBlob=null;fileInput.value="";editor.hidden=true;upload.hidden=false;refine.hidden=true;progress.hidden=true;downloadBtn.disabled=true;removeBtn.disabled=false;$("rb-reset").disabled=true;$("rb-fileinfo").textContent="Aún no has cargado ningún archivo";say("Carga una imagen para comenzar.");resetHistory();
+    if(sourceURL)URL.revokeObjectURL(sourceURL);sourceURL=null;sourceImage=null;activeFile=null;resultBlob=null;fileInput.value="";editor.hidden=true;upload.hidden=false;refine.hidden=true;progress.hidden=true;downloadBtn.disabled=true;removeBtn.disabled=false;$("rb-reset").disabled=true;$("rb-fileinfo").textContent="Aún no has cargado ningún archivo";say("Carga una imagen para comenzar.");resetHistory();
   });
   setBackground("transparent");
 })();
