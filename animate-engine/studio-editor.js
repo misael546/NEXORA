@@ -346,8 +346,9 @@
       this.backgroundStartTime=currentScene?.backgroundTiming?.startTime??0;
       this.backgroundEndTime=currentScene?.backgroundTiming?.endTime??null;
       this.items=currentScene?.items||[];this.selected=this.items[0]||null;this.editingFrame=null;
-      this._refreshLayers();this._renderAudio();this.setEditingVisible(!!currentScene);
-      if(window.nexoraSequenceLayer)this.engine.updateLayer(window.nexoraSequenceLayer,{visible:!currentScene});
+      const hasCurrentScene=!!(currentScene&&(currentScene.background||this.items.length));
+      this._refreshLayers();this._renderAudio();this.setEditingVisible(hasCurrentScene);
+      if(window.nexoraSequenceLayer)this.engine.updateLayer(window.nexoraSequenceLayer,{visible:!hasCurrentScene});
       this.onFrameCaptured();this.engine.draw(0);
       this.status("Proyecto abierto: "+this.sequence.count+" fotogramas y "+this.audio.tracks.length+" pistas de audio.");
     }
